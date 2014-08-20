@@ -1,0 +1,17 @@
+{% extends "_base.html" %}
+
+{% block main %}
+  <form method="post">
+    {% for name, field in form._fields.items() %}
+      {% if field.errors %}
+        {% raw field.label(title=', '.join(field.errors)) %}
+      {% else %}
+        {% raw field.label() %}
+      {% end %}
+      {% raw field() %}
+    {% end %}
+    <input type="submit" />
+  </form>
+
+  <a href="{{reverse_url('ProjectAdd')}}"> Add a new project</a>
+{% end %}
