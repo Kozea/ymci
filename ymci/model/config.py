@@ -11,10 +11,7 @@ class Config(object):
 
     def __init__(self, path):
         self._config = {
-            'ymci': {
-                'projects_path': 'projects'
-            },
-            'projects': {}
+            'projects_path': 'projects'
         }
         self._read(path)
         self._sync()
@@ -23,10 +20,10 @@ class Config(object):
         if os.path.exists(path):
             with open(path, 'r') as f:
                 self._config.update(yaml.load(f))
-        self._config['ymci']['path'] = path
+        self._config['path'] = path
 
     def _sync(self):
-        with open(self._config['ymci']['path'], 'w') as f:
+        with open(self._config['path'], 'w') as f:
             f.write(yaml.safe_dump(
                 self._config, default_flow_style=False, allow_unicode=True))
 

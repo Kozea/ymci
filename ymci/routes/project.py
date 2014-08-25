@@ -1,19 +1,21 @@
-from ymci import url, config, Route, WebSocket, MultiDict, ioloop
-from ymci.tools import build, get_log_file
-from wtforms import Form, StringField, TextAreaField, validators
+from ymci import url, Route, WebSocket, ioloop, builder
+from ymci.tools import Task
+from wtforms_alchemy import ModelForm
+from ymci.model import Project, Build
+from datetime import datetime
 from time import time
 
 
-class ProjectForm(Form):
-    name = StringField('Name', [validators.Required()])
-    description = TextAreaField('Description')
-    build_script = TextAreaField('Build script')
+class ProjectForm(ModelForm):
+    class Meta(object):
+        model = Project
 
 
 @url(r'/project/view/([^/]+)')
 class ProjectView(Route):
     def get(self, id):
-        return self.render('project/view.html', id=id)
+        project = self.db.query(Project).get(id)
+        return self.render('project/view.html', project=project)
 
 
 @url(r'/project/add')
@@ -24,9 +26,10 @@ class ProjectAdd(Route):
     def post(self):
         form = ProjectForm(self.posted)
         if form.validate():
-            id = form.name.data.replace(' ', '-')
-            config['projects'][id] = form.data
-            config._sync()
+            project = Project()
+            form.populate_obj(project)
+            self.db.add(project)
+            self.db.commit()
             return self.redirect('/')
         return self.render('form.html', form=form)
 
@@ -34,14 +37,16 @@ class ProjectAdd(Route):
 @url(r'/project/edit/([^/]+)')
 class ProjectEdit(Route):
     def get(self, id):
+        project = self.db.query(Project).get(id)
         return self.render(
-            'form.html', form=ProjectForm(MultiDict(config['projects'][id])))
+            'form.html', form=ProjectForm(obj=project))
 
     def post(self, id):
-        form = ProjectForm(self.posted, config['projects'][id])
+        project = self.db.query(Project).get(id)
+        form = ProjectForm(self.posted, project)
         if form.validate():
-            config['projects'][id] = form.data
-            config._sync()
+            form.populate_obj(project)
+            self.db.commit()
             return self.redirect('/')
         return self.render('form.html', form=form)
 
@@ -49,30 +54,44 @@ class ProjectEdit(Route):
 @url(r'/project/delete/([^/]+)')
 class ProjectDelete(Route):
     def get(self, id):
+        project = self.db.query(Project).get(id)
         return self.render(
             'ask.html', message="Do you really want to delete project %s" %
-            config['projects'][id]['name'])
+            project.name)
 
     def post(self, id):
-        config['projects'].pop(id)
-        config._sync()
+        project = self.db.query(Project).get(id)
+        self.db.remove(project)
+        self.db.commit()
         return self.redirect('/')
 
 
 @url(r'/project/build/([^/]+)')
 class ProjectBuild(Route):
     def get(self, id):
-        idx = config['projects'][id]['build_number'] = config[
-            'projects'][id].get('build_number', 0) + 1
-        config._sync()
-        build(id, idx)
-        return self.redirect(self.reverse_url('ProjectLog', id, idx))
+        project = self.db.query(Project).get(id)
+        build = Build()
+        build.timestamp = datetime.now()
+        build.build_id = project.last_build + 1
+        build.status = 'PENDING'
+        project.builds.append(build)
+
+        self.db.add(build)
+        self.db.commit()
+
+        builder.add(Task(project, build))
+
+        return self.redirect(self.reverse_url(
+            'ProjectLog', project.project_id, build.build_id))
 
 
 @url(r'/log/([^/]+)/(\d*)/pipe')
 class ProjectLogWebsocket(WebSocket):
     def open(self, id, idx):
-        self.file = open(get_log_file(id, int(idx)), 'r')
+        # project = self.db.query(Project).get(id)
+        build = self.db.query(Build).get((idx, id))
+
+        self.file = open(build.log_file, 'r')
         self.write_message(self.file.read())
         self.timeout_hdl = ioloop.add_timeout(time(), self.read)
 
@@ -90,12 +109,6 @@ class ProjectLogWebsocket(WebSocket):
 @url(r'/project/log/([^/]+)/(\d*)')
 class ProjectLog(Route):
     def get(self, id, idx):
-        if idx:
-            idx = int(idx)
-        else:
-            idx = config['projects'][id].get('build_number', 0)
-
-        if idx > config['projects'][id].get('build_number', -1):
-            self.abort(404)
-        else:
-            return self.render('project/log.html', id=id, idx=idx)
+        project = self.db.query(Project).get(id)
+        build = self.db.query(Build).get((idx or project.last_build, id))
+        return self.render('project/log.html', project=project, build=build)

@@ -1,29 +1,53 @@
-from ymci import config
-from subprocess import Popen
+from tornado.process import Subprocess
 import os
 
 
-def get_log_file(id, idx):
-    path = config['ymci']['projects_path']
-    project_dir = os.path.join(path, id)
-    return os.path.join(project_dir, 'build_%d.log' % idx)
+class Builder(object):
+    def __init__(self, db):
+        self.queue = []
+        self.current_task = None
+        self.db = db
+
+    def add(self, task):
+        if not len(self.queue):
+            self.build(task)
+        else:
+            self.queue.append(task)
+
+    def build(self, task):
+        self.current_task = task
+        task.db = self.db
+        task.run(self.next)
+
+    def next(self):
+        self.db.remove()
+        self.current_task = None
+        if len(self.queue):
+            self.build(self.queue.pop(0))
 
 
-def build(id, idx):
-    project = config['projects'][id]
-    path = config['ymci']['projects_path']
-    project_dir = os.path.join(path, id)
-    if not os.path.exists(project_dir):
-        os.mkdir(project_dir)
-    build_dir = os.path.join(project_dir, 'build_%d' % idx)
-    if not os.path.exists(build_dir):
-        os.mkdir(build_dir)
-    log = open(get_log_file(id, idx), 'w')
-    log.write('Starting build %d...\n' % idx)
+class Task(object):
+    def __init__(self, project, build):
+        self.project = project
+        self.build = build
+        self.script = project.script
+        self.build_dir = os.path.join(
+            project.project_dir, 'build_%d' % build.build_id)
+        os.mkdir(self.build_dir)
 
-    Popen(
-        ['/bin/bash', '-x', '-c', project['build_script']],
-        executable='/bin/bash',
-        stdout=log,
-        stderr=log,
-        cwd=build_dir)
+    def run(self, callback):
+        log = open(self.build.log_file, 'w')
+        log.write('Starting build %d...\n' % self.build.build_id)
+        self.subprocess = Subprocess(
+            ['/bin/bash', '-x', '-c', self.script],
+            stdout=log,
+            stderr=log,
+            cwd=self.build_dir)
+        self.subprocess.set_exit_callback(self.done)
+
+    def done(self, rv):
+        if rv == 0:
+            self.build.status = 'SUCESS'
+        else:
+            self.build.status = 'FAIL'
+        self.db.commit()

@@ -2,14 +2,13 @@
 
 
 {% block main %}
-  {% set project = config['projects'][id] %}
-  <h2>{{ project['name'] }} build #{{ idx }}</h2>
-  <code class="out" data-id="{{ id }}" data-idx="{{ idx }}">
+  <h2>{{ project.name }} build #{{ build.build_id }} [{{ build.status }}]</h2>
+  <code class="out" data-id="{{ project.project_id }}" data-idx="{{ build.build_id }}">
 
   </code>
   <a href="{{ reverse_url('Index') }}"> Project list</a>
-  <a href="{{ reverse_url('ProjectEdit', id) }}"> Edit {{ project['name'] }}</a>
-  <a href="{{ reverse_url('ProjectDelete', id) }}"> Delete {{ project['name'] }}</a>
+  <a href="{{ reverse_url('ProjectEdit', project.project_id) }}"> Edit {{ project.name }}</a>
+  <a href="{{ reverse_url('ProjectDelete', project.project_id) }}"> Delete {{ project.name }}</a>
 {% end %}
 
 {% block js %}

@@ -5,11 +5,14 @@
 
 from tornado.web import (
     Application, RequestHandler, url as tornado_url, HTTPError)
+from sqlalchemy.orm import scoped_session, sessionmaker
 from tornado.websocket import WebSocketHandler
 from tornado.options import define, parse_command_line, options
 from tornado.ioloop import IOLoop
 from logging import getLogger
-from ymci.config import Config
+from ymci.tools import Builder
+from ymci.model import engine
+from ymci.model.config import Config
 import os.path
 
 __version__ = '0.0.1'
@@ -27,11 +30,15 @@ parse_command_line()
 config = Config(options.config)
 ioloop = IOLoop.instance()
 
+
 server = Application(
     debug=options.debug,
     cookie_secret=options.secret,
     static_path=os.path.join(os.path.dirname(__file__), "static"),
     template_path=os.path.join(os.path.dirname(__file__), "templates"))
+
+server.db = scoped_session(sessionmaker(bind=engine))
+builder = Builder(server.db)
 
 
 class url(object):
@@ -60,6 +67,13 @@ class Base(object):
 
     def abort(self, code):
         raise HTTPError(code)
+
+    @property
+    def db(self):
+        return self.application.db
+
+    def on_finish(self):
+        return self.application.db.remove()
 
 
 class Route(RequestHandler, Base):
