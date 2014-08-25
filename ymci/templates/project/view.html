@@ -1,0 +1,13 @@
+{% extends "../_base.html" %}
+
+
+{% block main %}
+  {% set project = config['projects'][id] %}
+  <h2>{{ project['name'] }}</h2>
+  <p>
+    {{ project['description'] }}
+  </p>
+  <a href="{{ reverse_url('Index') }}"> Project list</a>
+  <a href="{{ reverse_url('ProjectEdit', id) }}"> Edit {{ project['name'] }}</a>
+  <a href="{{ reverse_url('ProjectDelete', id) }}"> Delete {{ project['name'] }}</a>
+{% end %}

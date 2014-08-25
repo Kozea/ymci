@@ -2,11 +2,19 @@
 
 {% block main %}
   <h2>Projects</h2>
-  <ul>
+
+  <table>
     {% for id, project in config['projects'].items() %}
-      <li>{{ project['name'] }} <a href="{{ reverse_url('ProjectEdit', id) }}"> Edit project</a></li>
+      <tr>
+        <td>{{ project['name'] }}</td>
+        <td><a href="{{ reverse_url('ProjectView', id) }}">View</a></td>
+        <td><a href="{{ reverse_url('ProjectBuild', id) }}">Build</a></td>
+        <td><a href="{{ reverse_url('ProjectLog', id, '') }}">Log</a></td>
+        <td><a href="{{ reverse_url('ProjectEdit', id) }}">Edit</a></td>
+        <td><a href="{{ reverse_url('ProjectDelete', id) }}">Delete</a></td>
+      </tr>
     {% end %}
-  </ul>
+  </table>
 
   <a href="{{ reverse_url('ProjectAdd') }}"> Add a new project</a>
 {% end %}

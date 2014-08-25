@@ -3,8 +3,11 @@
 # ymci - You Modern Continous Integration server
 # Copyright © 2014 Florian Mounier, Kozea
 
-from tornado.web import Application, RequestHandler, url as tornado_url
+from tornado.web import (
+    Application, RequestHandler, url as tornado_url, HTTPError)
+from tornado.websocket import WebSocketHandler
 from tornado.options import define, parse_command_line, options
+from tornado.ioloop import IOLoop
 from logging import getLogger
 from ymci.config import Config
 import os.path
@@ -22,7 +25,7 @@ define("secret", default='secret', help="Secret key for cookies")
 
 parse_command_line()
 config = Config(options.config)
-
+ioloop = IOLoop.instance()
 
 server = Application(
     debug=options.debug,
@@ -50,14 +53,23 @@ class MultiDict(dict):
                 else [self[attr]])]
 
 
-class Route(RequestHandler):
+class Base(object):
     @property
     def log(self):
         return log
 
+    def abort(self, code):
+        raise HTTPError(code)
+
+
+class Route(RequestHandler, Base):
     @property
     def posted(self):
         return MultiDict(self.request.arguments)
+
+
+class WebSocket(WebSocketHandler, Base):
+    pass
 
 
 import ymci.routes

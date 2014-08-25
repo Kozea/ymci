@@ -7,6 +7,7 @@
     <meta name="description" content="Your Modern Continous Integration server">
     <meta name="author" content="Florian Mounier, Kozea">
     <link rel="shortcut icon" href="{{ static_url('images/favicon.png') }}">
+    <link rel="stylesheet" href="{{ static_url('base.css') }}">
 
     <title>YMCI server</title>
   </head>
@@ -17,5 +18,7 @@
     <section>
       {% block main %}{% end %}
     </section>
+    <script src="{{ static_url('main.js') }}"></script>
+    {% block js %}{% end %}
   </body>
 </html>

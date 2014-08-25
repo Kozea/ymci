@@ -11,7 +11,9 @@ class Config(object):
 
     def __init__(self, path):
         self._config = {
-            'ymci': {},
+            'ymci': {
+                'projects_path': 'projects'
+            },
             'projects': {}
         }
         self._read(path)
