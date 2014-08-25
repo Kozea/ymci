@@ -1,4 +1,5 @@
 from tornado.process import Subprocess
+from subprocess import STDOUT
 import os
 
 
@@ -27,23 +28,43 @@ class Builder(object):
 
 
 class Task(object):
-    def __init__(self, project, build):
+    def __init__(self, project, build, socks):
         self.project = project
         self.build = build
+        self.socks = socks
         self.script = project.script
         self.build_dir = os.path.join(
             project.project_dir, 'build_%d' % build.build_id)
         os.mkdir(self.build_dir)
 
+    def read(self, data):
+        if data:
+            data = data.decode('utf-8')
+            self.log.write(data)
+            self.log.flush()
+
+            for sock in self.socks:
+                try:
+                    sock.write_message(data)
+                except Exception:
+                    sock.on_close()
+                    sock.close()
+
+        else:
+            self.log.close()
+
     def run(self, callback):
-        log = open(self.build.log_file, 'w')
-        log.write('Starting build %d...\n' % self.build.build_id)
+        self.log = open(self.build.log_file, 'w')
+        self.log.write('Starting build %d...\n' % self.build.build_id)
+
         self.subprocess = Subprocess(
             ['/bin/bash', '-x', '-c', self.script],
-            stdout=log,
-            stderr=log,
+            stdout=Subprocess.STREAM,
+            stderr=STDOUT,
             cwd=self.build_dir)
+
         self.subprocess.set_exit_callback(self.done)
+        self.subprocess.stdout.read_until_close(self.read, self.read)
 
     def done(self, rv):
         if rv == 0:

@@ -1,11 +1,20 @@
+from tornado.web import HTTPError
 from sqlalchemy import (
     Column, Integer, String, Text, DateTime, ForeignKey, create_engine)
+from sqlalchemy.orm import relationship, Query as SAQuery
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
 import os
 
 engine = create_engine('postgresql+psycopg2://ymci@localhost/ymci', echo=False)
 Table = declarative_base()
+
+
+class Query(SAQuery):
+    def get(self, *args, **kwargs):
+        obj = super(Query, self).get(*args, **kwargs)
+        if obj is None:
+            raise HTTPError(404)
+        return obj
 
 
 class Project(Table):

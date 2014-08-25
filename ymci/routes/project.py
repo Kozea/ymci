@@ -1,8 +1,9 @@
 from ymci import url, Route, WebSocket, ioloop, builder
-from ymci.tools import Task
+from ymci.builder import Task
 from wtforms_alchemy import ModelForm
 from ymci.model import Project, Build
 from datetime import datetime
+from collections import defaultdict
 from time import time
 
 
@@ -79,36 +80,37 @@ class ProjectBuild(Route):
         self.db.add(build)
         self.db.commit()
 
-        builder.add(Task(project, build))
+        builder.add(Task(project, build, ProjectLogWebSocket.log_clients[
+            '%s-%s' % (
+                project.project_id,
+                build.build_id
+            )]))
 
         return self.redirect(self.reverse_url(
             'ProjectLog', project.project_id, build.build_id))
 
 
 @url(r'/log/([^/]+)/(\d*)/pipe')
-class ProjectLogWebsocket(WebSocket):
+class ProjectLogWebSocket(WebSocket):
+
+    log_clients = defaultdict(list)
+
     def open(self, id, idx):
-        # project = self.db.query(Project).get(id)
-        build = self.db.query(Build).get((idx, id))
+        self.project = self.db.query(Project).get(id)
+        self.build = self.db.query(Build).get((idx, id))
+        ProjectLogWebSocket.log_clients['%s-%s' % (
+            self.project.project_id,
+            self.build.build_id
+        )].append(self)
 
-        self.file = open(build.log_file, 'r')
-        self.write_message(self.file.read())
-        self.timeout_hdl = ioloop.add_timeout(time(), self.read)
-
-    def read(self):
-        try:
-            data = self.file.read()
-        except ValueError:
-            self.on_close()
-            self.close()
-            return
-        if data:
-            self.write_message(data)
-        self.timeout_hdl = ioloop.add_timeout(time() + .001, self.read)
+        with open(self.build.log_file, 'r') as f:
+            self.write_message(f.read())
 
     def on_close(self):
-        ioloop.remove_timeout(self.timeout_hdl)
-        self.file.close()
+        ProjectLogWebSocket.log_clients['%s-%s' % (
+            self.project.project_id,
+            self.build.build_id
+        )].remove(self)
 
 
 @url(r'/project/log/([^/]+)/(\d*)')

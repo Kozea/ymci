@@ -10,8 +10,8 @@ from tornado.websocket import WebSocketHandler
 from tornado.options import define, parse_command_line, options
 from tornado.ioloop import IOLoop
 from logging import getLogger
-from ymci.tools import Builder
-from ymci.model import engine
+from ymci.builder import Builder
+from ymci.model import engine, Query
 from ymci.model.config import Config
 import os.path
 
@@ -37,7 +37,7 @@ server = Application(
     static_path=os.path.join(os.path.dirname(__file__), "static"),
     template_path=os.path.join(os.path.dirname(__file__), "templates"))
 
-server.db = scoped_session(sessionmaker(bind=engine))
+server.db = scoped_session(sessionmaker(bind=engine, query_cls=Query))
 builder = Builder(server.db)
 
 
