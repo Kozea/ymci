@@ -47,7 +47,7 @@ class Task(object):
 
     def done(self, rv):
         if rv == 0:
-            self.build.status = 'SUCESS'
+            self.build.status = 'SUCCESS'
         else:
             self.build.status = 'FAIL'
         self.db.commit()

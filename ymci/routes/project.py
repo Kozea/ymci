@@ -96,7 +96,12 @@ class ProjectLogWebsocket(WebSocket):
         self.timeout_hdl = ioloop.add_timeout(time(), self.read)
 
     def read(self):
-        data = self.file.read()
+        try:
+            data = self.file.read()
+        except ValueError:
+            self.on_close()
+            self.close()
+            return
         if data:
             self.write_message(data)
         self.timeout_hdl = ioloop.add_timeout(time() + .001, self.read)
