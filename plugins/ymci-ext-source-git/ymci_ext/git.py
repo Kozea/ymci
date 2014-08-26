@@ -1,5 +1,9 @@
+from tornado import gen
 from ymci.ext.hooks import BuildHook
+from logging import getLogger
 import os
+
+log = getLogger('ymci')
 
 
 class GitHook(BuildHook):
@@ -8,10 +12,22 @@ class GitHook(BuildHook):
     def active(self):
         return self.project.repository.endswith('.git')
 
+    @gen.coroutine
     def pre_copy(self):
+        log.info('Starting git pre copy')
         if not os.path.exists(os.path.join(self.project.src_dir, '.git')):
-            self.execute(
+            log.info('No .git running git clone')
+            yield gen.Task(
+                self.execute,
                 ['git', 'clone', self.project.repository, '.'])
         else:
-            self.execute(['git', 'fetch', 'origin'])
-            self.execute(['git', 'reset', '--hard', 'origin/master'])
+            log.info('.git found running git fetch')
+            yield gen.Task(
+                self.execute,
+                ['git', 'fetch', 'origin'])
+
+            log.info('.git found running git reset')
+            yield gen.Task(
+                self.execute,
+                ['git', 'reset', '--hard', 'origin/master'])
+        log.info('Git pre_copy done')

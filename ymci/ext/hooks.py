@@ -9,7 +9,7 @@ class BuildHook(object):
         self.build = build
         self.out = out
 
-    def execute(self, cmd, cwd=None):
+    def execute(self, cmd, callback, cwd=None):
         subproc = Subprocess(
             cmd,
             stdout=Subprocess.STREAM,
@@ -21,7 +21,7 @@ class BuildHook(object):
                 self.out(data.decode('utf-8'))
 
         subproc.stdout.read_until_close(send, send)
-        subproc.proc.wait()
+        subproc.set_exit_callback(callback)
 
     @property
     def active(self):
@@ -33,5 +33,5 @@ class BuildHook(object):
     def pre_build(self):
         pass
 
-    def post_build(self, rv):
+    def post_build(self):
         pass

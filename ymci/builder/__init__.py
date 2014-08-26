@@ -1,18 +1,23 @@
+from tornado.ioloop import IOLoop
+from tornado import gen
 from tornado.process import Subprocess
 from subprocess import STDOUT
 from logging import getLogger
+from ymci.model import Build
 import shutil
 import os
 import pkg_resources
+
 
 log = getLogger('ymci')
 
 
 class Builder(object):
-    def __init__(self, db):
+    def __init__(self, db, ioloop=None):
         self.queue = []
         self.current_task = None
         self.db = db
+        self.ioloop = ioloop or IOLoop.instance()
 
     def add(self, task):
         if not len(self.queue):
@@ -23,7 +28,9 @@ class Builder(object):
     def build(self, task):
         self.current_task = task
         task.db = self.db
-        task.run(self.next)
+        import wdb
+        wdb.set_trace()
+        self.ioloop.add_callback(task.run, self.next)
 
     def next(self):
         self.db.remove()
@@ -39,23 +46,27 @@ class Task(object):
         self.socks = socks
         self.script = project.script
 
+    def out(self, data):
+        self.log.write(data)
+        self.log.flush()
+
+        for sock in self.socks:
+            try:
+                sock.write_message(data)
+            except Exception:
+                sock.on_close()
+                sock.close()
+
     def read(self, data):
         if data:
             data = data.decode('utf-8')
-            self.log.write(data)
-            self.log.flush()
-
-            for sock in self.socks:
-                try:
-                    sock.write_message(data)
-                except Exception:
-                    sock.on_close()
-                    sock.close()
-
+            self.out(data)
         else:
             self.log.close()
 
+    @gen.coroutine
     def run(self, callback):
+        log.info('Starting run for task')
         self.log = open(self.build.log_file, 'w')
         self.log.write('Starting build %d...\n' % self.build.build_id)
         self.build_hooks = []
@@ -68,23 +79,26 @@ class Task(object):
                 continue
 
             def out(message):
-                self.log.write('%s> %s\n' % (Hook.__name__, message))
+                self.out('%s> %s\n' % (Hook.__name__, message))
 
-            hook = Hook(self.project, self.build, out)
+            hook = Hook(self.project, self.build, self.out)
             if hook.active:
                 self.build_hooks.append(hook)
 
         src = self.project.src_dir
 
+        log.info('Running for task')
         for hook in self.build_hooks:
-            hook.pre_copy()
+            log.info('Pre copy hook %r' % hook)
+            yield hook.pre_copy()
+            log.info('Pre copy hook end')
 
         assert not os.path.exists(self.build.dir)
 
         shutil.copytree(src, self.build.dir)
 
         for hook in self.build_hooks:
-            hook.pre_build()
+            yield hook.pre_build()
 
         self.subprocess = Subprocess(
             ['/bin/bash', '-x', '-c', self.script],
@@ -96,13 +110,17 @@ class Task(object):
         self.subprocess.stdout.read_until_close(self.read, self.read)
         self.log.flush()
 
+    @gen.coroutine
     def done(self, rv):
+        self.db.remove()
+
+        build = self.db.query(Build).get(self.build.build_id)
         if rv == 0:
-            self.build.status = 'SUCCESS'
+            build.status = 'SUCCESS'
         else:
-            self.build.status = 'FAIL'
+            build.status = 'FAIL'
 
         for hook in self.build_hooks:
-            hook.post_build(self.build.status)
+            yield hook.post_build()
 
         self.db.commit()
