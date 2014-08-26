@@ -1,7 +1,5 @@
-from tornado.process import Subprocess
 from tornado import gen
-from tornado.concurrent import Future
-from subprocess import STDOUT
+from ymci.builder.util import execute
 
 
 class BuildHook(object):
@@ -12,24 +10,11 @@ class BuildHook(object):
         self.out = out
 
     def execute(self, cmd, cwd=None):
-        future = Future()
-
-        subproc = Subprocess(
-            cmd,
-            stdout=Subprocess.STREAM,
-            stderr=STDOUT,
-            cwd=cwd or self.project.src_dir)
-
         def send(data):
             if data:
-                self.out(data.decode('utf-8'))
+                self.out(data)
 
-        def callback(rv):
-            future.set_result(rv)
-
-        subproc.stdout.read_until_close(send, send)
-        subproc.set_exit_callback(callback)
-        return future
+        return execute(cmd, cwd or self.project.src_dir, send)
 
     @property
     def active(self):

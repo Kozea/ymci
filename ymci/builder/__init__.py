@@ -1,9 +1,7 @@
 from tornado.ioloop import IOLoop
 from tornado import gen
-from tornado.process import Subprocess
-from subprocess import STDOUT
 from logging import getLogger
-from ymci.model import Build
+from ymci.builder.util import execute
 import shutil
 import os
 import pkg_resources
@@ -57,7 +55,6 @@ class Task(object):
 
     def read(self, data):
         if data:
-            data = data.decode('utf-8')
             self.out(data)
         else:
             self.log.close()
@@ -95,25 +92,16 @@ class Task(object):
         for hook in self.build_hooks:
             yield hook.pre_build()
 
-        self.subprocess = Subprocess(
+        rv = yield execute(
             ['/bin/bash', '-x', '-c', self.script],
-            stdout=Subprocess.STREAM,
-            stderr=STDOUT,
-            cwd=self.build.dir)
+            self.build.dir, self.read)
 
-        self.subprocess.set_exit_callback(self.done)
-        self.subprocess.stdout.read_until_close(self.read, self.read)
-        self.log.flush()
-
-    @gen.coroutine
-    def done(self, rv):
-        self.db.remove()
-
-        build = self.db.query(Build).get(self.build.build_id)
+        # self.db.remove()
+        # build = self.db.query(Build).get(self.build.build_id)
         if rv == 0:
-            build.status = 'SUCCESS'
+            self.build.status = 'SUCCESS'
         else:
-            build.status = 'FAIL'
+            self.build.status = 'FAIL'
 
         for hook in self.build_hooks:
             yield hook.post_build()
