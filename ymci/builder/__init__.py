@@ -28,8 +28,6 @@ class Builder(object):
     def build(self, task):
         self.current_task = task
         task.db = self.db
-        import wdb
-        wdb.set_trace()
         self.ioloop.add_callback(task.run, self.next)
 
     def next(self):
@@ -87,11 +85,8 @@ class Task(object):
 
         src = self.project.src_dir
 
-        log.info('Running for task')
         for hook in self.build_hooks:
-            log.info('Pre copy hook %r' % hook)
             yield hook.pre_copy()
-            log.info('Pre copy hook end')
 
         assert not os.path.exists(self.build.dir)
 
