@@ -1,10 +1,9 @@
-from ymci import url, Route, WebSocket, ioloop, builder
+from ymci import url, Route, WebSocket, builder
 from ymci.builder import Task
 from wtforms_alchemy import ModelForm
 from ymci.model import Project, Build
 from datetime import datetime
 from collections import defaultdict
-from time import time
 
 
 class ProjectForm(ModelForm):
@@ -92,7 +91,6 @@ class ProjectBuild(Route):
 
 @url(r'/log/([^/]+)/(\d*)/pipe')
 class ProjectLogWebSocket(WebSocket):
-
     log_clients = defaultdict(list)
 
     def open(self, id, idx):

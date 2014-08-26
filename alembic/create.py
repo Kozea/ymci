@@ -1,4 +1,5 @@
 from ymci.model import engine, Table
+Table.metadata.drop_all(engine)
 Table.metadata.create_all(engine)
 
 from alembic.config import Config

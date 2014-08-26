@@ -55,7 +55,8 @@ class url(object):
 
 class MultiDict(dict):
     def getlist(self, attr):
-        return [v.decode('utf-8') if isinstance(v, bytes) else v
+        return [v.decode('utf-8').replace('\r', '')
+                if isinstance(v, bytes) else v
                 for v in (self[attr] if isinstance(self[attr], list)
                 else [self[attr]])]
 

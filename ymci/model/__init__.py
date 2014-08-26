@@ -22,6 +22,7 @@ class Project(Table):
     project_id = Column(Integer, autoincrement=True, primary_key=True)
     name = Column(String, nullable=False)
     description = Column(Text)
+    repository = Column(String)
     script = Column(Text)
 
     builds = relationship('Build', backref='project')
@@ -44,6 +45,13 @@ class Project(Table):
         return path
 
     @property
+    def src_dir(self):
+        path = os.path.join(self.project_dir, 'src')
+        if not os.path.exists(path):
+            os.mkdir(path)
+        return path
+
+    @property
     def last_build(self):
         return max([b.build_id for b in self.builds] or [0])
 
@@ -54,7 +62,13 @@ class Build(Table):
     project_id = Column(Integer, ForeignKey(Project.project_id),
                         primary_key=True)
     timestamp = Column(DateTime, nullable=False)
+    duration = Column(DateTime)
     status = Column(String)
+
+    @property
+    def dir(self):
+        return os.path.join(
+            self.project.project_dir, 'build_%d' % self.build_id)
 
     @property
     def log_file(self):

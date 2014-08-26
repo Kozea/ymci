@@ -1,6 +1,11 @@
 from tornado.process import Subprocess
 from subprocess import STDOUT
+from logging import getLogger
+import shutil
 import os
+import pkg_resources
+
+log = getLogger('ymci')
 
 
 class Builder(object):
@@ -33,9 +38,6 @@ class Task(object):
         self.build = build
         self.socks = socks
         self.script = project.script
-        self.build_dir = os.path.join(
-            project.project_dir, 'build_%d' % build.build_id)
-        os.mkdir(self.build_dir)
 
     def read(self, data):
         if data:
@@ -56,19 +58,51 @@ class Task(object):
     def run(self, callback):
         self.log = open(self.build.log_file, 'w')
         self.log.write('Starting build %d...\n' % self.build.build_id)
+        self.build_hooks = []
+        for hook in pkg_resources.iter_entry_points(
+                'ymci.ext.hooks.BuildHook'):
+            try:
+                Hook = hook.load()
+            except Exception:
+                log.exception('Failed to load plugin %r' % hook)
+                continue
+
+            def out(message):
+                self.log.write('%s> %s\n' % (Hook.__name__, message))
+
+            hook = Hook(self.project, self.build, out)
+            if hook.active:
+                self.build_hooks.append(hook)
+
+        src = self.project.src_dir
+
+        for hook in self.build_hooks:
+            hook.pre_copy()
+
+        assert not os.path.exists(self.build.dir)
+
+        shutil.copytree(src, self.build.dir)
+
+        for hook in self.build_hooks:
+            hook.pre_build()
 
         self.subprocess = Subprocess(
             ['/bin/bash', '-x', '-c', self.script],
             stdout=Subprocess.STREAM,
             stderr=STDOUT,
-            cwd=self.build_dir)
+            cwd=self.build.dir)
 
         self.subprocess.set_exit_callback(self.done)
         self.subprocess.stdout.read_until_close(self.read, self.read)
+        self.log.flush()
 
     def done(self, rv):
         if rv == 0:
             self.build.status = 'SUCCESS'
         else:
             self.build.status = 'FAIL'
+
+        for hook in self.build_hooks:
+            hook.post_build(self.build.status)
+
         self.db.commit()
