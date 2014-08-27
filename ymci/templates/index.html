@@ -9,6 +9,7 @@
         <th>Name</th>
         <th>Last build</th>
         <th>Status</th>
+        <th>Duration</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -16,8 +17,16 @@
       {% for project in projects %}
         <tr>
           <td>{{ project.name }}</td>
-          <td>{{ project.last_build.build_id }}</td>
-          <td>{{ project.last_build.status }}</td>
+
+          {% if project.last_build %}
+            <td>{{ project.last_build.build_id }}</td>
+            <td>{{ project.last_build.status }}</td>
+            <td>{{ project.last_build.duration }}</td>
+          {% else %}
+            <td>N/A</td>
+            <td>N/A</td>
+            <td>N/A</td>
+          {% end %}
           <td>
             <div class="btn-group">
               <a class="btn btn-default" href="{{ reverse_url('ProjectView', project.project_id) }}">View</a>

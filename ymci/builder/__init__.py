@@ -2,6 +2,8 @@ from tornado.ioloop import IOLoop
 from logging import getLogger
 from collections import defaultdict
 from threading import Thread
+from time import time
+from datetime import datetime
 from ..builder.util import execute, ExecutionException
 from .. import conf
 import shutil
@@ -78,11 +80,10 @@ class Task(Thread):
     def read(self, data):
         if data:
             self.out(data)
-        else:
-            self.log.close()
 
     def run(self):
-        log.info('Starting run for task %r' % self)
+        log.info('Starting run for task %r on %s' % (self, datetime.now()))
+        self.start = time()
         self.log = open(self.build.log_file, 'w')
         self.build.status = 'RUNNING'
 
@@ -118,7 +119,10 @@ class Task(Thread):
             self.out('Success !')
             self.build.status = 'SUCCESS'
 
+        self.build.duration = time() - self.start
+        self.out('\n(Duration %fs)' % self.build.duration)
         self.db.commit()
+        self.log.close()
         self.callback()
 
     def run_task(self):

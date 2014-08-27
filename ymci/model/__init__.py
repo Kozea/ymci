@@ -1,6 +1,6 @@
 from tornado.web import HTTPError
 from sqlalchemy import (
-    Column, Integer, String, Text, DateTime, ForeignKey, create_engine)
+    Column, Integer, String, Text, Float, DateTime, ForeignKey, create_engine)
 from sqlalchemy.orm import relationship, Query as SAQuery
 from sqlalchemy.ext.declarative import declarative_base
 from .. import conf
@@ -63,7 +63,7 @@ class Build(Table):
     project_id = Column(Integer, ForeignKey(Project.project_id),
                         primary_key=True)
     timestamp = Column(DateTime, nullable=False)
-    duration = Column(DateTime)
+    duration = Column(Float)
     status = Column(String)
 
     @property
