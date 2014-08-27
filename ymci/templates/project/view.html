@@ -6,7 +6,10 @@
   <p>
     {{ project.description }}
   </p>
-  <a href="{{ reverse_url('Index') }}"> Project list</a>
-  <a href="{{ reverse_url('ProjectEdit', project.project_id) }}"> Edit {{ project.name }}</a>
-  <a href="{{ reverse_url('ProjectDelete', project.project_id) }}"> Delete {{ project.name }}</a>
+{% end %}
+
+{% block nav %}
+  <li><a href="{{ reverse_url('Index') }}"> Project list</a></li>
+  <li><a href="{{ reverse_url('ProjectEdit', project.project_id) }}"> Edit {{ project.name }}</a></li>
+  <li><a href="{{ reverse_url('ProjectDelete', project.project_id) }}"> Delete {{ project.name }}</a></li>
 {% end %}

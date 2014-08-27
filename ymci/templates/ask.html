@@ -1,10 +1,12 @@
 {% extends "_base.html" %}
 
 {% block main %}
+  <h2>Delete</h2>
   <p>
     {{ message }}
     <form method="post">
-      <input type="submit" value="Yes" />
+      <input type="submit" class="btn btn-default btn-primary" value="Yes" />
+      <a class="btn btn-default" href="javascript:window.history.go(-1)">Back</a>
     </form>
   </p>
 {% end %}

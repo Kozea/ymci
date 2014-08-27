@@ -1,15 +1,27 @@
 {% extends "_base.html" %}
 
 {% block main %}
-  <form method="post">
-    {% for name, field in form._fields.items() %}
-      {% if field.errors %}
-        {% raw field.label(title=', '.join(field.errors)) %}
-      {% else %}
-        {% raw field.label() %}
+  <form class="form-horizontal" method="post">
+    <fieldset>
+      <legend>{{ form.__class__.__name__ }}</legend>
+      {% for name, field in form._fields.items() %}
+        <div class="form-group">
+          {% if field.errors %}
+            {% raw field.label(class_="col-lg-2 control-label", title=', '.join(field.errors)) %}
+          {% else %}
+            {% raw field.label(class_="col-lg-2 control-label") %}
+          {% end %}
+          <div class="col-lg-10">
+            {% raw field(class_="form-control", placeholder=field.label.text) %}
+          </div>
+        </div>
       {% end %}
-      {% raw field() %}
-    {% end %}
-    <input type="submit" />
+    </fieldset>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <input type="submit" class="btn btn-default btn-primary" />
+        <a class="btn btn-default" href="javascript:window.history.go(-1)">Back</a>
+      </div>
+    </div>
   </form>
 {% end %}

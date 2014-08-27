@@ -25,7 +25,7 @@ class Project(Table):
     repository = Column(String)
     script = Column(Text)
 
-    builds = relationship('Build', backref='project')
+    builds = relationship('Build', backref='project', lazy='dynamic')
 
     @property
     def dir_name(self):
@@ -53,7 +53,7 @@ class Project(Table):
 
     @property
     def last_build(self):
-        return max([b.build_id for b in self.builds] or [0])
+        return self.builds.order_by(Build.build_id.desc()).first()
 
 
 class Build(Table):

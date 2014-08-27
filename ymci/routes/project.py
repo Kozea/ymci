@@ -72,7 +72,7 @@ class ProjectBuild(Route):
         project = self.db.query(Project).get(id)
         build = Build()
         build.timestamp = datetime.now()
-        build.build_id = project.last_build + 1
+        build.build_id = project.last_build.build_id + 1
         build.status = 'PENDING'
         project.builds.append(build)
 
@@ -115,5 +115,6 @@ class ProjectLogWebSocket(WebSocket):
 class ProjectLog(Route):
     def get(self, id, idx):
         project = self.db.query(Project).get(id)
-        build = self.db.query(Build).get((idx or project.last_build, id))
+        build = self.db.query(Build).get(
+            (idx or project.last_build.build_id, id))
         return self.render('project/log.html', project=project, build=build)

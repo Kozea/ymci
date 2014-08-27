@@ -7,6 +7,7 @@
     <meta name="description" content="Your Modern Continous Integration server">
     <meta name="author" content="Florian Mounier, Kozea">
     <link rel="shortcut icon" href="{{ static_url('images/favicon.png') }}">
+    <link rel="stylesheet" href="{{ static_url('lumen-bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ static_url('base.css') }}">
 
     <title>YMCI server</title>
@@ -15,9 +16,34 @@
   {% from ymci import config %}
 
   <body>
-    <section>
+    <header class="navbar navbar-default">
+      <nav class="container">
+        <div class="nav navbar-header">
+          <a class="navbar-brand" href="/">YMCI</a>
+        </div>
+        <ul class="nav navbar-nav">
+          <li class="active">
+            <a href="{{ reverse_url('Index') }}">Project list</a>
+          </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="http://kozea.fr/">Kozea</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="container">
       {% block main %}{% end %}
-    </section>
+    </main>
+
+    <footer class="container">
+      <nav class="navbar navbar-bottom">
+        <ul class="pager">
+          <li class="previous"><a href="/">← Back</a></li>
+          {% block nav %}{% end %}
+        </ul>
+      </nav>
+    </footer>
     <script src="{{ static_url('main.js') }}"></script>
     {% block js %}{% end %}
   </body>
