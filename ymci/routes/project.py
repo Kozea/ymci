@@ -1,9 +1,8 @@
-from ymci import url, Route, WebSocket, builder
-from ymci.builder import Task
+from .. import url, Route, WebSocket, builder
 from wtforms_alchemy import ModelForm
-from ymci.model import Project, Build
+from ..model import Project, Build
 from datetime import datetime
-from collections import defaultdict
+import os
 
 
 class ProjectForm(ModelForm):
@@ -72,18 +71,15 @@ class ProjectBuild(Route):
         project = self.db.query(Project).get(id)
         build = Build()
         build.timestamp = datetime.now()
-        build.build_id = project.last_build.build_id + 1
+        build.build_id = (
+            project.last_build and project.last_build.build_id or 0) + 1
         build.status = 'PENDING'
         project.builds.append(build)
 
         self.db.add(build)
         self.db.commit()
 
-        builder.add(Task(project, build, ProjectLogWebSocket.log_clients[
-            '%s-%s' % (
-                project.project_id,
-                build.build_id
-            )]))
+        builder.add(build)
 
         return self.redirect(self.reverse_url(
             'ProjectLog', project.project_id, build.build_id))
@@ -91,22 +87,20 @@ class ProjectBuild(Route):
 
 @url(r'/log/([^/]+)/(\d*)/pipe')
 class ProjectLogWebSocket(WebSocket):
-    log_clients = defaultdict(list)
-
     def open(self, id, idx):
-        self.project = self.db.query(Project).get(id)
         self.build = self.db.query(Build).get((idx, id))
-        ProjectLogWebSocket.log_clients['%s-%s' % (
-            self.project.project_id,
+        builder.log_streams['%s-%s' % (
+            self.build.project_id,
             self.build.build_id
         )].append(self)
-
-        with open(self.build.log_file, 'r') as f:
-            self.write_message(f.read())
+        if os.path.exists(self.build.log_file):
+            with open(self.build.log_file, 'r') as f:
+                for line in f:
+                    self.write_message(line)
 
     def on_close(self):
-        ProjectLogWebSocket.log_clients['%s-%s' % (
-            self.project.project_id,
+        builder.log_streams['%s-%s' % (
+            self.build.project_id,
             self.build.build_id
         )].remove(self)
 
@@ -115,6 +109,18 @@ class ProjectLogWebSocket(WebSocket):
 class ProjectLog(Route):
     def get(self, id, idx):
         project = self.db.query(Project).get(id)
-        build = self.db.query(Build).get(
-            (idx or project.last_build.build_id, id))
+        if idx:
+            build = self.db.query(Build).get((idx, id))
+        else:
+            build = project.last_build
         return self.render('project/log.html', project=project, build=build)
+
+
+@url(r'/project/build/([^/]+)/(\d*)/stop')
+class ProjectBuildStop(Route):
+    def get(self, id, idx):
+        build = self.db.query(Build).get((idx, id))
+        builder.stop(build)
+
+        return self.redirect(self.reverse_url(
+            'ProjectLog', build.project_id, build.build_id))

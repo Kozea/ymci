@@ -1,5 +1,5 @@
-from ymci import url, Route
-from ymci.model import Project
+from .. import url, Route
+from ..model import Project
 
 
 @url(r'/')

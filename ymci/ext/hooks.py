@@ -1,11 +1,9 @@
-from tornado import gen
-from ymci.builder.util import execute
+from ..builder.util import execute
 
 
 class BuildHook(object):
 
-    def __init__(self, project, build, out):
-        self.project = project
+    def __init__(self, build, out):
         self.build = build
         self.out = out
 
@@ -14,20 +12,17 @@ class BuildHook(object):
             if data:
                 self.out(data)
 
-        return execute(cmd, cwd or self.project.src_dir, send)
+        execute(cmd, cwd or self.build.project.src_dir, send)
 
     @property
     def active(self):
         return False
 
-    @gen.coroutine
     def pre_copy(self):
         pass
 
-    @gen.coroutine
     def pre_build(self):
         pass
 
-    @gen.coroutine
     def post_build(self):
         pass

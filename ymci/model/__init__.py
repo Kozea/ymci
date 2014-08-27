@@ -3,9 +3,11 @@ from sqlalchemy import (
     Column, Integer, String, Text, DateTime, ForeignKey, create_engine)
 from sqlalchemy.orm import relationship, Query as SAQuery
 from sqlalchemy.ext.declarative import declarative_base
+from .. import conf
 import os
 
-engine = create_engine('postgresql+psycopg2://ymci@localhost/ymci', echo=False)
+
+engine = create_engine(conf['db_url'], echo=False)
 Table = declarative_base()
 
 
@@ -38,8 +40,7 @@ class Project(Table):
 
     @property
     def project_dir(self):
-        from ymci import config
-        path = os.path.join(config['projects_path'], self.dir_name)
+        path = os.path.join(conf['projects_path'], self.dir_name)
         if not os.path.exists(path):
             os.mkdir(path)
         return path

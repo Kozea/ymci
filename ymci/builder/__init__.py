@@ -1,7 +1,9 @@
 from tornado.ioloop import IOLoop
-from tornado import gen
 from logging import getLogger
-from ymci.builder.util import execute
+from collections import defaultdict
+from threading import Thread
+from ..builder.util import execute, ExecutionException
+from .. import conf
 import shutil
 import os
 import pkg_resources
@@ -10,48 +12,68 @@ import pkg_resources
 log = getLogger('ymci')
 
 
-class Builder(object):
+class Pool(object):
+
     def __init__(self, db, ioloop=None):
+        self.log_streams = defaultdict(list)
         self.queue = []
-        self.current_task = None
         self.db = db
+        self.current_task = None
         self.ioloop = ioloop or IOLoop.instance()
 
-    def add(self, task):
-        if not len(self.queue):
+    def add(self, build):
+        task = Task(build)
+        if not len(self.queue) and not self.current_task:
             self.build(task)
         else:
             self.queue.append(task)
 
+    def stop(self, build):
+        if (self.current_task and
+                self.current_task.build.project_id == build.project_id and
+                self.current_task.build.build_id == build.build_id):
+            self.current_task.stop = True
+            return
+        for task in self.queue:
+            if (self.current_task.build.project_id == build.project_id and
+                    self.current_task.build.build_id == build.build_id):
+                self.queue.remove(task)
+
     def build(self, task):
         self.current_task = task
+        task.callback = self.next
         task.db = self.db
-        self.ioloop.add_callback(task.run, self.next)
+        task.streams = self.log_streams['%s-%s' % (
+            task.build.project_id,
+            task.build.build_id
+        )]
+        self.ioloop.add_callback(task.start)
 
     def next(self):
-        self.db.remove()
         self.current_task = None
         if len(self.queue):
             self.build(self.queue.pop(0))
 
 
-class Task(object):
-    def __init__(self, project, build, socks):
-        self.project = project
+class Task(Thread):
+    def __init__(self, build, *args, **kwargs):
         self.build = build
-        self.socks = socks
-        self.script = project.script
+        self.stop = False
+        self.script = build.project.script
+        self.db_url = conf['db_url']
+        super(Task, self).__init__(*args, **kwargs)
 
     def out(self, data):
         self.log.write(data)
         self.log.flush()
 
-        for sock in self.socks:
+        for stream in self.streams:
             try:
-                sock.write_message(data)
+                for line in data.splitlines(True):
+                    stream.write_message(line)
             except Exception:
-                sock.on_close()
-                sock.close()
+                stream.on_close()
+                stream.close()
 
     def read(self, data):
         if data:
@@ -59,11 +81,48 @@ class Task(object):
         else:
             self.log.close()
 
-    @gen.coroutine
-    def run(self, callback):
-        log.info('Starting run for task')
+    def run(self):
+        log.info('Starting run for task %r' % self)
         self.log = open(self.build.log_file, 'w')
-        self.log.write('Starting build %d...\n' % self.build.build_id)
+        self.build.status = 'RUNNING'
+
+        def treat(e):
+            if e.errno < 0:
+                if self.stop:
+                    self.out('\nStoped by user')
+                    status = 'STOPPED'
+                else:
+                    self.out('\nCommand %s was killed by signal %d' % (
+                        e.command, -e.errno))
+                    status = 'KILLED'
+            else:
+                self.out('\nCommand %s returned %d' % (
+                    e.command, -e.errno))
+                status = 'FAILED'
+                return status
+
+        try:
+            self.run_task()
+        except ExecutionException as e:
+            log.warn('Error during task execution %r' % self)
+            self.build.status = treat(e)
+
+        try:
+            for hook in self.build_hooks:
+                hook.post_build()
+        except ExecutionException as e:
+            log.warn('Error during task execution %r' % self)
+            self.build.status = treat(e)
+
+        if self.build.status == 'RUNNING':
+            self.out('Success !')
+            self.build.status = 'SUCCESS'
+
+        self.db.commit()
+        self.callback()
+
+    def run_task(self):
+        self.out('Starting build %d...\n' % self.build.build_id)
         self.build_hooks = []
         for hook in pkg_resources.iter_entry_points(
                 'ymci.ext.hooks.BuildHook'):
@@ -76,34 +135,22 @@ class Task(object):
             def out(message):
                 self.out('%s> %s\n' % (Hook.__name__, message))
 
-            hook = Hook(self.project, self.build, self.out)
+            hook = Hook(self.build, self.out)
             if hook.active:
                 self.build_hooks.append(hook)
 
-        src = self.project.src_dir
+        src = self.build.project.src_dir
 
         for hook in self.build_hooks:
-            yield hook.pre_copy()
+            hook.pre_copy()
 
         assert not os.path.exists(self.build.dir)
 
         shutil.copytree(src, self.build.dir)
 
         for hook in self.build_hooks:
-            yield hook.pre_build()
+            hook.pre_build()
 
-        rv = yield execute(
+        execute(
             ['/bin/bash', '-x', '-c', self.script],
             self.build.dir, self.read)
-
-        # self.db.remove()
-        # build = self.db.query(Build).get(self.build.build_id)
-        if rv == 0:
-            self.build.status = 'SUCCESS'
-        else:
-            self.build.status = 'FAIL'
-
-        for hook in self.build_hooks:
-            yield hook.post_build()
-
-        self.db.commit()

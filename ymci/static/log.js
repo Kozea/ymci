@@ -13,7 +13,9 @@
       return console.error('ws error', arguments);
     };
     return ws.onmessage = function(e) {
-      return code.innerHTML += e.data;
+      return setTimeout((function() {
+        return code.innerHTML += e.data;
+      }), 10);
     };
   });
 

@@ -1,10 +1,18 @@
-from tornado.concurrent import Future
 from subprocess import STDOUT
 from tornado.process import Subprocess
+from time import sleep
+
+
+class ExecutionException(Exception):
+    def __init__(self, command, errno):
+        self.command = command
+        self.errno = errno
+        super(ExecutionException, self).__init__(
+            '%s exited with return code %d' % (command, errno))
 
 
 def execute(cmd, cwd, out):
-    future = Future()
+    from .. import builder
 
     subproc = Subprocess(
         cmd,
@@ -16,9 +24,10 @@ def execute(cmd, cwd, out):
         if data:
             out(data.decode('utf-8'))
 
-    def callback(rv):
-        future.set_result(rv)
-
     subproc.stdout.read_until_close(send, send)
-    subproc.set_exit_callback(callback)
-    return future
+    while subproc.proc.poll() is None:
+        sleep(.1)
+        if builder.current_task.stop:
+            subproc.proc.kill()
+    if subproc.proc.returncode != 0:
+        raise ExecutionException(''.join(cmd), subproc.proc.returncode)

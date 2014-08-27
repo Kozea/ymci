@@ -11,7 +11,8 @@ class Config(object):
 
     def __init__(self, path):
         self._config = {
-            'projects_path': 'projects'
+            'projects_path': 'projects',
+            'db_url': 'postgresql+psycopg2://ymci@localhost/ymci'
         }
         self._read(path)
         self._sync()

@@ -6,4 +6,5 @@ document.addEventListener 'DOMContentLoaded', ->
   ws.onclose = -> console.log('ws closed', arguments)
   ws.onerror = -> console.error('ws error', arguments)
   ws.onmessage = (e) ->
-    code.innerHTML += e.data
+    setTimeout (->
+      code.innerHTML += e.data), 100

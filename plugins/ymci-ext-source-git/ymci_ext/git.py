@@ -1,4 +1,3 @@
-from tornado import gen
 from ymci.ext.hooks import BuildHook
 from logging import getLogger
 import os
@@ -10,16 +9,14 @@ class GitHook(BuildHook):
 
     @property
     def active(self):
-        return self.project.repository.endswith('.git')
+        return self.build.project.repository.endswith('.git')
 
-    @gen.coroutine
     def pre_copy(self):
-        if not os.path.exists(os.path.join(self.project.src_dir, '.git')):
-            yield self.execute(
-                ['git', 'clone', self.project.repository, '.'])
-        else:
-            yield self.execute(
-                ['git', 'fetch', 'origin'])
+        if not os.path.exists(
+                os.path.join(self.build.project.src_dir, '.git')):
+            self.execute(
+                ['git', 'clone', self.build.project.repository, '.'])
 
-            yield self.execute(
-                ['git', 'reset', '--hard', 'origin/master'])
+        self.execute(['git', 'fetch', 'origin'])
+        self.execute(
+            ['git', 'reset', '--hard', 'origin/master'])
