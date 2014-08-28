@@ -10,6 +10,13 @@ class ProjectForm(ModelForm):
         model = Project
 
 
+@url(r'/project/list')
+class ProjectList(Route):
+    def get(self):
+        return self.render(
+            'project/list.html', projects=self.db.query(Project).all())
+
+
 @url(r'/project/view/([^/]+)')
 class ProjectView(Route):
     def get(self, id):

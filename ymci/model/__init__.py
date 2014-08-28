@@ -56,6 +56,22 @@ class Project(Table):
     def last_build(self):
         return self.builds.order_by(Build.build_id.desc()).first()
 
+    @property
+    def last_non_running_build(self):
+        return (
+            self.builds
+                .filter(~Build.status.in_(('RUNNING', 'PENDING')))
+                .order_by(Build.build_id.desc())
+                .first())
+
+    @property
+    def last_successful_build(self):
+        return (
+            self.builds
+                .filter(Build.status == 'SUCCESS')
+                .order_by(Build.build_id.desc())
+                .first())
+
 
 class Build(Table):
     __tablename__ = 'build'
@@ -76,3 +92,20 @@ class Build(Table):
         return os.path.join(
             self.project.project_dir,
             'build_%d.log' % self.build_id)
+
+    @property
+    def pretty_duration(self):
+        if self.duration is None:
+            return ''
+        return '%.2fs' % self.duration
+
+    @property
+    def bootstrap_status(self):
+        return {
+            'SUCCESS': 'success',
+            'RUNNING': 'primary',
+            'FAILED': 'danger',
+            'PENDING': 'default',
+            'WARNING': 'warning',
+            None: 'default'
+        }[self.status]

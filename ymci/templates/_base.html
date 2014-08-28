@@ -13,7 +13,7 @@
     <title>YMCI server</title>
   </head>
 
-  {% from ymci import config %}
+  {% from ymci import config, builder %}
 
   <body>
     <header class="navbar navbar-default">
@@ -23,7 +23,7 @@
         </div>
         <ul class="nav navbar-nav">
           <li class="active">
-            <a href="{{ reverse_url('Index') }}">Project list</a>
+            <a href="{{ reverse_url('ProjectList') }}">Project list</a>
           </li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
