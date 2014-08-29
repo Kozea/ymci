@@ -116,7 +116,8 @@ class Build(Table):
             'SUCCESS': 'success',
             'RUNNING': 'primary',
             'FAILED': 'danger',
-            'PENDING': 'default',
+            'STOPPED': 'default',
+            'PENDING': 'info',
             'WARNING': 'warning',
             None: 'default'
         }[self.status]

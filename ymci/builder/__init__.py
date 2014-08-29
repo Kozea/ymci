@@ -110,7 +110,7 @@ class Task(Thread):
                 self.out('\nCommand %s returned %d' % (
                     e.command, -e.errno))
                 status = 'FAILED'
-                return status
+            return status
 
         try:
             self.run_task()
@@ -132,6 +132,7 @@ class Task(Thread):
         self.build.duration = time() - self.start_time
         self.out('\n(Duration %fs)' % self.build.duration)
         self.log.close()
+        self.db.commit()
         self.callback()
 
     def run_task(self):
