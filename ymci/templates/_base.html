@@ -13,9 +13,10 @@
     <title>YMCI server</title>
   </head>
 
-  {% from ymci import config, builder %}
+  {% from ymci import server %}
+  {% set builder = server.builder %}
 
-  <body>
+  <body data-page="{{ handler.__class__.__name__ }}">
     <header class="navbar navbar-default">
       <nav class="container">
         <div class="nav navbar-header">
@@ -44,6 +45,8 @@
         </ul>
       </nav>
     </footer>
+    <script src="{{ static_url('jquery-2.1.1.min.js') }}"></script>
+    <script src="{{ static_url('blocks.js') }}"></script>
     <script src="{{ static_url('main.js') }}"></script>
     {% block js %}{% end %}
   </body>

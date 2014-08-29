@@ -4,8 +4,8 @@ from collections import defaultdict
 from threading import Thread
 from time import time
 from datetime import datetime
-from ..builder.util import execute, ExecutionException
-from .. import conf
+from .util import execute, ExecutionException
+from .. import server
 import shutil
 import os
 import pkg_resources
@@ -19,7 +19,7 @@ class Pool(object):
     def __init__(self, db, ioloop=None):
         self.log_streams = defaultdict(list)
         self.queue = []
-        self.db = db
+        self.db = db()
         self.current_task = None
         self.ioloop = ioloop or IOLoop.instance()
 
@@ -29,6 +29,9 @@ class Pool(object):
             self.build(task)
         else:
             self.queue.append(task)
+        server.blocks.build.refresh()
+        server.blocks.project.refresh()
+        server.blocks.history.refresh(build.project_id)
 
     def stop(self, build):
         if (self.current_task and
@@ -40,10 +43,13 @@ class Pool(object):
             if (self.current_task.build.project_id == build.project_id and
                     self.current_task.build.build_id == build.build_id):
                 self.queue.remove(task)
+        server.blocks.build.refresh()
+        server.blocks.project.refresh()
+        server.blocks.history.refresh(build.project_id)
 
     def build(self, task):
         self.current_task = task
-        task.callback = self.next
+        task.callback = lambda: self.ioloop.add_callback(self.next)
         task.db = self.db
         task.streams = self.log_streams['%s-%s' % (
             task.build.project_id,
@@ -52,17 +58,21 @@ class Pool(object):
         self.ioloop.add_callback(task.start)
 
     def next(self):
+        project_id = self.current_task.build.project_id
         self.current_task = None
         if len(self.queue):
             self.build(self.queue.pop(0))
+        server.blocks.build.refresh()
+        server.blocks.project.refresh()
+        server.blocks.history.refresh(project_id)
 
 
 class Task(Thread):
     def __init__(self, build, *args, **kwargs):
         self.build = build
         self.stop = False
+        self.start_time = None
         self.script = build.project.script
-        self.db_url = conf['db_url']
         super(Task, self).__init__(*args, **kwargs)
 
     def out(self, data):
@@ -83,7 +93,7 @@ class Task(Thread):
 
     def run(self):
         log.info('Starting run for task %r on %s' % (self, datetime.now()))
-        self.start = time()
+        self.start_time = time()
         self.log = open(self.build.log_file, 'w')
         self.build.status = 'RUNNING'
 
@@ -119,9 +129,8 @@ class Task(Thread):
             self.out('Success !')
             self.build.status = 'SUCCESS'
 
-        self.build.duration = time() - self.start
+        self.build.duration = time() - self.start_time
         self.out('\n(Duration %fs)' % self.build.duration)
-        self.db.commit()
         self.log.close()
         self.callback()
 

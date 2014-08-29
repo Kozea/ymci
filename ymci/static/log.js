@@ -1,8 +1,8 @@
 (function() {
-  document.addEventListener('DOMContentLoaded', function() {
-    var code, ws;
-    code = document.querySelectorAll('code.out')[0];
-    ws = new WebSocket("ws://" + location.host + "/log/" + (code.getAttribute('data-id')) + "/" + (code.getAttribute('data-idx')) + "/pipe");
+  $(function() {
+    var $code, ws;
+    $code = $('code.out');
+    ws = new WebSocket("ws://" + location.host + "/log/" + ($code.attr('data-id')) + "/" + ($code.attr('data-idx')) + "/pipe");
     ws.onopen = function() {
       return console.log('ws opened');
     };
@@ -14,8 +14,8 @@
     };
     return ws.onmessage = function(e) {
       return setTimeout((function() {
-        return code.innerHTML += e.data;
-      }), 10);
+        return $code.get(0).innerHTML += e.data;
+      }), 100);
     };
   });
 

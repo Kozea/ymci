@@ -1,0 +1,26 @@
+<h3>History</h3>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Build</th>
+      <th>Status</th>
+      <th>Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for build in project.builds %}
+      <tr>
+        <td>
+          <a class="badge" href="{{ reverse_url('ProjectLog', build.project_id, build.build_id) }}">{{ build.build_id }}</a>
+        </td>
+        <td>
+          <span class="label label-{{ build.bootstrap_status }}">{{ build.status.title() }}</span>
+        </td>
+        <td>
+            {{ build.pretty_duration }}
+        </td>
+      </tr>
+    {% end %}
+  </tbody>
+</table>

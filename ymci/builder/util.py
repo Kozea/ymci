@@ -12,7 +12,7 @@ class ExecutionException(Exception):
 
 
 def execute(cmd, cwd, out):
-    from .. import builder
+    from .. import server
 
     subproc = Subprocess(
         cmd,
@@ -27,7 +27,7 @@ def execute(cmd, cwd, out):
     subproc.stdout.read_until_close(send, send)
     while subproc.proc.poll() is None:
         sleep(.1)
-        if builder.current_task.stop:
+        if server.builder.current_task.stop:
             subproc.proc.kill()
     if subproc.proc.returncode != 0:
         raise ExecutionException(''.join(cmd), subproc.proc.returncode)

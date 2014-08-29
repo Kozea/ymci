@@ -2,10 +2,16 @@
 
 
 {% block main %}
-  <h2>{{ project.name }}</h2>
-  <p>
-    {{ project.description }}
-  </p>
+  <section class="row">
+    <h2>{{ project.name }}</h2>
+
+    <article class="col-md-10">
+      <p>
+        {{ project.description }}
+      </p>
+    </article>
+    <article class="col-md-2 block" data-block="history" data-args="/{{ project.project_id }}"></article>
+  </section>
 {% end %}
 
 {% block nav %}

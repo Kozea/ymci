@@ -26,9 +26,11 @@ module.exports = (grunt) ->
         sourceMap: true
 
       ymci:
-        files:
-          'ymci/static/main.js': 'coffee/main.coffee'
-          'ymci/static/log.js': 'coffee/log.coffee'
+        expand: true
+        cwd: 'coffee'
+        src: '*.coffee'
+        dest: 'ymci/static/'
+        ext: '.js'
 
     coffeelint:
       ymci:

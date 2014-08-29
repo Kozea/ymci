@@ -1,4 +1,4 @@
-document.addEventListener 'DOMContentLoaded', ->
+$ ->
   console.log """
     ___    ___ _____ ______   ________  ___
    |\\  \\  /  /|\\   _ \\  _   \\|\\   ____\\|\\  \\
@@ -8,3 +8,7 @@ document.addEventListener 'DOMContentLoaded', ->
    __/  / /      \\ \\__\\    \\ \\__\\ \\_______\\ \\__\\
   |\\___/ /        \\|__|     \\|__|\\|_______|\\|__|
   \\|___|/"""
+
+  $('body').on 'click', 'a.xhr', ->
+    $.get $(@).attr('href')
+    false

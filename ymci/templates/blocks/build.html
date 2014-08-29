@@ -1,0 +1,22 @@
+{% from time import time, mktime %}
+{% from ymci import server %}
+{% set builder = server.builder %}
+
+<h3>Builder</h3>
+<ul class="list-group ">
+  {% if builder.current_task %}
+    <li class="list-group-item">
+      {{ builder.current_task.build.project.name }} <a class="badge" href="{{ reverse_url('ProjectLog', builder.current_task.build.project.project_id, builder.current_task.build.build_id) }}">{{ builder.current_task.build.build_id }}</a>
+
+        <div class="progress">
+          <div class="progress-bar build-progress progress-bar-striped active" data-now="{{ (time() - builder.current_task.start_time) if builder.current_task.start_time else 0 }}" data-end="{{ builder.current_task.build.project.average_build_duration }}" style="width: {{ 100 * ((time() - builder.current_task.start_time) if builder.current_task.start_time else 0) / builder.current_task.build.project.average_build_duration }}%;">
+          </div>
+        </div>
+    </li>
+    {% for task in builder.queue %}
+      <li class="list-group-item"><a href="{{ reverse_url('ProjectView', task.build.project.project_id) }}">{{ task.build.project.name }}</a><span class="badge">{{ task.build.build_id + 1 }}</span></li>
+    {% end %}
+  {% else %}
+    <li class="list-group-item">Empty queue</li>
+  {% end %}
+</ul>

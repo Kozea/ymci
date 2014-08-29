@@ -1,0 +1,42 @@
+<h3>Projects</h3>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Last build</th>
+      <th>Status</th>
+      <th>Duration</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for project in projects %}
+      <tr>
+        <td>{{ project.name }}</td>
+        <td>
+          {% if project.last_non_running_build %}
+            <a class="badge" href="{{ reverse_url('ProjectLog', project.project_id, project.last_non_running_build.build_id) }}">{{ project.last_non_running_build.build_id }}</a>
+          {% end %}
+        </td>
+        <td>
+          {% if project.last_build %}
+            <span class="label label-{{ project.last_build.bootstrap_status }}">{{ project.last_build.status.title() }}</span>
+          {% else %}
+            <span class="label label-info">New</span>
+          {% end %}
+        </td>
+        <td>
+          {% if project.last_non_running_build %}
+            {{ project.last_non_running_build.pretty_duration }}
+          {% end %}
+        </td>
+        <td>
+          <div class="btn-group">
+            <a class="btn btn-default" href="{{ reverse_url('ProjectView', project.project_id) }}">View</a>
+            <a class="btn btn-default xhr" href="{{ reverse_url('ProjectBuild', project.project_id) }}">Build</a>
+          </div>
+        </td>
+      </tr>
+    {% end %}
+  </tbody>
+</table>

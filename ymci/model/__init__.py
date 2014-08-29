@@ -1,13 +1,14 @@
 from tornado.web import HTTPError
 from sqlalchemy import (
-    Column, Integer, String, Text, Float, DateTime, ForeignKey, create_engine)
+    Column, Integer, String, Text, Float, DateTime, ForeignKey, create_engine,
+    func)
 from sqlalchemy.orm import relationship, Query as SAQuery
 from sqlalchemy.ext.declarative import declarative_base
-from .. import conf
+from .. import server
 import os
 
 
-engine = create_engine(conf['db_url'], echo=False)
+engine = create_engine(server.conf['db_url'], echo=False)
 Table = declarative_base()
 
 
@@ -27,7 +28,8 @@ class Project(Table):
     repository = Column(String)
     script = Column(Text)
 
-    builds = relationship('Build', backref='project', lazy='dynamic')
+    builds = relationship('Build', backref='project', lazy='dynamic',
+                          order_by='Build.build_id.desc()')
 
     @property
     def dir_name(self):
@@ -40,7 +42,7 @@ class Project(Table):
 
     @property
     def project_dir(self):
-        path = os.path.join(conf['projects_path'], self.dir_name)
+        path = os.path.join(server.conf['projects_path'], self.dir_name)
         if not os.path.exists(path):
             os.mkdir(path)
         return path
@@ -71,6 +73,15 @@ class Project(Table):
                 .filter(Build.status == 'SUCCESS')
                 .order_by(Build.build_id.desc())
                 .first())
+
+    @property
+    def average_build_duration(self):
+        return (self.builds
+                .filter(Build.status == 'SUCCESS')
+                .order_by(Build.build_id.desc())
+                .limit(5)
+                .from_self(
+                    func.avg(Build.duration)).scalar() or 60)
 
 
 class Build(Table):

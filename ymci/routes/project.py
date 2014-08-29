@@ -1,4 +1,4 @@
-from .. import url, Route, WebSocket, builder
+from .. import url, Route, WebSocket
 from wtforms_alchemy import ModelForm
 from ..model import Project, Build
 from datetime import datetime
@@ -17,7 +17,7 @@ class ProjectList(Route):
             'project/list.html', projects=self.db.query(Project).all())
 
 
-@url(r'/project/view/([^/]+)')
+@url(r'/project/view/(\d+)')
 class ProjectView(Route):
     def get(self, id):
         project = self.db.query(Project).get(id)
@@ -40,7 +40,7 @@ class ProjectAdd(Route):
         return self.render('form.html', form=form)
 
 
-@url(r'/project/edit/([^/]+)')
+@url(r'/project/edit/(\d+)')
 class ProjectEdit(Route):
     def get(self, id):
         project = self.db.query(Project).get(id)
@@ -57,7 +57,7 @@ class ProjectEdit(Route):
         return self.render('form.html', form=form)
 
 
-@url(r'/project/delete/([^/]+)')
+@url(r'/project/delete/(\d+)')
 class ProjectDelete(Route):
     def get(self, id):
         project = self.db.query(Project).get(id)
@@ -72,7 +72,7 @@ class ProjectDelete(Route):
         return self.redirect('/')
 
 
-@url(r'/project/build/([^/]+)')
+@url(r'/project/build/(\d+)')
 class ProjectBuild(Route):
     def get(self, id):
         project = self.db.query(Project).get(id)
@@ -86,17 +86,17 @@ class ProjectBuild(Route):
         self.db.add(build)
         self.db.commit()
 
-        builder.add(build)
+        self.application.builder.add(build)
 
         return self.redirect(self.reverse_url(
             'ProjectLog', project.project_id, build.build_id))
 
 
-@url(r'/log/([^/]+)/(\d*)/pipe')
+@url(r'/log/(\d+)/(\d+)/pipe')
 class ProjectLogWebSocket(WebSocket):
     def open(self, id, idx):
         self.build = self.db.query(Build).get((idx, id))
-        builder.log_streams['%s-%s' % (
+        self.application.builder.log_streams['%s-%s' % (
             self.build.project_id,
             self.build.build_id
         )].append(self)
@@ -106,13 +106,13 @@ class ProjectLogWebSocket(WebSocket):
                     self.write_message(line)
 
     def on_close(self):
-        builder.log_streams['%s-%s' % (
+        self.application.builder.log_streams['%s-%s' % (
             self.build.project_id,
             self.build.build_id
         )].remove(self)
 
 
-@url(r'/project/log/([^/]+)/(\d*)')
+@url(r'/project/log/(\d+)/(\d*)')
 class ProjectLog(Route):
     def get(self, id, idx):
         project = self.db.query(Project).get(id)
@@ -123,11 +123,11 @@ class ProjectLog(Route):
         return self.render('project/log.html', project=project, build=build)
 
 
-@url(r'/project/build/([^/]+)/(\d*)/stop')
+@url(r'/project/build/(\d+)/(\d+)/stop')
 class ProjectBuildStop(Route):
     def get(self, id, idx):
         build = self.db.query(Build).get((idx, id))
-        builder.stop(build)
+        self.application.builder.stop(build)
 
         return self.redirect(self.reverse_url(
             'ProjectLog', build.project_id, build.build_id))
