@@ -4,10 +4,13 @@ from sqlalchemy import (
     func)
 from sqlalchemy.orm import relationship, Query as SAQuery
 from sqlalchemy.ext.declarative import declarative_base
+from logging import getLogger
 from .. import server
 import os
+import pkg_resources
 
 
+log = getLogger('ymci')
 engine = create_engine(server.conf['db_url'], echo=False)
 Table = declarative_base()
 
@@ -121,3 +124,12 @@ class Build(Table):
             'WARNING': 'warning',
             None: 'default'
         }[self.status]
+
+plugin_tables = []
+
+for table in pkg_resources.iter_entry_points('ymci.ext.db.Table'):
+    try:
+        plugin_tables.append(table.load())
+    except Exception:
+        log.exception('Failed to load plugin db table %r' % table)
+        continue

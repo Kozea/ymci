@@ -9,3 +9,7 @@ a.badge {
 
 span.badge {
   background-color: #999999 !important; }
+
+.pygal {
+  width: 100%;
+  max-height: 800px; }

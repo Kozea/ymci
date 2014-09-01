@@ -9,6 +9,10 @@
       <p>
         {{ project.description }}
       </p>
+      <embed class="pygal" type="image/svg+xml" src="{{ reverse_url('ProjectChartTime', project.project_id) }}" />
+      {% for chart in server.components.project_charts %}
+        <embed class="pygal" type="image/svg+xml" src="{{ reverse_url(chart.__name__, project.project_id) }}" />
+      {% end %}
     </article>
     <article class="col-md-2 block" data-block="history" data-args="/{{ project.project_id }}"></article>
   </section>

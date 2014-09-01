@@ -40,9 +40,6 @@ server.conf = Config(options.config)
 from .model import engine, Query
 server.db = scoped_session(sessionmaker(bind=engine, query_cls=Query))
 
-from .builder import Pool
-server.builder = Pool(server.db)
-
 
 class url(object):
     def __init__(self, url):
@@ -90,10 +87,19 @@ class WebSocket(WebSocketHandler, Base):
     pass
 
 
-class Blocks(object):
-    pass
+class Container(object):
+    def __iter__(self):
+        for name, attr in self.__dict__.items():
+            if not name.startswith('_'):
+                yield attr
 
-server.blocks = Blocks()
+
+class Components(object):
+    def __init__(self):
+        self.blocks = Container()
+        self.project_charts = Container()
+
+server.components = Components()
 
 
 class MetaBlock(type):
@@ -128,5 +134,7 @@ class BlockWebSocket(WebSocket, metaclass=MetaBlock):
     def on_close(self):
         self.__class__._sockets[self.args].remove(self)
 
+from .builder import Pool
+server.builder = Pool(server.db)
 
 import ymci.routes

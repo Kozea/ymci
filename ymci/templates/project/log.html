@@ -3,7 +3,12 @@
 
 {% block main %}
   <h2>{{ project.name }} build #{{ build.build_id }} [{{ build.status }}]</h2>
-  <code class="out" data-id="{{ project.project_id }}" data-idx="{{ build.build_id }}">
+  <code class="out"
+  {% if not log %}
+    data-id="{{ project.project_id }}" data-idx="{{ build.build_id }}"
+  {% end %}
+  >
+    {{ log }}
   </code>
 {% end %}
 
@@ -15,5 +20,7 @@
 {% end %}
 
 {% block js %}
-  <script src="{{ static_url('log.js') }}"></script>
+  {% if not log %}
+    <script src="{{ static_url('log.js') }}"></script>
+  {% end %}
 {% end %}

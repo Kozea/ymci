@@ -2,6 +2,8 @@ from .. import url, Route, WebSocket
 from wtforms_alchemy import ModelForm
 from ..model import Project, Build
 from datetime import datetime
+from . import ymci_style
+import pygal
 import os
 
 
@@ -13,7 +15,7 @@ class ProjectForm(ModelForm):
 @url(r'/project/list')
 class ProjectList(Route):
     def get(self):
-        return self.render(
+        self.render(
             'project/list.html', projects=self.db.query(Project).all())
 
 
@@ -21,7 +23,7 @@ class ProjectList(Route):
 class ProjectView(Route):
     def get(self, id):
         project = self.db.query(Project).get(id)
-        return self.render('project/view.html', project=project)
+        self.render('project/view.html', project=project)
 
 
 @url(r'/project/add')
@@ -36,15 +38,15 @@ class ProjectAdd(Route):
             form.populate_obj(project)
             self.db.add(project)
             self.db.commit()
-            return self.redirect('/')
-        return self.render('form.html', form=form)
+            self.redirect('/')
+        self.render('form.html', form=form)
 
 
 @url(r'/project/edit/(\d+)')
 class ProjectEdit(Route):
     def get(self, id):
         project = self.db.query(Project).get(id)
-        return self.render(
+        self.render(
             'form.html', form=ProjectForm(obj=project))
 
     def post(self, id):
@@ -53,15 +55,16 @@ class ProjectEdit(Route):
         if form.validate():
             form.populate_obj(project)
             self.db.commit()
-            return self.redirect('/')
-        return self.render('form.html', form=form)
+            self.redirect('/')
+            return
+        self.render('form.html', form=form)
 
 
 @url(r'/project/delete/(\d+)')
 class ProjectDelete(Route):
     def get(self, id):
         project = self.db.query(Project).get(id)
-        return self.render(
+        self.render(
             'ask.html', message="Do you really want to delete project %s" %
             project.name)
 
@@ -69,7 +72,7 @@ class ProjectDelete(Route):
         project = self.db.query(Project).get(id)
         self.db.remove(project)
         self.db.commit()
-        return self.redirect('/')
+        self.redirect('/')
 
 
 @url(r'/project/build/(\d+)')
@@ -88,7 +91,7 @@ class ProjectBuild(Route):
 
         self.application.builder.add(build)
 
-        return self.redirect(self.reverse_url(
+        self.redirect(self.reverse_url(
             'ProjectLog', project.project_id, build.build_id))
 
 
@@ -120,7 +123,13 @@ class ProjectLog(Route):
             build = self.db.query(Build).get((idx, id))
         else:
             build = project.last_build
-        return self.render('project/log.html', project=project, build=build)
+        if build.status != 'RUNNING' and os.path.exists(build.log_file):
+            with open(build.log_file, 'r') as f:
+                log = f.read()
+        else:
+            log = None
+        self.render(
+            'project/log.html', project=project, build=build, log=log)
 
 
 @url(r'/project/build/(\d+)/(\d+)/stop')
@@ -129,5 +138,30 @@ class ProjectBuildStop(Route):
         build = self.db.query(Build).get((idx, id))
         self.application.builder.stop(build)
 
-        return self.redirect(self.reverse_url(
+        self.redirect(self.reverse_url(
             'ProjectLog', build.project_id, build.build_id))
+
+
+@url(r'/project/chart/time/(\d+).svg')
+class ProjectChartTime(Route):
+    def get(self, id):
+        project = self.db.query(Project).get(id)
+        svg = pygal.Line(
+            js=['/static/svg.jquery.js?://',
+                '/static/pygal-tooltips.js?://'],
+            style=ymci_style)
+        builds = project.builds.filter(Build.status == 'SUCCESS').all()[::-1]
+        svg.add('Success', [{
+            'xlink': self.reverse_url('ProjectLog', id, b.build_id),
+            'value': b.duration} for b in builds])
+        svg.x_labels = ['#%d' % b.build_id for b in builds]
+        svg.show_minor_x_labels = False
+        svg.value_formatter = lambda x: '%.2fs' % x
+        svg.interpolate = 'cubic'
+        svg.x_labels_major_count = 20
+        svg.include_x_axis = True
+        svg.truncate_label = 10
+        svg.show_legend = False
+        svg.title = 'Build duration in seconds'
+        self.set_header("Content-Type", "image/svg+xml")
+        self.write(svg.render())

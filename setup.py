@@ -23,7 +23,7 @@ setup(
     packages=['ymci'],
     provides=['ymci'],
     install_requires=['tornado', 'tornado_systemd', 'pyyaml', 'wtforms',
-                      'sqlalchemy', 'psycopg2', 'wtforms_alchemy'],
+                      'sqlalchemy', 'psycopg2', 'wtforms_alchemy', 'pygal'],
     tests_require=["pytest"],
     package_data={'ymci': ['static/*']},
     classifiers=[

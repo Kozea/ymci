@@ -1,5 +1,23 @@
 from .. import url, Route, BlockWebSocket, server
 from ..model import Project
+import pkg_resources
+from logging import getLogger
+import pygal
+log = getLogger('ymci')
+
+
+base_style = pygal.style.Style(
+    background='white',
+    plot_background='white',
+    foreground='#555',
+    foreground_light='#666',
+    foreground_dark='#444',
+    opacity='.6',
+    opacity_hover='.9',
+    transition='400ms ease-in',
+    colors=[])
+
+ymci_style = pygal.style.RotateStyle('#28b62c', base_style=base_style)
 
 
 @url(r'/')
@@ -30,8 +48,17 @@ class HistoryBlock(BlockWebSocket):
             'blocks/history.html',
             project=self.db.query(Project).get(id))
 
-
-server.blocks.build = BuildBlock
-server.blocks.project = ProjectBlock
-server.blocks.history = HistoryBlock
+blocks = server.components.blocks
+blocks.build = BuildBlock
+blocks.project = ProjectBlock
+blocks.history = HistoryBlock
 import ymci.routes.project
+
+plugin_routes = []
+
+for route in pkg_resources.iter_entry_points('ymci.ext.routes.Route'):
+    try:
+        plugin_routes.append(route.load())
+    except Exception:
+        log.exception('Failed to load plugin route %r' % route)
+        continue

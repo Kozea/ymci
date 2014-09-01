@@ -11,12 +11,12 @@ setup(
 
     scripts=[],
 
-    provides=['ymci_ext.git'],
+    provides=['ymci_ext_source_git.git'],
     packages=find_packages(),
 
     entry_points={
         'ymci.ext.hooks.BuildHook': [
-            'git = ymci_ext.git:GitHook'
+            'git = ymci_ext_source_git.git:GitHook'
         ],
     }
 )

@@ -12,6 +12,7 @@ import pkg_resources
 
 
 log = getLogger('ymci')
+blocks = server.components.blocks
 
 
 class Pool(object):
@@ -29,9 +30,9 @@ class Pool(object):
             self.build(task)
         else:
             self.queue.append(task)
-        server.blocks.build.refresh()
-        server.blocks.project.refresh()
-        server.blocks.history.refresh(build.project_id)
+        blocks.build.refresh()
+        blocks.project.refresh()
+        blocks.history.refresh(build.project_id)
 
     def stop(self, build):
         if (self.current_task and
@@ -43,9 +44,9 @@ class Pool(object):
             if (self.current_task.build.project_id == build.project_id and
                     self.current_task.build.build_id == build.build_id):
                 self.queue.remove(task)
-        server.blocks.build.refresh()
-        server.blocks.project.refresh()
-        server.blocks.history.refresh(build.project_id)
+        blocks.build.refresh()
+        blocks.project.refresh()
+        blocks.history.refresh(build.project_id)
 
     def build(self, task):
         self.current_task = task
@@ -62,9 +63,9 @@ class Pool(object):
         self.current_task = None
         if len(self.queue):
             self.build(self.queue.pop(0))
-        server.blocks.build.refresh()
-        server.blocks.project.refresh()
-        server.blocks.history.refresh(project_id)
+        blocks.build.refresh()
+        blocks.project.refresh()
+        blocks.history.refresh(project_id)
 
 
 class Task(Thread):
@@ -146,10 +147,12 @@ class Task(Thread):
                 log.exception('Failed to load plugin %r' % hook)
                 continue
 
-            def out(message):
-                self.out('%s> %s\n' % (Hook.__name__, message))
+            def get_out(hook_name):
+                def out(message):
+                    self.out('%s> %s\n' % (hook_name, message))
+                return out
 
-            hook = Hook(self.build, self.out)
+            hook = Hook(self.build, get_out(Hook.__name__))
             if hook.active:
                 self.build_hooks.append(hook)
 
