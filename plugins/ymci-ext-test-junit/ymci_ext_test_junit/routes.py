@@ -31,7 +31,7 @@ class ResultChart(Route):
             'value': b.result.success if b.result else 0} for b in builds])
         svg.x_labels = ['#%d' % b.build_id for b in builds]
         svg.show_minor_x_labels = False
-        svg.value_formatter = lambda x: '%.2fs' % x
+        svg.value_formatter = lambda x: '%d' % x
         svg.x_labels_major_count = 20
         svg.include_x_axis = True
         svg.truncate_label = 10

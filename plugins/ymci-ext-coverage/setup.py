@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='ymci-ext-test-junit',
+    name='ymci-ext-coverage',
     version='1.0',
-    description='Junit test result plugin for ymci',
+    description='Coverage (cobertura) plugin for ymci',
     author="Florian Mounier, Kozea",
     author_email="florian.mounier@kozea.fr",
 
@@ -11,18 +11,18 @@ setup(
 
     scripts=[],
 
-    provides=['ymci_ext_test_junit'],
+    provides=['ymci_ext_coverage'],
     packages=find_packages(),
 
     entry_points={
         'ymci.ext.hooks.BuildHook': [
-            'junit = ymci_ext_test_junit.junit:JunitHook'
+            'coverage = ymci_ext_coverage.coverage:CoverageHook'
         ],
         'ymci.ext.db.Table': [
-            'result = ymci_ext_test_junit.db:Result'
+            'result = ymci_ext_coverage.db:Coverage'
         ],
         'ymci.ext.routes.Route': [
-            'result_chart = ymci_ext_test_junit.routes:ResultChart'
+            'result_chart = ymci_ext_coverage.routes:CoverageChart'
         ],
     }
 )

@@ -30,7 +30,7 @@ class JunitHook(BuildHook):
                 self.build.status = 'FAILED'
             self.build.result = result
             self.out(
-                '\nBuild is %s: %d tests run, '
+                'Build is %s: %d tests run, '
                 '%d errors %d fails %d skips %d success' % (
                     self.build.status,
                     result.total,

@@ -11,7 +11,7 @@ setup(
 
     scripts=[],
 
-    provides=['ymci_ext_source_git.git'],
+    provides=['ymci_ext_source_git'],
     packages=find_packages(),
 
     entry_points={
