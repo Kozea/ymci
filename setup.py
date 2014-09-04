@@ -23,9 +23,10 @@ setup(
     packages=['ymci'],
     provides=['ymci'],
     install_requires=['tornado', 'tornado_systemd', 'pyyaml', 'wtforms',
-                      'sqlalchemy', 'psycopg2', 'wtforms_alchemy', 'pygal'],
+                      'sqlalchemy', 'psycopg2', 'wtforms_alchemy', 'pygal',
+                      'pygments'],
     tests_require=["pytest"],
-    package_data={'ymci': ['static/*']},
+    package_data={'ymci': ['static/*', 'templates/*']},
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Web Environment",

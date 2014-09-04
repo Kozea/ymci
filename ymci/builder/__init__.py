@@ -119,6 +119,8 @@ class Task(Thread):
             log.warn('Error during task execution %r' % self)
             self.build.status = treat(e)
 
+        self.out('\n')
+
         try:
             for hook in self.build_hooks:
                 hook.post_build()

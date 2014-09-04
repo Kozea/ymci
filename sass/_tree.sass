@@ -1,0 +1,37 @@
+.tree
+  *
+    padding: 0
+    margin: 0
+    list-style: none
+
+  input[type="checkbox"]
+    display: none
+
+  input[type="checkbox"]
+
+    &:checked ~ label i.glyphicon::before
+      content: "\e118"
+
+    &:not(:checked) ~ ul
+      display: none
+
+  li
+    -webkit-user-select: none
+    user-select: none
+
+    ul
+      margin: 0 0 0 1em
+
+  label[for]
+    cursor: pointer
+
+    i.glyphicon::before
+      content: "\e117"
+      color: #777
+
+
+  label
+    white-space: nowrap
+
+    i.glyphicon::before
+      padding-right: .25em

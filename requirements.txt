@@ -1,0 +1,9 @@
+tornado
+tornado_systemd
+pyyaml
+wtforms
+sqlalchemy
+psycopg2
+wtforms_alchemy
+pygal
+hg+https://bitbucket.org/birkenfeld/pygments-main

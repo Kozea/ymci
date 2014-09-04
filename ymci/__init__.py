@@ -98,6 +98,7 @@ class Components(object):
     def __init__(self):
         self.blocks = Container()
         self.project_charts = Container()
+        self.project_links = Container()
 
 server.components = Components()
 
