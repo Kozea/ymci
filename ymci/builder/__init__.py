@@ -15,6 +15,13 @@ log = getLogger('ymci')
 blocks = server.components.blocks
 
 
+def refresh(id):
+    blocks.build.refresh()
+    blocks.project.refresh()
+    blocks.home.refresh()
+    blocks.history.refresh(id)
+
+
 class Pool(object):
 
     def __init__(self, db, ioloop=None):
@@ -30,9 +37,7 @@ class Pool(object):
             self.build(task)
         else:
             self.queue.append(task)
-        blocks.build.refresh()
-        blocks.project.refresh()
-        blocks.history.refresh(build.project_id)
+        refresh(build.project_id)
 
     def stop(self, build):
         if (self.current_task and
@@ -44,9 +49,7 @@ class Pool(object):
             if (self.current_task.build.project_id == build.project_id and
                     self.current_task.build.build_id == build.build_id):
                 self.queue.remove(task)
-        blocks.build.refresh()
-        blocks.project.refresh()
-        blocks.history.refresh(build.project_id)
+        refresh(build.project_id)
 
     def build(self, task):
         self.current_task = task
@@ -63,9 +66,7 @@ class Pool(object):
         self.current_task = None
         if len(self.queue):
             self.build(self.queue.pop(0))
-        blocks.build.refresh()
-        blocks.project.refresh()
-        blocks.history.refresh(project_id)
+        refresh(project_id)
 
 
 class Task(Thread):

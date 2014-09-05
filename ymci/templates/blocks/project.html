@@ -1,3 +1,5 @@
+{% include "_base.html" %}
+
 <h3>Projects</h3>
 <table class="table table-striped">
   <thead>
@@ -33,7 +35,13 @@
         <td>
           <div class="btn-group">
             <a class="btn btn-default" href="{{ reverse_url('ProjectView', project.project_id) }}">View</a>
-            <a class="btn btn-default xhr" href="{{ reverse_url('ProjectBuild', project.project_id) }}">Build</a>
+            {% for route in server.components.project_links %}
+              <a class="btn btn-default" href="{{ reverse_url(route.__name__, project.project_id, '') }}">{{ route.__name__.title() }}</a>
+            {% end %}
+            <a class="btn btn-default" href="{{ reverse_url('ProjectBuild', project.project_id) }}">Build</a>
+            <a class="btn btn-default" href="{{ reverse_url('ProjectLog', project.project_id, '') }}">Log</a>
+            <a class="btn btn-default" href="{{ reverse_url('ProjectEdit', project.project_id) }}">Edit</a>
+            <a class="btn btn-default" href="{{ reverse_url('ProjectDelete', project.project_id) }}">Delete</a>
           </div>
         </td>
       </tr>

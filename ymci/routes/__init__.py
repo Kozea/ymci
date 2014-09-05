@@ -48,9 +48,19 @@ class HistoryBlock(BlockWebSocket):
             'blocks/history.html',
             project=self.db.query(Project).get(id))
 
+
+@url(r'/blocks/home')
+class HomeBlock(BlockWebSocket):
+    def render_block(self):
+        return self.render_string(
+            'blocks/home.html',
+            projects=self.db.query(Project).all())
+
+
 blocks = server.components.blocks
 blocks.build = BuildBlock
 blocks.project = ProjectBlock
+blocks.home = HomeBlock
 blocks.history = HistoryBlock
 import ymci.routes.project
 

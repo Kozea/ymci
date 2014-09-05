@@ -2,47 +2,8 @@
 
 {% block main %}
   <h2>Projects</h2>
-
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Last build</th>
-        <th>Status</th>
-        <th>Duration</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for project in projects %}
-        <tr>
-          <td>{{ project.name }}</td>
-
-          {% if project.last_build %}
-            <td>{{ project.last_build.build_id }}</td>
-            <td><span class="label label-{{ project.last_build.bootstrap_status }}">{{ project.last_build.status }}</span></td>
-            <td>{{ '%2.fs' % (project.last_build.duration or 0) }}</td>
-          {% else %}
-            <td>N/A</td>
-            <td>N/A</td>
-            <td>N/A</td>
-          {% end %}
-          <td>
-            <div class="btn-group">
-              <a class="btn btn-default" href="{{ reverse_url('ProjectView', project.project_id) }}">View</a>
-              {% for route in server.components.project_links %}
-                <a class="btn btn-default" href="{{ reverse_url(route.__name__, project.project_id, '') }}">{{ route.__name__.title() }}</a>
-              {% end %}
-              <a class="btn btn-default" href="{{ reverse_url('ProjectBuild', project.project_id) }}">Build</a>
-              <a class="btn btn-default" href="{{ reverse_url('ProjectLog', project.project_id, '') }}">Log</a>
-              <a class="btn btn-default" href="{{ reverse_url('ProjectEdit', project.project_id) }}">Edit</a>
-              <a class="btn btn-default" href="{{ reverse_url('ProjectDelete', project.project_id) }}">Delete</a>
-            </div>
-          </td>
-        </tr>
-      {% end %}
-    </tbody>
-  </table>
+  <article class="block" data-block="project">
+  </article>
 {% end %}
 
 {% block nav %}

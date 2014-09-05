@@ -171,3 +171,16 @@ span.badge {
   color: #008080; }
 .codetable .il {
   color: #009999; }
+
+.grid {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between; }
+  .grid .grid-elt {
+    background-color: #fafafa;
+    flex-basis: 30%;
+    text-align: center;
+    margin: 1em;
+    padding: 0.25em; }
+    .grid .grid-elt div {
+      padding: 0.5em; }
