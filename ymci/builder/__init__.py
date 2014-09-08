@@ -166,7 +166,7 @@ class Task(Thread):
 
         assert not os.path.exists(self.build.dir)
 
-        shutil.copytree(src, self.build.dir)
+        shutil.copytree(src, self.build.dir, follow_symlinks=False)
 
         for hook in self.build_hooks:
             hook.pre_build()
