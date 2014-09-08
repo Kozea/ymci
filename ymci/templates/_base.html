@@ -14,8 +14,7 @@
     <title>YMCI server</title>
   </head>
 
-  {% from ymci import server %}
-  {% set builder = server.builder %}
+  {% include '_globals.html' %}
 
   <body data-page="{{ handler.__class__.__name__ }}">
     <header class="navbar navbar-default">

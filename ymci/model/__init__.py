@@ -108,29 +108,6 @@ class Build(Table):
             'build_%d.log' % self.build_id)
 
     @property
-    def pretty_duration(self):
-        periods = [
-            ('year', 1000 * 60 * 60 * 24 * 365),
-            ('month', 1000 * 60 * 60 * 24 * 30),
-            ('day', 1000 * 60 * 60 * 24),
-            ('h', 1000 * 60 * 60),
-            ('min', 1000 * 60),
-            ('s', 1000),
-            ('ms', 1)
-        ]
-        ms = int((self.duration or 0) * 1000)
-        out = ''
-        for name, nms in periods:
-            if ms > nms:
-                val, ms = divmod(ms, nms)
-                out += str(val) + name
-                if val != 1 and name in ('year', 'month', 'day'):
-                    out += 's'
-                out += ' '
-
-        return out
-
-    @property
     def bootstrap_status(self):
         return {
             'SUCCESS': 'success',

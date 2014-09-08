@@ -20,6 +20,6 @@ class Result(Table):
 
     @property
     def success(self):
-        return self.total - self.fail - self.error - self.skip
+        return self.total - self.fail - self.error
 
     build = relationship('Build', backref=backref('result', uselist=False))

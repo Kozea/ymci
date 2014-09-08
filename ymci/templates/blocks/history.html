@@ -20,7 +20,7 @@
           <span class="label label-{{ build.bootstrap_status }}">{{ (build.status or '').title() }}</span>
         </td>
         <td>
-            {{ build.pretty_duration }}
+          <abbr title="{{ pretty_duration(build.duration) }}">{{ pretty_duration_round(build.duration) }}</abbr>
         </td>
       </tr>
     {% end %}

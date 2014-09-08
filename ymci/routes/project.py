@@ -70,7 +70,7 @@ class ProjectDelete(Route):
 
     def post(self, id):
         project = self.db.query(Project).get(id)
-        self.db.remove(project)
+        self.db.delete(project)
         self.db.commit()
         self.redirect('/')
 
