@@ -52,7 +52,7 @@ class StatsChart(Route):
         svg = pygal.Line(
             js=['/static/svg.jquery.js?://',
                 '/static/pygal-tooltips.js?://'],
-            style=style)
+            style=style, logarithmic=True, human_readable=True)
 
         builds = project.builds[::-1]
         svg.add('Lines', [{
@@ -60,9 +60,9 @@ class StatsChart(Route):
             'value': b.coverage.lines if b.coverage else 0
         } for b in builds])
 
-        svg.add('Files', [{
+        svg.add('Classes', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.coverage.files if b.coverage else 0
+            'value': b.coverage.cls if b.coverage else 0
         } for b in builds])
 
         svg.x_labels = ['#%d' % b.build_id for b in builds]
