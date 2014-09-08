@@ -19,10 +19,10 @@ class JunitHook(BuildHook):
             tree = ElementTree.parse(results)
             node = tree.getroot()
             result = Result()
-            result.error = int(node.get('errors'), 0)
-            result.fail = int(node.get('failures'), 0)
-            result.skip = int(node.get('skips'), 0)
-            result.total = int(node.get('tests'), 0)
+            result.error = int(node.get('errors', 0))
+            result.fail = int(node.get('failures', 0))
+            result.skip = int(node.get('skips', node.get('skip', 0)))
+            result.total = int(node.get('tests', 0))
 
             if result.fail + result.error == 0:
                 self.build.status = 'SUCCESS'
