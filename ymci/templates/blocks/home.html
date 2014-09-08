@@ -20,7 +20,7 @@
     </div>
     <div>
     {% if project.last_non_running_build %}
-      Duration: <abbr title="{{ pretty_duration(project.last_non_running_build.duration) }}">{{ pretty_duration_abbr(project.last_non_running_build.duration) }}</abbr>
+      Duration: <abbr title="{{ pretty_duration(project.last_non_running_build.duration) }}">{{ pretty_duration_round(project.last_non_running_build.duration) }}</abbr>
     {% end %}
     </div>
     <div class="btn-group pull-right">
