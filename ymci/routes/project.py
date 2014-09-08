@@ -2,7 +2,7 @@ from .. import url, Route, WebSocket
 from wtforms_alchemy import ModelForm
 from ..model import Project, Build
 from datetime import datetime
-from . import ymci_style
+from . import ymci_style, default_config
 import pygal
 import os
 
@@ -146,10 +146,9 @@ class ProjectBuildStop(Route):
 class ProjectChartTime(Route):
     def get(self, id):
         project = self.db.query(Project).get(id)
-        svg = pygal.Line(
-            js=['/static/svg.jquery.js?://',
-                '/static/pygal-tooltips.js?://'],
-            style=ymci_style, width=500, height=500)
+        config = default_config()
+        config.style = ymci_style
+        svg = pygal.Line(config)
         builds = project.builds.filter(Build.status == 'SUCCESS').all()[::-1]
         svg.add('Success', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),

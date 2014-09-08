@@ -3,6 +3,8 @@ from ..model import Project
 import pkg_resources
 from logging import getLogger
 import pygal
+from pygal import Config
+from copy import copy
 log = getLogger('ymci')
 
 
@@ -18,6 +20,16 @@ base_style = pygal.style.Style(
     colors=[])
 
 ymci_style = pygal.style.RotateStyle('#28b62c', base_style=base_style)
+
+
+def default_config():
+    class DefaultConfig(Config):
+        """Config for minimal graph."""
+        js = ['/static/svg.jquery.js?://', '/static/pygal-tooltips.js?://']
+        style = pygal.style.Style(**ymci_style.__dict__)
+        width = 500
+        height = 500
+    return copy(DefaultConfig)
 
 
 @url(r'/')

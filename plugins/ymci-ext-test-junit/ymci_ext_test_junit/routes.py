@@ -1,7 +1,7 @@
 from ymci.ext.routes import url, Route
 from ymci.model import Project
 from ymci import server
-from ymci.routes import ymci_style
+from ymci.routes import default_config
 import pygal
 
 
@@ -9,13 +9,9 @@ import pygal
 class ResultChart(Route):
     def get(self, id):
         project = self.db.query(Project).get(id)
-        style = pygal.style.Style(**ymci_style.__dict__)
-        style.colors = ('#ff7156', '#ff4136', '#ff851b', '#28b62c')
-        svg = pygal.StackedBar(
-            js=['/static/svg.jquery.js?://',
-                '/static/pygal-tooltips.js?://'],
-            style=style, width=500, height=500)
-
+        config = default_config()
+        config.style.colors = ('#ff7156', '#ff4136', '#ff851b', '#28b62c')
+        svg = pygal.StackedBar(config)
         builds = project.builds[::-1]
         svg.add('Errors', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),

@@ -1,7 +1,7 @@
 from ymci.ext.routes import url, Route
 from ymci.model import Project
 from ymci import server
-from ymci.routes import ymci_style
+from ymci.routes import default_config
 import pygal
 
 
@@ -9,12 +9,7 @@ import pygal
 class CoverageChart(Route):
     def get(self, id):
         project = self.db.query(Project).get(id)
-        style = pygal.style.Style(**ymci_style.__dict__)
-        svg = pygal.Line(
-            js=['/static/svg.jquery.js?://',
-                '/static/pygal-tooltips.js?://'],
-            style=style, width=500, height=500)
-
+        svg = pygal.Line(default_config())
         builds = project.builds[::-1]
         svg.add('Lines', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
@@ -45,15 +40,21 @@ class CoverageChart(Route):
 
 
 @url(r'/project/chart/coverage/stats/(\d+).svg')
+@url(r'/project/chart/coverage/stats/(\d+)_(\d+)_(\d+).svg')
 class StatsChart(Route):
-    def get(self, id):
+    def get(self, id, width=None, height=None):
         project = self.db.query(Project).get(id)
-        style = pygal.style.Style(**ymci_style.__dict__)
-        svg = pygal.Line(
-            js=['/static/svg.jquery.js?://',
-                '/static/pygal-tooltips.js?://'],
-            style=style, logarithmic=True, width=500, height=500)
-
+        config = default_config()
+        config.logarithmic = True
+        # If we have width we should always have height, default value will be
+        # sent if one of these is not defined for the popup view.
+        if width:
+            config.width = width
+            config.height = height
+        else:
+            config.show_legend = False
+            config.show_y_labels = False
+        svg = pygal.Line(config)
         builds = project.builds[::-1]
         svg.add('Lines', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
