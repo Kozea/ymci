@@ -149,7 +149,7 @@ class ProjectChartTime(Route):
         svg = pygal.Line(
             js=['/static/svg.jquery.js?://',
                 '/static/pygal-tooltips.js?://'],
-            style=ymci_style)
+            style=ymci_style, width=500, height=500)
         builds = project.builds.filter(Build.status == 'SUCCESS').all()[::-1]
         svg.add('Success', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
