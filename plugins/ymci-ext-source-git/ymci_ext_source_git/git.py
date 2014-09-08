@@ -9,7 +9,7 @@ class GitHook(BuildHook):
 
     @property
     def active(self):
-        return self.build.project.repository.startswith('git:')
+        return self.build.project.repository.startswith('git+')
 
     def pre_copy(self):
         if not os.path.exists(
