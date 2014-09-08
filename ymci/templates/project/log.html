@@ -12,13 +12,6 @@
   </code>
 {% end %}
 
-{% block nav %}
-  <li><a href="{{ reverse_url('Index') }}"> Project list</a></li>
-  <li><a href="{{ reverse_url('ProjectBuildStop', project.project_id, build.build_id) }}"> Stop</a></li>
-  <li><a href="{{ reverse_url('ProjectEdit', project.project_id) }}"> Edit {{ project.name }}</a></li>
-  <li><a href="{{ reverse_url('ProjectDelete', project.project_id) }}"> Delete {{ project.name }}</a></li>
-{% end %}
-
 {% block js %}
   {% if not log %}
     <script src="{{ static_url('log.js') }}"></script>

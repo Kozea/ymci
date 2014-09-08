@@ -23,9 +23,17 @@
           <a class="navbar-brand" href="/">YMCI</a>
         </div>
         <ul class="nav navbar-nav">
-          <li class="active">
-            <a href="{{ reverse_url('ProjectList') }}">Project list</a>
-          </li>
+          <li><a href="{{ reverse_url('Index') }}">Project list</a></li>
+          <li><a href="{{ reverse_url('ProjectAdd') }}">New project</a></li>
+          {% if globals().get('project', None) %}
+            <li><a href="{{ reverse_url('ProjectBuild', project.project_id) }}">Build {{ project.name }}</a></li>
+            <li><a href="{{ reverse_url('ProjectEdit', project.project_id) }}">Edit {{ project.name }}</a></li>
+            <li><a href="{{ reverse_url('ProjectDelete', project.project_id) }}">Delete {{ project.name }}</a></li>
+          {% end %}
+          {% if globals().get('build', None) and build.status == 'RUNNING' %}
+            <li><a href="{{ reverse_url('ProjectBuildStop', project.project_id, build.build_id) }}">Stop</a></li>
+          {% end %}
+          {% block nav %}{% end %}
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li><a href="http://kozea.fr/">Kozea</a></li>
@@ -37,14 +45,6 @@
       {% block main %}{% end %}
     </main>
 
-    <footer class="container">
-      <nav class="navbar navbar-bottom">
-        <ul class="pager">
-          <li class="previous"><a href="/">← Back</a></li>
-          {% block nav %}{% end %}
-        </ul>
-      </nav>
-    </footer>
     <script src="{{ static_url('jquery-2.1.1.min.js') }}"></script>
     <script src="{{ static_url('blocks.js') }}"></script>
     <script src="{{ static_url('main.js') }}"></script>
