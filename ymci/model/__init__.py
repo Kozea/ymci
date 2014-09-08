@@ -84,7 +84,7 @@ class Project(Table):
                 .order_by(Build.build_id.desc())
                 .limit(5)
                 .from_self(
-                    func.avg(Build.duration)).scalar() or 60)
+                    func.avg(Build.duration)).scalar() or 60 * 10)
 
 
 class Build(Table):
