@@ -29,7 +29,7 @@
         </td>
         <td>
           {% if project.last_non_running_build %}
-            {{ project.last_non_running_build.pretty_duration }}
+            <abbr title="{{ pretty_duration(project.last_non_running_build.duration) }}">{{ pretty_duration_abbr(project.last_non_running_build.duration) }}</abbr>
           {% end %}
         </td>
         <td>
