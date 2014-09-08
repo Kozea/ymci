@@ -14,7 +14,7 @@ class ResultChart(Route):
         svg = pygal.StackedBar(
             js=['/static/svg.jquery.js?://',
                 '/static/pygal-tooltips.js?://'],
-            style=style)
+            style=style, width=500, height=500)
 
         builds = project.builds[::-1]
         svg.add('Errors', [{

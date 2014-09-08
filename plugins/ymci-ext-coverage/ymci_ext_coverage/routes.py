@@ -13,7 +13,7 @@ class CoverageChart(Route):
         svg = pygal.Line(
             js=['/static/svg.jquery.js?://',
                 '/static/pygal-tooltips.js?://'],
-            style=style)
+            style=style, width=500, height=500)
 
         builds = project.builds[::-1]
         svg.add('Lines', [{
@@ -52,7 +52,7 @@ class StatsChart(Route):
         svg = pygal.Line(
             js=['/static/svg.jquery.js?://',
                 '/static/pygal-tooltips.js?://'],
-            style=style, logarithmic=True, human_readable=True)
+            style=style, logarithmic=True, width=500, height=500)
 
         builds = project.builds[::-1]
         svg.add('Lines', [{
