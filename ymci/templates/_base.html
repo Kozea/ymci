@@ -14,8 +14,6 @@
     <title>YMCI server</title>
   </head>
 
-  {% include '_globals.html' %}
-
   <body data-page="{{ handler.__class__.__name__ }}">
     <header class="navbar navbar-default">
       <nav class="container">
@@ -23,7 +21,7 @@
           <a class="navbar-brand" href="/">YMCI</a>
         </div>
         <ul class="nav navbar-nav">
-          <li><a href="{{ reverse_url('Index') }}">Project list</a></li>
+          <li><a href="{{ reverse_url('ProjectList') }}">Project list</a></li>
           <li><a href="{{ reverse_url('ProjectAdd') }}">New project</a></li>
           {% if globals().get('project', None) %}
             <li><a href="{{ reverse_url('ProjectBuild', project.project_id) }}">Build {{ project.name }}</a></li>
