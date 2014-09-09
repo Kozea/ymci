@@ -19,6 +19,10 @@ span.badge {
 .pygal {
   width: 49%; }
 
+[data-block="build"] .progress-bar {
+  -webkit-transition: none;
+  transition: none; }
+
 @font-face {
   font-family: "Source Code Pro";
   src: url("/static/fonts/SourceCodePro-Regular.ttf.woff") format("woff");

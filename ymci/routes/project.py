@@ -38,7 +38,10 @@ class ProjectAdd(Route):
             form.populate_obj(project)
             self.db.add(project)
             self.db.commit()
+            self.blocks.project.refresh()
+            self.blocks.home.refresh()
             self.redirect('/')
+            return
         self.render('form.html', form=form)
 
 
@@ -55,6 +58,8 @@ class ProjectEdit(Route):
         if form.validate():
             form.populate_obj(project)
             self.db.commit()
+            self.blocks.project.refresh()
+            self.blocks.home.refresh()
             self.redirect('/')
             return
         self.render('form.html', form=form)
@@ -72,7 +77,9 @@ class ProjectDelete(Route):
         project = self.db.query(Project).get(id)
         self.db.delete(project)
         self.db.commit()
-        self.redirect('/')
+        self.blocks.project.refresh()
+        self.blocks.home.refresh()
+        self.redirect(self.reverse_url('ProjectList'))
 
 
 @url(r'/project/build/(\d+)')

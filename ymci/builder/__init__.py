@@ -5,6 +5,7 @@ from threading import Thread
 from time import time
 from datetime import datetime
 from .util import execute, ExecutionException
+from ..model import Build
 from .. import server
 import shutil
 import os
@@ -13,6 +14,17 @@ import pkg_resources
 
 log = getLogger('ymci')
 blocks = server.components.blocks
+
+
+class short_transaction(object):
+    def __enter__(self):
+        self.db = server.scoped_session()
+        return self.db
+
+    def __exit__(self, type, value, traceback):
+        if type is None:
+            self.db.commit()
+        server.scoped_session.remove()
 
 
 def refresh(id):
@@ -24,15 +36,17 @@ def refresh(id):
 
 class Pool(object):
 
-    def __init__(self, db, ioloop=None):
+    def __init__(self, ioloop=None):
         self.log_streams = defaultdict(list)
         self.queue = []
-        self.db = db()
         self.current_task = None
         self.ioloop = ioloop or IOLoop.instance()
 
     def add(self, build):
-        task = Task(build)
+        task = Task(
+            build.build_id, build.project_id,
+            self.log_streams['%s-%s' % (build.project_id, build.build_id)],
+            build.project.name, self.ioloop)
         if not len(self.queue) and not self.current_task:
             self.build(task)
         else:
@@ -41,28 +55,23 @@ class Pool(object):
 
     def stop(self, build):
         if (self.current_task and
-                self.current_task.build.project_id == build.project_id and
-                self.current_task.build.build_id == build.build_id):
+                self.current_task.project_id == build.project_id and
+                self.current_task.build_id == build.build_id):
             self.current_task.stop = True
             return
         for task in self.queue:
-            if (self.current_task.build.project_id == build.project_id and
-                    self.current_task.build.build_id == build.build_id):
+            if (self.current_task.project_id == build.project_id and
+                    self.current_task.build_id == build.build_id):
                 self.queue.remove(task)
         refresh(build.project_id)
 
     def build(self, task):
         self.current_task = task
-        task.callback = lambda: self.ioloop.add_callback(self.next)
-        task.db = self.db
-        task.streams = self.log_streams['%s-%s' % (
-            task.build.project_id,
-            task.build.build_id
-        )]
+        task.callback = self.next
         self.ioloop.add_callback(task.start)
 
     def next(self):
-        project_id = self.current_task.build.project_id
+        project_id = self.current_task.project_id
         self.current_task = None
         if len(self.queue):
             self.build(self.queue.pop(0))
@@ -70,12 +79,16 @@ class Pool(object):
 
 
 class Task(Thread):
-    def __init__(self, build, *args, **kwargs):
-        self.build = build
+    def __init__(self, build_id, project_id, streams, name, ioloop,
+                 *args, **kwargs):
+        super(Task, self).__init__(*args, **kwargs)
+        self.build_id = build_id
+        self.project_id = project_id
+        self.name = name
+        self.streams = streams
+        self.ioloop = ioloop
         self.stop = False
         self.start_time = None
-        self.script = build.project.script
-        super(Task, self).__init__(*args, **kwargs)
 
     def out(self, data):
         self.log.write(data)
@@ -95,9 +108,19 @@ class Task(Thread):
 
     def run(self):
         log.info('Starting run for task %r on %s' % (self, datetime.now()))
+
         self.start_time = time()
+
+        with short_transaction() as db:
+            build = db.query(Build).get((self.build_id, self.project_id))
+            build.status = 'RUNNING'
+
+        self.db = server.scoped_session()
+        self.build = self.db.query(Build).get((self.build_id, self.project_id))
+        self.ioloop.add_callback(refresh, self.project_id)
+
         self.log = open(self.build.log_file, 'w')
-        self.build.status = 'RUNNING'
+        self.script = self.build.project.script
 
         def treat(e):
             if e.errno < 0:
@@ -137,7 +160,8 @@ class Task(Thread):
         self.out('\n(Duration %fs)' % self.build.duration)
         self.log.close()
         self.db.commit()
-        self.callback()
+        self.ioloop.add_callback(self.callback)
+        server.scoped_session.remove()
 
     def run_task(self):
         self.out('Starting build %d...\n' % self.build.build_id)

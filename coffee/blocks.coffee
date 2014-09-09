@@ -54,5 +54,6 @@ $ =>
     ws.onmessage = (e) =>
       $block = $(@)
       blocks[block].hook?.before?($block)
+      console.debug("Refreshing block #{block}")
       $block.html(e.data)
       blocks[block].hook?.after?($block)
