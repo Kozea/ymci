@@ -1,20 +1,16 @@
 from ymci.ext.routes import url, Route
 from ymci.model import Project
 from ymci import server
-from ymci.routes import ymci_style
+from ymci.routes import graph_config
 import pygal
 
 
 @url(r'/project/chart/coverage/(\d+).svg')
+@url(r'/project/chart/coverage/(\d+)_(\d+)_(\d+).svg')
 class CoverageChart(Route):
-    def get(self, id):
+    def get(self, id, width=None, height=None):
         project = self.db.query(Project).get(id)
-        style = pygal.style.Style(**ymci_style.__dict__)
-        svg = pygal.Line(
-            js=['/static/svg.jquery.js?://',
-                '/static/pygal-tooltips.js?://'],
-            style=style)
-
+        svg = pygal.Line(graph_config(width, height))
         builds = project.builds[::-1]
         svg.add('Lines', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
@@ -33,45 +29,33 @@ class CoverageChart(Route):
             'value': b.coverage.file_rate if b.coverage else 0
         } for b in builds])
         svg.x_labels = ['#%d' % b.build_id for b in builds]
-        svg.show_minor_x_labels = False
         svg.value_formatter = lambda x: '%.2fs %%' % x
-        svg.x_labels_major_count = 20
-        svg.include_x_axis = True
-        svg.truncate_label = 10
-        svg.legend_at_bottom = True
         svg.title = 'Test coverage'
         self.set_header("Content-Type", "image/svg+xml")
         self.write(svg.render())
 
 
 @url(r'/project/chart/coverage/stats/(\d+).svg')
+@url(r'/project/chart/coverage/stats/(\d+)_(\d+)_(\d+).svg')
 class StatsChart(Route):
-    def get(self, id):
+    def get(self, id, width=None, height=None):
         project = self.db.query(Project).get(id)
-        style = pygal.style.Style(**ymci_style.__dict__)
-        svg = pygal.Line(
-            js=['/static/svg.jquery.js?://',
-                '/static/pygal-tooltips.js?://'],
-            style=style)
-
+        config = graph_config(width, height)
+        config.logarithmic = True
+        svg = pygal.Line(config)
         builds = project.builds[::-1]
         svg.add('Lines', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
             'value': b.coverage.lines if b.coverage else 0
         } for b in builds])
 
-        svg.add('Files', [{
+        svg.add('Classes', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.coverage.files if b.coverage else 0
+            'value': b.coverage.cls if b.coverage else 0
         } for b in builds])
 
         svg.x_labels = ['#%d' % b.build_id for b in builds]
-        svg.show_minor_x_labels = False
         svg.value_formatter = lambda x: '%d' % x
-        svg.x_labels_major_count = 20
-        svg.include_x_axis = True
-        svg.truncate_label = 10
-        svg.legend_at_bottom = True
         svg.title = 'Source metric'
         self.set_header("Content-Type", "image/svg+xml")
         self.write(svg.render())

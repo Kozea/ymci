@@ -2,8 +2,8 @@ from .. import url, Route, WebSocket
 from wtforms_alchemy import ModelForm
 from ..model import Project, Build
 from datetime import datetime
-from . import ymci_style
 from ..utils import short_transaction
+from . import ymci_style, graph_config
 import pygal
 import os
 
@@ -153,24 +153,20 @@ class ProjectBuildStop(Route):
 
 
 @url(r'/project/chart/time/(\d+).svg')
+@url(r'/project/chart/time/(\d+)_(\d+)_(\d+).svg')
 class ProjectChartTime(Route):
-    def get(self, id):
+    def get(self, id, width=None, height=None):
         project = self.db.query(Project).get(id)
-        svg = pygal.Line(
-            js=['/static/svg.jquery.js?://',
-                '/static/pygal-tooltips.js?://'],
-            style=ymci_style)
+        config = graph_config(width, height)
+        config.style = ymci_style
+        svg = pygal.Line(config)
         builds = project.builds.filter(Build.status == 'SUCCESS').all()[::-1]
         svg.add('Success', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
             'value': b.duration} for b in builds])
         svg.x_labels = ['#%d' % b.build_id for b in builds]
-        svg.show_minor_x_labels = False
         svg.value_formatter = lambda x: '%.2fs' % x
         svg.interpolate = 'cubic'
-        svg.x_labels_major_count = 20
-        svg.include_x_axis = True
-        svg.truncate_label = 10
         svg.show_legend = False
         svg.title = 'Build duration in seconds'
         self.set_header("Content-Type", "image/svg+xml")

@@ -1,7 +1,7 @@
 {
-  "name": "miaou",
+  "name": "ymci",
   "version": "1.0.0",
-  "description": "Meeeooooowww",
+  "description": "You Modern Continous Integration",
   "private": true,
   "devDependencies": {
     "coffeelint": "^1.5.6",
