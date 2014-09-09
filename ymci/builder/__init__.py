@@ -5,6 +5,7 @@ from threading import Thread
 from time import time
 from datetime import datetime
 from .util import execute, ExecutionException
+from ..utils import short_transaction
 from ..model import Build
 from .. import server
 import shutil
@@ -14,17 +15,6 @@ import pkg_resources
 
 log = getLogger('ymci')
 blocks = server.components.blocks
-
-
-class short_transaction(object):
-    def __enter__(self):
-        self.db = server.scoped_session()
-        return self.db
-
-    def __exit__(self, type, value, traceback):
-        if type is None:
-            self.db.commit()
-        server.scoped_session.remove()
 
 
 def refresh(id):

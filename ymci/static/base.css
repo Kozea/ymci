@@ -17,11 +17,16 @@ span.badge {
   background-color: #999999 !important; }
 
 .pygal {
-  width: 49%; }
+  width: 22%;
+  cursor: pointer; }
 
 [data-block="build"] .progress-bar {
   -webkit-transition: none;
   transition: none; }
+
+.popup_wrapper {
+  margin-left: 10%;
+  margin-right: 10%; }
 
 @font-face {
   font-family: "Source Code Pro";
@@ -179,11 +184,11 @@ span.badge {
   display: flex;
   flex-flow: row wrap;
   justify-content: space-between; }
-.grid .grid-elt {
-  background-color: #fafafa;
-  flex-basis: 30%;
-  text-align: center;
-  margin: 1em;
-  padding: 0.25em; }
-.grid .grid-elt div {
-  padding: 0.5em; }
+  .grid .grid-elt {
+    background-color: #fafafa;
+    flex-basis: 30%;
+    text-align: center;
+    margin: 1em;
+    padding: 0.25em; }
+    .grid .grid-elt div {
+      padding: 0.5em; }
