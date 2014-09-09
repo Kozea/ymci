@@ -1,5 +1,6 @@
 from .. import url, Route, BlockWebSocket, server
-from ..model import Project
+from ..model import Project, Build
+from time import time
 import pkg_resources
 from logging import getLogger
 import pygal
@@ -30,7 +31,20 @@ class Index(Route):
 @url(r'/blocks/build')
 class BuildBlock(BlockWebSocket):
     def render_block(self):
-        return self.render_string('blocks/build.html')
+        builder = server.builder
+        if builder.current_task:
+            build = self.db.query(Build).get(
+                (builder.current_task.build_id,
+                 builder.current_task.project_id))
+            if builder.current_task.start_time:
+                now = time() - builder.current_task.start_time
+            else:
+                now = 0
+        else:
+            build = None
+            now = None
+        return self.render_string('blocks/build.html',
+                                  current_build=build, now=now)
 
 
 @url(r'/blocks/project')

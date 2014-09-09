@@ -38,7 +38,7 @@ server = Application(
 server.conf = Config(options.config)
 
 from .model import engine, Query
-server.db = scoped_session(sessionmaker(bind=engine, query_cls=Query))
+server.scoped_session = scoped_session(sessionmaker(bind=engine, query_cls=Query))
 
 
 class url(object):
@@ -61,7 +61,7 @@ class MultiDict(dict):
                 else [self[attr]])]
 
 
-class Base(object):
+class Base(RequestHandler):
     @property
     def log(self):
         return log
@@ -71,20 +71,30 @@ class Base(object):
 
     @property
     def db(self):
-        return self.application.db()
+        # Explicit creation of the request session
+        if not getattr(self, '_db', None):
+            # Cache it even if it's the same
+            self._db = self.application.scoped_session()
+        return self._db
 
     def on_finish(self):
-        return self.db.remove()
+        # Teardown of the current session
+        return self.application.scoped_session.remove()
 
 
-class Route(RequestHandler, Base):
+class Route(Base):
     @property
     def posted(self):
         return MultiDict(self.request.arguments)
 
 
-class WebSocket(WebSocketHandler, Base):
-    pass
+class WebSocket(WebSocketHandler):
+    @property
+    def log(self):
+        return log
+
+    def abort(self, code):
+        raise HTTPError(code)
 
 
 class Container(object):
@@ -130,12 +140,15 @@ class BlockWebSocket(WebSocket, metaclass=MetaBlock):
         super().write_message(message)
 
     def render(self):
+        # Scope the session in the request
+        self.db = self.application.scoped_session()
         self.write_message(self.render_block(*self.args))
+        self.application.scoped_session.remove()
 
     def on_close(self):
         self.__class__._sockets[self.args].remove(self)
 
 from .builder import Pool
-server.builder = Pool(server.db)
+server.builder = Pool()
 
 import ymci.routes
