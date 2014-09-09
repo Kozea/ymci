@@ -8,7 +8,7 @@
     data-id="{{ project.project_id }}" data-idx="{{ build.build_id }}"
   {% end %}
   >
-    {{ log }}
+    {{ log or ''}}
   </code>
 {% end %}
 

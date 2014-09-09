@@ -12,7 +12,6 @@ from tornado.ioloop import IOLoop
 from collections import defaultdict
 from logging import getLogger
 from .config import Config
-from . import utils
 import os.path
 
 __version__ = '0.0.1'
@@ -64,6 +63,7 @@ class MultiDict(dict):
 
 class Base(object):
     def get_template_namespace(self):
+        from . import utils
         namespace = super().get_template_namespace()
         namespace.update(dict(
             server=self.application,

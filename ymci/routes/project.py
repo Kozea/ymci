@@ -3,6 +3,7 @@ from wtforms_alchemy import ModelForm
 from ..model import Project, Build
 from datetime import datetime
 from . import ymci_style
+from ..utils import short_transaction
 import pygal
 import os
 
@@ -105,21 +106,23 @@ class ProjectBuild(Route):
 @url(r'/log/(\d+)/(\d+)/pipe')
 class ProjectLogWebSocket(WebSocket):
     def open(self, id, idx):
-        self.build = self.db.query(Build).get((idx, id))
-        self.application.builder.log_streams['%s-%s' % (
-            self.build.project_id,
-            self.build.build_id
-        )].append(self)
-        if os.path.exists(self.build.log_file):
-            with open(self.build.log_file, 'r') as f:
-                for line in f:
-                    self.write_message(line)
+        self.id = id
+        self.idx = idx
+        with short_transaction() as db:
+            self.build = db.query(Build).get((idx, id))
+            self.application.builder.log_streams['%s-%s' % (
+                self.build.project_id,
+                self.build.build_id
+            )].append(self)
+
+            if os.path.exists(self.build.log_file):
+                with open(self.build.log_file, 'r') as f:
+                    for line in f:
+                        self.write_message(line)
 
     def on_close(self):
-        self.application.builder.log_streams['%s-%s' % (
-            self.build.project_id,
-            self.build.build_id
-        )].remove(self)
+        self.application.builder.log_streams[
+            '%s-%s' % (self.id, self.idx)].remove(self)
 
 
 @url(r'/project/log/(\d+)/(\d*)')

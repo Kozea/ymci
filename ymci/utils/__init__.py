@@ -1,3 +1,5 @@
+from .. import server
+
 periods = [
     (' year', 1000 * 60 * 60 * 24 * 365),
     (' month', 1000 * 60 * 60 * 24 * 30),
@@ -36,3 +38,15 @@ def pretty_duration_round(seconds):
                 out += 's'
             return out
     return out
+
+
+class short_transaction(object):
+    def __enter__(self):
+        self.db = server.scoped_session()
+        return self.db
+
+    def __exit__(self, type, value, traceback):
+        if type is None:
+            self.db.commit()
+        server.scoped_session.remove()
+
