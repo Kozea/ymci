@@ -12,7 +12,7 @@
         </div>
     </li>
     {% for task in server.builder.queue %}
-      <li class="list-group-item"><a href="{{ reverse_url('ProjectView', task.build.project.project_id) }}">{{ task.build.project.name }}</a><span class="badge">{{ task.build.build_id + 1 }}</span></li>
+      <li class="list-group-item"><a href="{{ reverse_url('ProjectView', task.project_id) }}">{{ task.name }}</a><span class="badge">{{ task.build_id }}</span></li>
     {% end %}
   {% else %}
     <li class="list-group-item">Empty queue</li>
