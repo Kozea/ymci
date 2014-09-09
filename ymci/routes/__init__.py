@@ -41,6 +41,7 @@ def graph_config(width, height):
         config.x_labels_major_count = None
         config.width = config.height = 200
     else:
+        # Good ratio for graph size, associated with a `margin` on the popup
         config.width = int(width) * 0.8
         config.height = int(height) * 0.8
     return copy(config)

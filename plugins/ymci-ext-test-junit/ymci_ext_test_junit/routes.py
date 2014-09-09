@@ -12,6 +12,7 @@ class ResultChart(Route):
         project = self.db.query(Project).get(id)
         config = graph_config(width, height)
         config.style.colors = ('#ff7156', '#ff4136', '#ff851b', '#28b62c')
+        config.print_values = False
         svg = pygal.StackedBar(config)
         builds = project.builds[::-1]
         svg.add('Errors', [{
