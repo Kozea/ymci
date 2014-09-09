@@ -1,6 +1,7 @@
 module.exports = (grunt) ->
 
   jsdeps = [
+    'jquery/dist/jquery'
     'jquery-popup-overlay/jquery.popupoverlay'
   ].map (js) -> "#{['bower_components', js].join '/'}.js"
 
