@@ -28,8 +28,9 @@ class CoverageChart(Route):
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
             'value': b.coverage.file_rate if b.coverage else 0
         } for b in builds])
-        svg.x_labels = ['#%d' % b.build_id for b in builds]
-        svg.value_formatter = lambda x: '%.2fs %%' % x
+        if width and height:
+            svg.x_labels = ['#%d' % b.build_id for b in builds]
+        svg.value_formatter = lambda x: '%.2fs %%' % (x or 0)
         svg.title = 'Test coverage'
         self.set_header("Content-Type", "image/svg+xml")
         self.write(svg.render())
@@ -54,8 +55,10 @@ class StatsChart(Route):
             'value': b.coverage.cls if b.coverage else 0
         } for b in builds])
 
-        svg.x_labels = ['#%d' % b.build_id for b in builds]
-        svg.value_formatter = lambda x: '%d' % x
+        if width and height:
+            svg.x_labels = ['#%d' % b.build_id for b in builds]
+
+        svg.value_formatter = lambda x: '%d' % (x or 0)
         svg.title = 'Source metric'
         self.set_header("Content-Type", "image/svg+xml")
         self.write(svg.render())

@@ -38,6 +38,7 @@ def graph_config(width, height):
         config.show_y_labels = False
         config.show_x_labels = False
         config.show_dots = False
+        config.no_data_font_size = 36
         config.x_labels_major_count = None
         config.width = config.height = 200
     else:

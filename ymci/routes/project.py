@@ -164,8 +164,9 @@ class ProjectChartTime(Route):
         svg.add('Success', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
             'value': b.duration} for b in builds])
-        svg.x_labels = ['#%d' % b.build_id for b in builds]
-        svg.value_formatter = lambda x: '%.2fs' % x
+        if width and height:
+            svg.x_labels = ['#%d' % b.build_id for b in builds]
+        svg.value_formatter = lambda x: '%.2fs' % (x or 0)
         svg.interpolate = 'cubic'
         svg.show_legend = False
         svg.title = 'Build duration in seconds'

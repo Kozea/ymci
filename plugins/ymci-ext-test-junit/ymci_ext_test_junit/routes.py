@@ -27,8 +27,10 @@ class ResultChart(Route):
         svg.add('Success', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
             'value': b.result.success if b.result else 0} for b in builds])
-        svg.x_labels = ['#%d' % b.build_id for b in builds]
-        svg.value_formatter = lambda x: '%d' % x
+        if width and height:
+            svg.x_labels = ['#%d' % b.build_id for b in builds]
+
+        svg.value_formatter = lambda x: '%d' % (x or 0)
         svg.title = 'Test results'
         self.set_header("Content-Type", "image/svg+xml")
         self.write(svg.render())
