@@ -24,5 +24,12 @@ setup(
         'ymci.ext.routes.Route': [
             'result_chart = ymci_ext_coverage.routes:CoverageChart'
         ],
+        'ymci.ext.config.Config': [
+            'config = ymci_ext_coverage.config:Config',
+            'form = ymci_ext_coverage.config:CoverageForm'
+        ],
+        'ymci.ext.config.ConfigHook': [
+            'config_hook = ymci_ext_coverage.config:CoverageConfigHook'
+        ],
     }
 )

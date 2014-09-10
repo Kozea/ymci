@@ -11,10 +11,11 @@ class CoverageHook(BuildHook):
 
     @property
     def active(self):
-        return True
+        return self.build.project.coverage.coverage_path is not None
 
     def post_build(self):
-        results = os.path.join(self.build.dir, 'coverage.xml')
+        results = os.path.join(self.build.dir,
+                               self.build.project.coverage.coverage_path)
         if os.path.exists(results):
             tree = ElementTree.parse(results)
             root = tree.getroot()

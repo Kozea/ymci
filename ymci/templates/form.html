@@ -4,18 +4,7 @@
   <form class="form-horizontal" method="post">
     <fieldset>
       <legend>{{ form.__class__.__name__ }}</legend>
-      {% for name, field in form._fields.items() %}
-        <div class="form-group">
-          {% if field.errors %}
-            {% raw field.label(class_="col-lg-2 control-label", title=', '.join(field.errors)) %}
-          {% else %}
-            {% raw field.label(class_="col-lg-2 control-label") %}
-          {% end %}
-          <div class="col-lg-10">
-            {% raw field(class_="form-control", placeholder=field.label.text) %}
-          </div>
-        </div>
-      {% end %}
+      {% raw render_form_recursively(form) %}
     </fieldset>
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">

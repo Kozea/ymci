@@ -1,15 +1,44 @@
 from .. import url, Route, WebSocket
-from wtforms_alchemy import ModelForm
+from wtforms_alchemy import ModelForm, ModelFormField
+from wtforms.widgets import ListWidget
 from ..model import Project, Build
 from datetime import datetime
+from logging import getLogger
 from . import ymci_style
+import pkg_resources
 import pygal
 import os
 
+log = getLogger('ymci')
 
-class ProjectForm(ModelForm):
-    class Meta(object):
-        model = Project
+config_tables = []
+for config_table in zip(
+        pkg_resources.iter_entry_points(
+            'ymci.ext.config.Config', name='config'),
+        pkg_resources.iter_entry_points(
+            'ymci.ext.config.Config', name='form')):
+    try:
+        config_tables.append(
+            (config_table[0].load(), config_table[1].load()))
+    except Exception:
+        log.exception('Failed to load config from plugin %s' % config_table)
+
+config_hooks = []
+for config_hook in pkg_resources.iter_entry_points(
+        'ymci.ext.config.ConfigHook'):
+    try:
+        config_hooks.append(config_hook.load())
+    except:
+        log.exception('Failed to load hook from plugin %s' % config_hook)
+
+
+class Meta(object):
+    model = Project
+
+forms = {c[0].project.property.back_populates: ModelFormField(c[1])
+         for c in config_tables}
+forms.update({'Meta': Meta})
+ProjectForm = type('ProjectForm', (ModelForm,), forms)
 
 
 @url(r'/project/list')
@@ -29,12 +58,16 @@ class ProjectView(Route):
 @url(r'/project/add')
 class ProjectAdd(Route):
     def get(self):
-        return self.render('form.html', form=ProjectForm())
+        return self.render(
+            'form.html', form=ProjectForm(),
+            render_form_recursively=self.render_form_recursively)
 
     def post(self):
         form = ProjectForm(self.posted)
         if form.validate():
             project = Project()
+            for hook in config_hooks:
+                hook().pre_populate(form)
             form.populate_obj(project)
             self.db.add(project)
             self.db.commit()
@@ -53,6 +86,8 @@ class ProjectEdit(Route):
         project = self.db.query(Project).get(id)
         form = ProjectForm(self.posted, project)
         if form.validate():
+            for hook in config_hooks:
+                hook().pre_populate(form)
             form.populate_obj(project)
             self.db.commit()
             self.redirect('/')
@@ -87,6 +122,7 @@ class ProjectBuild(Route):
         project.builds.append(build)
 
         self.db.add(build)
+
         self.db.commit()
 
         self.application.builder.add(build)

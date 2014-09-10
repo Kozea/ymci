@@ -82,6 +82,11 @@ class Route(RequestHandler, Base):
     def posted(self):
         return MultiDict(self.request.arguments)
 
+    def render_form_recursively(self, form):
+        return self.render_string(
+            'fields.html', form=form,
+            render_form_recursively=self.render_form_recursively)
+
 
 class WebSocket(WebSocketHandler, Base):
     pass
