@@ -34,14 +34,20 @@ ioloop = IOLoop.instance()
 class ExtStaticFileHandler(StaticFileHandler):
     ext_path = {}
 
-    def get(self, path):
-        self.root = self.application.settings.get('static_path')
+    @classmethod
+    def get_absolute_path(cls, root, path):
         if path.startswith('ext'):
             key = '/'.join(path.split('/')[:2])
             path = '/'.join(path.split('/')[2:])
-            self.root = ExtStaticFileHandler.ext_path[key]
-        return super().get(path)
+            root = ExtStaticFileHandler.ext_path[key]
+        abspath = os.path.abspath(os.path.join(root, path))
+        return abspath
 
+    def validate_absolute_path(self, root, absolute_path):
+        if self.path.startswith('ext'):
+            key = '/'.join(self.path.split('/')[:2])
+            root = ExtStaticFileHandler.ext_path[key]
+        return super().validate_absolute_path(root, absolute_path)
 
 server = Application(
     debug=options.debug,
