@@ -15,8 +15,9 @@ class Config(Table):
 
     columns_list = ['coverage_path']
 
-    project = relationship(
-        'Project', backref=backref('coverage', uselist=False))
+    project = relationship('Project', backref=backref(
+        'coverage', uselist=False,
+        cascade='all, delete-orphan', single_parent=True))
 
 
 class CoverageForm(ModelForm):

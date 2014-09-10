@@ -31,7 +31,8 @@ class Project(Table):
     repository = Column(String)
     script = Column(Text)
 
-    builds = relationship('Build', backref='project', lazy='dynamic',
+    builds = relationship('Build', cascade='all, delete-orphan',
+                          backref='project', lazy='dynamic',
                           order_by='Build.build_id.desc()')
 
     @property

@@ -11,7 +11,7 @@ class CoverageHook(BuildHook):
 
     @property
     def active(self):
-        return self.build.project.coverage.coverage_path is not None
+        return self.build.project.coverage and self.build.project.coverage.coverage_path is not None
 
     def post_build(self):
         results = os.path.join(self.build.dir,
