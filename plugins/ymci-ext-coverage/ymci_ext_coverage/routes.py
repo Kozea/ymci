@@ -6,7 +6,7 @@ import pygal
 
 
 @url(r'/project/chart/coverage/(\d+).svg')
-@url(r'/project/chart/coverage/(\d+)_(\d+)_(\d+).svg')
+@url(r'/project/chart/coverage/(\d+)_(\d+)_(\d+).svg', suffix='Size')
 class CoverageChart(Route):
     def get(self, id, width=None, height=None):
         project = self.db.query(Project).get(id)
@@ -37,7 +37,7 @@ class CoverageChart(Route):
 
 
 @url(r'/project/chart/coverage/stats/(\d+).svg')
-@url(r'/project/chart/coverage/stats/(\d+)_(\d+)_(\d+).svg')
+@url(r'/project/chart/coverage/stats/(\d+)_(\d+)_(\d+).svg', suffix='Size')
 class StatsChart(Route):
     def get(self, id, width=None, height=None):
         project = self.db.query(Project).get(id)
