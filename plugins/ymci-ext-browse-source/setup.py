@@ -14,7 +14,7 @@ setup(
     provides=['ymci_ext_browse_source'],
     packages=find_packages(),
     install_requires=['pygments'],
-    package_data={'ymci': ['templates/*']},
+    package_data={'ymci_ext_browse_source': ['templates/*', 'static/*']},
     entry_points={
         'ymci.ext.routes.Route': [
             'browse = ymci_ext_browse_source.routes:Browse'
