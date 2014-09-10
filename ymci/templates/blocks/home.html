@@ -2,6 +2,7 @@
 
 <h3>Projects</h3>
 <div class="grid">
+
 {% for project in projects %}
   <div class="grid-elt">
     <h4><a href="{{ reverse_url('ProjectView', project.project_id) }}">{{ project.name }}</a></h4>
@@ -20,13 +21,12 @@
     </div>
     <div>
     {% if project.last_non_running_build %}
-      Duration: <abbr title="{{ pretty_duration(project.last_non_running_build.duration) }}">{{ pretty_duration_round(project.last_non_running_build.duration) }}</abbr>
+      Duration: <abbr title="{{ utils.pretty_duration(project.last_non_running_build.duration) }}">{{ utils.pretty_duration_round(project.last_non_running_build.duration) }}</abbr>
     {% end %}
     </div>
     <div class="btn-group pull-right">
       <a class="btn btn-default xhr" href="{{ reverse_url('ProjectBuild', project.project_id) }}"><i class="glyphicon glyphicon-play-circle"></i></a>
     </div>
-
   </div>
 {% end %}
 </div>

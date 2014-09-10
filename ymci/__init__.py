@@ -38,7 +38,7 @@ server = Application(
 server.conf = Config(options.config)
 
 from .model import engine, Query
-server.db = scoped_session(sessionmaker(bind=engine, query_cls=Query))
+server.scoped_session = scoped_session(sessionmaker(bind=engine, query_cls=Query))
 
 
 class url(object):
@@ -62,25 +62,43 @@ class MultiDict(dict):
 
 
 class Base(object):
+    def get_template_namespace(self):
+        from . import utils
+        namespace = super().get_template_namespace()
+        namespace.update(dict(
+            server=self.application,
+            utils=utils
+        ))
+        return namespace
+
     @property
     def log(self):
         return log
+
+    @property
+    def blocks(self):
+        return server.components.blocks
+
+
+class Route(Base, RequestHandler):
+    @property
+    def posted(self):
+        return MultiDict(self.request.arguments)
 
     def abort(self, code):
         raise HTTPError(code)
 
     @property
     def db(self):
-        return self.application.db()
+        # Explicit creation of the request session
+        if not getattr(self, '_db', None):
+            # Cache it even if it's the same
+            self._db = self.application.scoped_session()
+        return self._db
 
     def on_finish(self):
-        return self.db.remove()
-
-
-class Route(RequestHandler, Base):
-    @property
-    def posted(self):
-        return MultiDict(self.request.arguments)
+        # Teardown of the current session
+        return self.application.scoped_session.remove()
 
     def render_form_recursively(self, form):
         return self.render_string(
@@ -88,7 +106,7 @@ class Route(RequestHandler, Base):
             render_form_recursively=self.render_form_recursively)
 
 
-class WebSocket(WebSocketHandler, Base):
+class WebSocket(Base, WebSocketHandler):
     pass
 
 
@@ -135,12 +153,15 @@ class BlockWebSocket(WebSocket, metaclass=MetaBlock):
         super().write_message(message)
 
     def render(self):
+        # Scope the session in the request
+        self.db = self.application.scoped_session()
         self.write_message(self.render_block(*self.args))
+        self.application.scoped_session.remove()
 
     def on_close(self):
         self.__class__._sockets[self.args].remove(self)
 
 from .builder import Pool
-server.builder = Pool(server.db)
+server.builder = Pool()
 
 import ymci.routes

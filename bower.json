@@ -1,0 +1,14 @@
+{
+  "name": "ymci",
+  "version": "0.0.0",
+  "authors": [
+    "Clément Plasse <clement.plasse@kozea.fr>"
+  ],
+  "description": "You Modern Continous Integration",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "jquery-popup-overlay": "~1.6.0",
+    "jquery": "~2.1.1"
+  }
+}

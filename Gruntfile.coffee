@@ -1,5 +1,10 @@
 module.exports = (grunt) ->
 
+  jsdeps = [
+    'jquery/dist/jquery'
+    'jquery-popup-overlay/jquery.popupoverlay'
+  ].map (js) -> "#{['bower_components', js].join '/'}.js"
+
   grunt.initConfig
     pkg: grunt.file.readJSON('package.json')
 
@@ -12,6 +17,10 @@ module.exports = (grunt) ->
       ymci:
         files:
           'ymci/static/main.min.js': 'ymci/static/main.js'
+
+      deps:
+        files:
+          'ymci/static/deps.min.js': jsdeps
 
     sass:
       ymci:

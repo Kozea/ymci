@@ -1,10 +1,10 @@
+from . import ymci_style, graph_config
 from .. import url, Route, WebSocket
-from wtforms_alchemy import ModelForm, ModelFormField
-from wtforms.widgets import ListWidget
 from ..model import Project, Build
+from ..utils import short_transaction
 from datetime import datetime
 from logging import getLogger
-from . import ymci_style
+from wtforms_alchemy import ModelForm, ModelFormField
 import pkg_resources
 import pygal
 import os
@@ -71,7 +71,10 @@ class ProjectAdd(Route):
             form.populate_obj(project)
             self.db.add(project)
             self.db.commit()
+            self.blocks.project.refresh()
+            self.blocks.home.refresh()
             self.redirect('/')
+            return
         self.render('form.html', form=form)
 
 
@@ -90,6 +93,8 @@ class ProjectEdit(Route):
                 hook().pre_populate(form)
             form.populate_obj(project)
             self.db.commit()
+            self.blocks.project.refresh()
+            self.blocks.home.refresh()
             self.redirect('/')
             return
         self.render('form.html', form=form)
@@ -107,7 +112,9 @@ class ProjectDelete(Route):
         project = self.db.query(Project).get(id)
         self.db.delete(project)
         self.db.commit()
-        self.redirect('/')
+        self.blocks.project.refresh()
+        self.blocks.home.refresh()
+        self.redirect(self.reverse_url('ProjectList'))
 
 
 @url(r'/project/build/(\d+)')
@@ -134,21 +141,23 @@ class ProjectBuild(Route):
 @url(r'/log/(\d+)/(\d+)/pipe')
 class ProjectLogWebSocket(WebSocket):
     def open(self, id, idx):
-        self.build = self.db.query(Build).get((idx, id))
-        self.application.builder.log_streams['%s-%s' % (
-            self.build.project_id,
-            self.build.build_id
-        )].append(self)
-        if os.path.exists(self.build.log_file):
-            with open(self.build.log_file, 'r') as f:
-                for line in f:
-                    self.write_message(line)
+        self.id = id
+        self.idx = idx
+        with short_transaction() as db:
+            self.build = db.query(Build).get((idx, id))
+            self.application.builder.log_streams['%s-%s' % (
+                self.build.project_id,
+                self.build.build_id
+            )].append(self)
+
+            if os.path.exists(self.build.log_file):
+                with open(self.build.log_file, 'r') as f:
+                    for line in f:
+                        self.write_message(line)
 
     def on_close(self):
-        self.application.builder.log_streams['%s-%s' % (
-            self.build.project_id,
-            self.build.build_id
-        )].remove(self)
+        self.application.builder.log_streams[
+            '%s-%s' % (self.id, self.idx)].remove(self)
 
 
 @url(r'/project/log/(\d+)/(\d*)')
@@ -179,24 +188,21 @@ class ProjectBuildStop(Route):
 
 
 @url(r'/project/chart/time/(\d+).svg')
+@url(r'/project/chart/time/(\d+)_(\d+)_(\d+).svg')
 class ProjectChartTime(Route):
-    def get(self, id):
+    def get(self, id, width=None, height=None):
         project = self.db.query(Project).get(id)
-        svg = pygal.Line(
-            js=['/static/svg.jquery.js?://',
-                '/static/pygal-tooltips.js?://'],
-            style=ymci_style)
+        config = graph_config(width, height)
+        config.style = ymci_style
+        svg = pygal.Line(config)
         builds = project.builds.filter(Build.status == 'SUCCESS').all()[::-1]
         svg.add('Success', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
             'value': b.duration} for b in builds])
-        svg.x_labels = ['#%d' % b.build_id for b in builds]
-        svg.show_minor_x_labels = False
-        svg.value_formatter = lambda x: '%.2fs' % x
+        if width and height:
+            svg.x_labels = ['#%d' % b.build_id for b in builds]
+        svg.value_formatter = lambda x: '%.2fs' % (x or 0)
         svg.interpolate = 'cubic'
-        svg.x_labels_major_count = 20
-        svg.include_x_axis = True
-        svg.truncate_label = 10
         svg.show_legend = False
         svg.title = 'Build duration in seconds'
         self.set_header("Content-Type", "image/svg+xml")

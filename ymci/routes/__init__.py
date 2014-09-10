@@ -1,8 +1,11 @@
 from .. import url, Route, BlockWebSocket, server
-from ..model import Project
+from ..model import Project, Build
+from time import time
 import pkg_resources
 from logging import getLogger
 import pygal
+from pygal import Config
+from copy import copy
 log = getLogger('ymci')
 
 
@@ -20,6 +23,31 @@ base_style = pygal.style.Style(
 ymci_style = pygal.style.RotateStyle('#28b62c', base_style=base_style)
 
 
+def graph_config(width, height):
+    class GraphConfig(Config):
+        """Config for minimal graph."""
+        js = ['/static/svg.jquery.js?://', '/static/pygal-tooltips.js?://']
+        style = pygal.style.Style(**ymci_style.__dict__)
+        show_minor_x_labels = False
+        x_labels_major_count = 20
+        truncate_label = 10
+        legend_at_bottom = True
+    config = GraphConfig()
+    if not (width or height):
+        config.show_legend = False
+        config.show_y_labels = False
+        config.show_x_labels = False
+        config.show_dots = False
+        config.no_data_font_size = 36
+        config.x_labels_major_count = None
+        config.width = config.height = 200
+    else:
+        # Good ratio for graph size, associated with a `margin` on the popup
+        config.width = int(width) * 0.8
+        config.height = int(height) * 0.8
+    return copy(config)
+
+
 @url(r'/')
 class Index(Route):
     def get(self):
@@ -30,7 +58,20 @@ class Index(Route):
 @url(r'/blocks/build')
 class BuildBlock(BlockWebSocket):
     def render_block(self):
-        return self.render_string('blocks/build.html')
+        builder = server.builder
+        if builder.current_task:
+            build = self.db.query(Build).get(
+                (builder.current_task.build_id,
+                 builder.current_task.project_id))
+            if builder.current_task.start_time:
+                now = time() - builder.current_task.start_time
+            else:
+                now = 0
+        else:
+            build = None
+            now = None
+        return self.render_string('blocks/build.html',
+                                  current_build=build, now=now)
 
 
 @url(r'/blocks/project')

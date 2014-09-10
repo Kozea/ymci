@@ -86,6 +86,7 @@
                 _ref.before($block);
               }
             }
+            console.debug("Refreshing block " + block);
             $block.html(e.data);
             return (_ref1 = blocks[block].hook) != null ? typeof _ref1.after === "function" ? _ref1.after($block) : void 0 : void 0;
           };
