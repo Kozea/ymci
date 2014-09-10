@@ -75,7 +75,9 @@ class ProjectAdd(Route):
             self.blocks.home.refresh()
             self.redirect('/')
             return
-        self.render('form.html', form=form)
+        self.render(
+            'form.html', form=form,
+            render_form_recursively=self.render_form_recursively)
 
 
 @url(r'/project/edit/(\d+)')
@@ -83,7 +85,8 @@ class ProjectEdit(Route):
     def get(self, id):
         project = self.db.query(Project).get(id)
         self.render(
-            'form.html', form=ProjectForm(obj=project))
+            'form.html', form=ProjectForm(obj=project),
+            render_form_recursively=self.render_form_recursively)
 
     def post(self, id):
         project = self.db.query(Project).get(id)
@@ -97,7 +100,9 @@ class ProjectEdit(Route):
             self.blocks.home.refresh()
             self.redirect('/')
             return
-        self.render('form.html', form=form)
+        self.render(
+            'form.html', form=form,
+            render_form_recursively=self.render_form_recursively)
 
 
 @url(r'/project/delete/(\d+)')
