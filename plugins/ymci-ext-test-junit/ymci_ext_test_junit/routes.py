@@ -6,7 +6,7 @@ import pygal
 
 
 @url(r'/project/chart/results/(\d+).svg')
-@url(r'/project/chart/results/(\d+)_(\d+)_(\d+).svg')
+@url(r'/project/chart/results/(\d+)_(\d+)_(\d+).svg', suffix='Size')
 class ResultChart(Route):
     def get(self, id, width=None, height=None):
         project = self.db.query(Project).get(id)

@@ -42,13 +42,15 @@ server.scoped_session = scoped_session(sessionmaker(bind=engine, query_cls=Query
 
 
 class url(object):
-    def __init__(self, url):
+    def __init__(self, url, name=None, suffix=None):
         self.url = url
+        self.name = name
+        self.suffix = suffix or ''
 
     def __call__(self, cls):
         server.add_handlers(
             r'.*$',
-            (tornado_url(self.url, cls, name=cls.__name__),)
+            (tornado_url(self.url, cls, name=self.name or (cls.__name__ + self.suffix)),)
         )
         return cls
 

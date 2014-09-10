@@ -193,7 +193,7 @@ class ProjectBuildStop(Route):
 
 
 @url(r'/project/chart/time/(\d+).svg')
-@url(r'/project/chart/time/(\d+)_(\d+)_(\d+).svg')
+@url(r'/project/chart/time/(\d+)_(\d+)_(\d+).svg', suffix='Size')
 class ProjectChartTime(Route):
     def get(self, id, width=None, height=None):
         project = self.db.query(Project).get(id)
