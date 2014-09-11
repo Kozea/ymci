@@ -9,3 +9,6 @@ class ConfigHook(object):
 
     def pre_commit(self, form=None):
         pass
+
+    def pre_add(self):
+        pass

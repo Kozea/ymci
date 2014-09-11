@@ -10,13 +10,13 @@ class Config(Table):
     __table_args__ = (
         ForeignKeyConstraint(['project_id'], ['project.project_id']),
     )
-    project_id = Column(Integer, primary_key=True)
+    project_id = Column(Integer, primary_key=True, nullable=False)
     coverage_path = Column('coverage_path', String)
 
     columns_list = ['coverage_path']
 
-    project = relationship(
-        'Project', backref=backref('coverage', uselist=False))
+    project = relationship('Project', backref=backref(
+        'coverage', uselist=False, cascade='all'))
 
 
 class CoverageForm(ModelForm):

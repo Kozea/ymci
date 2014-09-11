@@ -6,10 +6,12 @@
 from tornado.web import (
     Application, RequestHandler, url as tornado_url, HTTPError)
 from sqlalchemy.orm import scoped_session, sessionmaker
+from tornado import gen
 from tornado.websocket import WebSocketHandler
 from tornado.options import define, parse_command_line, options
 from tornado.ioloop import IOLoop
 from collections import defaultdict
+from tornado.web import StaticFileHandler
 from logging import getLogger
 from .config import Config
 import os.path
@@ -29,16 +31,36 @@ parse_command_line()
 ioloop = IOLoop.instance()
 
 
+class ExtStaticFileHandler(StaticFileHandler):
+    ext_path = {}
+
+    @classmethod
+    def get_absolute_path(cls, root, path):
+        if path.startswith('ext'):
+            key = '/'.join(path.split('/')[:2])
+            path = '/'.join(path.split('/')[2:])
+            root = ExtStaticFileHandler.ext_path[key]
+        abspath = os.path.abspath(os.path.join(root, path))
+        return abspath
+
+    def validate_absolute_path(self, root, absolute_path):
+        if self.path.startswith('ext'):
+            key = '/'.join(self.path.split('/')[:2])
+            root = ExtStaticFileHandler.ext_path[key]
+        return super().validate_absolute_path(root, absolute_path)
+
 server = Application(
     debug=options.debug,
     cookie_secret=options.secret,
     static_path=os.path.join(os.path.dirname(__file__), "static"),
+    static_handler_class=ExtStaticFileHandler,
     template_path=os.path.join(os.path.dirname(__file__), "templates"))
 
 server.conf = Config(options.config)
 
 from .model import engine, Query
-server.scoped_session = scoped_session(sessionmaker(bind=engine, query_cls=Query))
+server.scoped_session = scoped_session(
+    sessionmaker(bind=engine, query_cls=Query))
 
 
 class url(object):
@@ -50,7 +72,8 @@ class url(object):
     def __call__(self, cls):
         server.add_handlers(
             r'.*$',
-            (tornado_url(self.url, cls, name=self.name or (cls.__name__ + self.suffix)),)
+            (tornado_url(self.url, cls, name=self.name or (
+                cls.__name__ + self.suffix)),)
         )
         return cls
 

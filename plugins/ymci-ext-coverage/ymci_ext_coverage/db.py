@@ -53,4 +53,5 @@ class Coverage(Table):
         else:
             return 100
 
-    build = relationship('Build', backref=backref('coverage', uselist=False))
+    build = relationship(
+        'Build', backref=backref('coverage', uselist=False, cascade='all'))

@@ -31,7 +31,8 @@ class Project(Table):
     repository = Column(String)
     script = Column(Text)
 
-    builds = relationship('Build', backref='project', lazy='dynamic',
+    builds = relationship('Build', cascade='all, delete-orphan',
+                          backref='project', lazy='dynamic',
                           order_by='Build.build_id.desc()')
 
     @property
@@ -85,6 +86,18 @@ class Project(Table):
                 .limit(5)
                 .from_self(
                     func.avg(Build.duration)).scalar() or 60 * 10)
+
+    def health(self, over=10):
+        count = self.builds.count()
+        if not count:
+            return 0
+
+        if count > over:
+            count = over
+
+        ok = len(list(filter(
+            lambda b: b.status == 'SUCCESS', self.builds[:count])))
+        return int((ok / count) * over)
 
 
 class Build(Table):

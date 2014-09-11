@@ -1,13 +1,14 @@
 from . import ymci_style, graph_config
-from .. import url, Route, WebSocket
+from .. import url, Route, server, WebSocket
 from ..model import Project, Build
-from ..utils import short_transaction
+from ..utils import short_transaction, secure_rmtree
 from datetime import datetime
 from logging import getLogger
 from wtforms_alchemy import ModelForm, ModelFormField
 import pkg_resources
 import pygal
 import os
+
 
 log = getLogger('ymci')
 
@@ -94,7 +95,10 @@ class ProjectEdit(Route):
         if form.validate():
             for hook in config_hooks:
                 hook().pre_populate(form)
+            old_dir = project.project_dir
             form.populate_obj(project)
+            if project.project_dir != old_dir:
+                os.rename(old_dir, project.project_dir)
             self.db.commit()
             self.blocks.project.refresh()
             self.blocks.home.refresh()
@@ -116,6 +120,8 @@ class ProjectDelete(Route):
     def post(self, id):
         project = self.db.query(Project).get(id)
         self.db.delete(project)
+        secure_rmtree(
+            os.path.join(server.conf['projects_realpath'], project.dir_name))
         self.db.commit()
         self.blocks.project.refresh()
         self.blocks.home.refresh()

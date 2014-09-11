@@ -1,33 +1,3 @@
-code {
-  display: block;
-  white-space: pre-wrap;
-  word-break: break-all;
-  border: 1px solid black; }
-
-.scroll-x {
-  overflow-x: auto; }
-
-.scroll-y {
-  overflow-y: auto; }
-
-a.badge {
-  text-decoration: none !important; }
-
-span.badge {
-  background-color: #999999 !important; }
-
-.pygal {
-  width: 22%;
-  cursor: pointer; }
-
-[data-block="build"] .progress-bar {
-  -webkit-transition: none;
-  transition: none; }
-
-.popup_wrapper {
-  margin-left: 10%;
-  margin-right: 10%; }
-
 @font-face {
   font-family: "Source Code Pro";
   src: url("/static/fonts/SourceCodePro-Regular.ttf.woff") format("woff");
@@ -192,3 +162,52 @@ span.badge {
     padding: 0.25em; }
     .grid .grid-elt div {
       padding: 0.5em; }
+
+code {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-all;
+  border: 1px solid black; }
+
+.scroll-x {
+  overflow-x: auto; }
+
+.scroll-y {
+  overflow-y: auto; }
+
+a.badge {
+  text-decoration: none !important; }
+
+span.badge {
+  background-color: #999999 !important; }
+
+.pygal {
+  width: 22%;
+  cursor: pointer; }
+
+code.out {
+  margin-bottom: 2em; }
+
+[data-block="build"] .progress-bar {
+  -webkit-transition: none;
+  transition: none; }
+
+.popup_wrapper {
+  margin-left: 10%;
+  margin-right: 10%; }
+
+.health-bar {
+  font-size: 1.2em; }
+  .health-bar .healthy-heart {
+    color: #ff4136; }
+  .health-bar .broken-heart {
+    color: rgba(255, 65, 54, 0.25); }
+
+[data-block="home"] .grid-elt {
+  position: relative;
+  padding-top: 0.5em;
+  padding-bottom: 1em; }
+  [data-block="home"] .grid-elt .bottom-right {
+    position: absolute;
+    bottom: 0;
+    right: 0; }

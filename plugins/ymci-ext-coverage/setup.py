@@ -13,7 +13,7 @@ setup(
 
     provides=['ymci_ext_coverage'],
     packages=find_packages(),
-
+    package_data={'ymci_ext_coverage': ['templates/*', 'static/*']},
     entry_points={
         'ymci.ext.hooks.BuildHook': [
             'coverage = ymci_ext_coverage.coverage:CoverageHook'
@@ -22,7 +22,8 @@ setup(
             'result = ymci_ext_coverage.db:Coverage'
         ],
         'ymci.ext.routes.Route': [
-            'result_chart = ymci_ext_coverage.routes:CoverageChart'
+            'result_chart = ymci_ext_coverage.routes:CoverageChart',
+            'browse-coverage = ymci_ext_coverage.routes:BrowseCoverage'
         ],
         'ymci.ext.config.Config': [
             'config = ymci_ext_coverage.config:Config',
