@@ -139,9 +139,6 @@ class ProjectBuild(Route):
         build.status = 'PENDING'
         project.builds.append(build)
 
-        for hook in config_hooks:
-            hook().pre_add(build)
-
         self.db.add(build)
 
         self.db.commit()

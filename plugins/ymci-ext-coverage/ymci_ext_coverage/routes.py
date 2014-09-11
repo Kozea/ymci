@@ -3,6 +3,7 @@ from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import guess_lexer_for_filename, get_lexer_by_name
 from pygments.util import ClassNotFound
+from tornado.web import HTTPError
 from xml.etree import ElementTree
 from ymci.ext.routes import url, Route
 from ymci.ext.browse import Browse
@@ -11,6 +12,7 @@ from ymci import server
 from ymci.routes import graph_config
 import pygal
 import os
+import yaml
 
 log = getLogger('ymci')
 
@@ -85,13 +87,19 @@ class BrowseCoverage(Browse):
         code = ''
         project = self.db.query(Project).get(id)
         build = self.db.query(Build).get((build_id, project.project_id))
-        if not (os.path.exists(os.path.join(
-                build.dir, build.project.coverage.coverage_path))):
-            return super(BrowseCoverage, self).get(id, build_id, path)
+
+        config = os.path.join(build.dir, 'ymci_ext_coverage_config.yaml')
+        coverage_file_path = ''
+        with open(config) as fd:
+            coverage_file_path = yaml.load(fd).get('coverage_path')
+
+        if not (coverage_file_path and os.path.exists(coverage_file_path)):
+            log.error("Aucun fichier de coverage n'a été trouvé.")
+            raise HTTPError(404)
         if path and '..' not in path:
             file = os.path.join(project.src_dir, path)
             formatter = self.get_coverage_formatter(
-                id, build, file)
+                id, build, file, coverage_file_path)
             if os.path.exists(file):
                 try:
                     with open(file, 'r') as f:
@@ -142,11 +150,9 @@ class BrowseCoverage(Browse):
 
         return out + '</ul>'
 
-    def get_coverage_formatter(self, id, build, file):
+    def get_coverage_formatter(self, id, build, file, coverage_file):
         project = self.db.query(Project).get(id)
         build = self.db.query(Build).get((build.build_id, project.project_id))
-        coverage_file = os.path.join(
-            build.dir, build.project.coverage.coverage_path)
         tree = ElementTree.parse(coverage_file)
         root = tree.getroot()
         packages = root.find('packages')
@@ -162,4 +168,4 @@ class BrowseCoverage(Browse):
         return HtmlFormatter(
             linenos=True, cssclass='code', hl_lines=coverage)
 
-server.components.project_links.browse = BrowseCoverage
+server.components.project_links.coverage = BrowseCoverage
