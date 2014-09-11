@@ -13,7 +13,7 @@ setup(
 
     provides=['ymci_ext_coverage'],
     packages=find_packages(),
-
+    package_data={'ymci_ext_coverage': ['templates/*', 'static/*']},
     entry_points={
         'ymci.ext.hooks.BuildHook': [
             'coverage = ymci_ext_coverage.coverage:CoverageHook'
