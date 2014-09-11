@@ -22,10 +22,10 @@
       </div>
       <div>
         <span class="health-bar">
-        {% for i in range(project.health(10)) %}
+        {% for i in range(project.health(6)) %}
           <i class="glyphicon glyphicon-heart healthy-heart"></i>
         {% end %}
-        {% for i in range(10 - project.health(10)) %}
+        {% for i in range(6 - project.health(6)) %}
           <i class="glyphicon glyphicon-heart broken-heart"></i>
         {% end %}
         </span>
