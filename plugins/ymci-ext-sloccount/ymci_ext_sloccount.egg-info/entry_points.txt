@@ -1,0 +1,9 @@
+[ymci.ext.db.Table]
+result = ymci_ext_sloccount.db:Sloccount
+
+[ymci.ext.hooks.BuildHook]
+sloccount = ymci_ext_sloccount.sloccount:SloccountHook
+
+[ymci.ext.routes.Route]
+result_chart = ymci_ext_sloccount.routes:SloccountChart
+
