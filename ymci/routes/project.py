@@ -95,7 +95,10 @@ class ProjectEdit(Route):
         if form.validate():
             for hook in config_hooks:
                 hook().pre_populate(form)
+            old_dir = project.project_dir
             form.populate_obj(project)
+            if project.project_dir != old_dir:
+                os.rename(old_dir, project.project_dir)
             self.db.commit()
             self.blocks.project.refresh()
             self.blocks.home.refresh()
