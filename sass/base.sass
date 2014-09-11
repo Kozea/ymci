@@ -1,3 +1,8 @@
+@import font
+@import tree
+@import hl_style
+@import grid
+
 code
   display: block
   white-space: pre-wrap
@@ -30,15 +35,20 @@ span.badge
   margin-right: 10%
 
 .health-bar
-
+  font-size: 1.2em
   .healthy-heart
     color: rgba(255, 65, 54, 1)
 
   .broken-heart
     color: rgba(255, 65, 54, .25)
 
+[data-block="home"]
+  .grid-elt
+    position: relative
+    padding-top: .5em
+    padding-bottom: 1em
 
-@import font
-@import tree
-@import hl_style
-@import grid
+    .bottom-right
+      position: absolute
+      bottom: 0
+      right: 0

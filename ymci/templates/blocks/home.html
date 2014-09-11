@@ -20,6 +20,7 @@
           <span class="label label-info">New</span>
         {% end %}
       </div>
+
       <div>
         <span class="health-bar">
         {% for i in range(project.health(6)) %}
@@ -37,7 +38,7 @@
         {% end %}
       </div>
 
-      <div class="btn-group pull-right">
+      <div class="btn-group bottom-right">
         <a class="btn btn-default xhr" href="{{ reverse_url('ProjectBuild', project.project_id) }}"><i class="glyphicon glyphicon-play-circle"></i></a>
       </div>
     </div>
