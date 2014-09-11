@@ -39,7 +39,7 @@
               {% if project.last_non_running_build %}
                 <a class="btn btn-default" href="{{ reverse_url(route.__name__, project.project_id, project.last_non_running_build.build_id, '') }}">{{ route.__name__.title() }}</a>
               {% else %}
-                <a class="btn btn-default" href="{{ reverse_url(route.__name__, project.project_id, '') }}">{{ route.__name__.title() }}</a>
+                <a class="btn btn-default" href="{{ reverse_url(route.__name__, project.project_id, '', '') }}">{{ route.__name__.title() }}</a>
               {% end %}
             {% end %}
             <a class="btn btn-default" href="{{ reverse_url('ProjectBuild', project.project_id) }}">Build</a>

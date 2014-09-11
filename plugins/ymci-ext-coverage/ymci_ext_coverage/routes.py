@@ -90,12 +90,17 @@ class BrowseCoverage(Browse):
 
         config = os.path.join(build.dir, 'ymci_ext_coverage_config.yaml')
         coverage_file_path = ''
+
+        if os.path.exists(config):
+            log.error("Aucun fichier de couverture de code n'a été trouvé.")
+            raise HTTPError(404)
+
         with open(config) as fd:
             coverage_file_path = yaml.load(fd).get('coverage_path')
-
         if not (coverage_file_path and os.path.exists(coverage_file_path)):
-            log.error("Aucun fichier de coverage n'a été trouvé.")
+            log.error("Aucun fichier de couverture de code n'a été trouvé.")
             raise HTTPError(404)
+
         if path and '..' not in path:
             file = os.path.join(project.src_dir, path)
             formatter = self.get_coverage_formatter(
