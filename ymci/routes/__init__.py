@@ -105,6 +105,8 @@ blocks.home = HomeBlock
 blocks.history = HistoryBlock
 import ymci.routes.project
 
+from ..ext.browse import Browse
+
 plugin_routes = []
 
 for route in pkg_resources.iter_entry_points('ymci.ext.routes.Route'):

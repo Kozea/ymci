@@ -22,7 +22,8 @@ setup(
             'result = ymci_ext_coverage.db:Coverage'
         ],
         'ymci.ext.routes.Route': [
-            'result_chart = ymci_ext_coverage.routes:CoverageChart'
+            'result_chart = ymci_ext_coverage.routes:CoverageChart',
+            'browse-coverage = ymci_ext_coverage.routes:BrowseCoverage'
         ],
         'ymci.ext.config.Config': [
             'config = ymci_ext_coverage.config:Config',

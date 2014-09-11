@@ -1,13 +1,14 @@
 from . import ymci_style, graph_config
-from .. import url, Route, WebSocket
+from .. import url, Route, server, WebSocket
 from ..model import Project, Build
-from ..utils import short_transaction
+from ..utils import short_transaction, secure_rmtree
 from datetime import datetime
 from logging import getLogger
 from wtforms_alchemy import ModelForm, ModelFormField
 import pkg_resources
 import pygal
 import os
+
 
 log = getLogger('ymci')
 
@@ -116,6 +117,8 @@ class ProjectDelete(Route):
     def post(self, id):
         project = self.db.query(Project).get(id)
         self.db.delete(project)
+        secure_rmtree(
+            os.path.join(server.conf['projects_realpath'], project.dir_name))
         self.db.commit()
         self.blocks.project.refresh()
         self.blocks.home.refresh()
@@ -132,6 +135,9 @@ class ProjectBuild(Route):
             project.last_build and project.last_build.build_id or 0) + 1
         build.status = 'PENDING'
         project.builds.append(build)
+
+        for hook in config_hooks:
+            hook().pre_add(build)
 
         self.db.add(build)
 

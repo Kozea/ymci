@@ -1,4 +1,6 @@
 from .. import server
+import os
+import shutil
 
 periods = [
     (' year', 1000 * 60 * 60 * 24 * 365),
@@ -9,6 +11,7 @@ periods = [
     ('s', 1000),
     ('ms', 1)
 ]
+
 
 def pretty_duration(seconds):
     """Transform a float time in secoands to human readable duration."""
@@ -50,3 +53,10 @@ class short_transaction(object):
             self.db.commit()
         server.scoped_session.remove()
 
+
+def secure_rmtree(path):
+    """Checks a path before deleting it."""
+    path = os.path.realpath(path)
+    if (os.path.exists(path) and os.path.isdir(path) and
+            server.conf['projects_realpath'] in path):
+        shutil.rmtree(path)

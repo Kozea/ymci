@@ -20,7 +20,7 @@ class CoverageHook(BuildHook):
             tree = ElementTree.parse(results)
             root = tree.getroot()
             coverage = Coverage()
-            packages = root[0]
+            packages = root.find('packages')
             for attr in (
                     'cls', 'missed_cls', 'branches', 'missed_branches',
                     'files', 'missed_files', 'lines', 'missed_lines'):
