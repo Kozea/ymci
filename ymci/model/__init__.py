@@ -87,6 +87,18 @@ class Project(Table):
                 .from_self(
                     func.avg(Build.duration)).scalar() or 60 * 10)
 
+    def health(self, over=10):
+        count = self.builds.count()
+        if not count:
+            return 0
+
+        if count > over:
+            count = over
+
+        ok = len(list(filter(
+            lambda b: b.status == 'SUCCESS', self.builds[:count])))
+        return int((ok / count) * over)
+
 
 class Build(Table):
     __tablename__ = 'build'
