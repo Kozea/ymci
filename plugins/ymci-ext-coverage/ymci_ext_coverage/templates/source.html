@@ -1,6 +1,16 @@
 {% extends "_base.html" %}
 
 
+{% block nav %}
+<li>
+  <select name="build-select">
+    {% for b in project.builds %}
+      <option value="{{ reverse_url('BrowseCoverage', project.project_id, b.build_id, path) }}" {{ "selected=selected" if b.build_id == int(build_id) else '' }}>Build {{ b.build_id }}</option></li>
+    {% end %}
+  </select>
+</li>
+{% end %}
+
 {% block main %}
   <section class="row">
     <article class="col-md-10 scroll-x">
