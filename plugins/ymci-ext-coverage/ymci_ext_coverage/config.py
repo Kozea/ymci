@@ -13,7 +13,7 @@ class Config(Table):
     )
     project_id = Column(Integer, primary_key=True, nullable=False)
     build_id = Column(Integer)
-    coverage_path = Column('coverage_path', String, default='coverage.xml')
+    coverage_path = Column('coverage_path', String)
 
     columns_list = ['coverage_path']
 
