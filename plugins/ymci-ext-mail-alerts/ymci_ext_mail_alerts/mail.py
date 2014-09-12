@@ -13,7 +13,7 @@ log = logging.getLogger('ymci')
 
 class Mail(object):
     """Handles mails in plain text type."""
-    server = 'localhost'
+    auth = False
 
     def __init__(self):
         self.read_config()
@@ -24,28 +24,45 @@ class Mail(object):
         self._from = config['From']
         self.to = config['To']
 
-        self.__server = None
+        if config['credentials']:
+            self.login = config['credentials']['login']
+            self.password = config['credentials']['password']
+            self.auth = True
+
+        self.__smtp_server = None
 
     @property
-    def server(self):
-        self.__server = self.__server or smtplib.SMTP(self.smtp, self.port)
-        return self.__server
+    def smtp_server(self):
+        self.__smtp_server = self.__smtp_server or smtplib.SMTP(self.smtp, self.port)
+        return self.__smtp_server
 
     def quit(self):
-        if self.__server:
-            self.__server.quit()
+        if self.__smtp_server:
+            self.__smtp_server.quit()
 
     def send_mail(self, message, mtype):
         message = self.set_mail_headers(message, mtype)
-        self.server.starttls()
-        self.server.send_message(message)
-        self.quit()
+        try:
+            self.authenticate()
+            self.smtp_server.send_message(message)
+        finally:
+            self.quit()
 
     def set_mail_headers(self, message, mtype):
         message['Subject'] = mtype
         message['From'] = self._from
         message['To'] = self.to
         return message
+
+    def authenticate(self):
+        self.smtp_server.ehlo()
+
+        if self.smtp_server.has_extn('STARTTLS'):
+            self.smtp_server.starttls()
+            self.smtp_server.ehlo()
+
+        if self.auth and self.login and self.password:
+            self.smtp_server.login(self.login, self.password)
 
     def read_config(self):
         with open(os.path.join(cur_dir, 'config.yaml')) as fd:

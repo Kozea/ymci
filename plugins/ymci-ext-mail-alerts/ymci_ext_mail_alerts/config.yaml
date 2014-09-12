@@ -1,9 +1,12 @@
 mails:
   server:
-    smtp.server.org
+    smtp.kozea.fr
   port:
-    25
+    587
   From:
     ymci
   To:
     youraddress@server.org
+  credentials:
+    login: testlogin
+    password: secret
