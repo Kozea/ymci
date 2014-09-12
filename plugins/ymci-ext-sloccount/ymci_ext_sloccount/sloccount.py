@@ -12,7 +12,7 @@ class SloccountHook(BuildHook):
     def active(self):
         return True
 
-    def post_build(self):
+    def validate_build(self):
         sloccount_file = os.path.join(self.build.dir, 'sloccount.sc')
         if os.path.exists(sloccount_file):
             values = defaultdict(int)

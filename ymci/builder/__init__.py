@@ -125,8 +125,6 @@ class Task(Thread):
                 self.out('\nCommand %s returned %d' % (
                     e.command, -e.errno))
                 status = 'FAILED'
-                for hook in self.build_hooks:
-                    hook.on_build_failure()
             return status
 
         try:
@@ -139,7 +137,7 @@ class Task(Thread):
 
         try:
             for hook in self.build_hooks:
-                hook.post_build()
+                hook.validate_build()
         except ExecutionException as e:
             log.warn('Error during task execution %r' % self)
             self.build.status = treat(e)
@@ -152,6 +150,8 @@ class Task(Thread):
         self.out('\n(Duration %fs)' % self.build.duration)
         self.log.close()
         self.db.commit()
+        for hook in self.build_hooks:
+            hook.post_build()
         self.ioloop.add_callback(self.callback)
         server.scoped_session.remove()
 

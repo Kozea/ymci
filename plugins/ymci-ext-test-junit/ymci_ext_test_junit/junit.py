@@ -13,7 +13,7 @@ class JunitHook(BuildHook):
     def active(self):
         return True
 
-    def post_build(self):
+    def validate_build(self):
         results = os.path.join(self.build.dir, 'results.xml')
         if os.path.exists(results):
             tree = ElementTree.parse(results)

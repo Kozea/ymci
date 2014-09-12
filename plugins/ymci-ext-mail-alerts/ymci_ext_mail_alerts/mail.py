@@ -84,7 +84,9 @@ class MailHook(BuildHook):
     def active(self):
         return os.path.exists(os.path.join(cur_dir, 'config.yaml'))
 
-    def on_build_failure(self):
+    def post_build(self):
+        if not self.status == 'FAILED':
+            return
         mailer = Mail()
         message = self.read_mail('mails/error.txt')
         mailer.send_mail(message=message, mtype='error')

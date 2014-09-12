@@ -15,7 +15,7 @@ class CoverageHook(BuildHook):
         return (self.build.project.coverage and
                 self.build.project.coverage.coverage_path)
 
-    def post_build(self):
+    def validate_build(self):
 
         projects_path = server.conf['projects_realpath']
         with open(os.path.join(self.build.dir,
