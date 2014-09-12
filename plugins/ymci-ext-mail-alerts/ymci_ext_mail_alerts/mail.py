@@ -19,12 +19,12 @@ class Mail(object):
         self.read_config()
         config = server.conf['mails']
 
-        self.smtp = config['server']
-        self.port = int(config['port'])
-        self._from = config['From']
-        self.to = config['To']
+        self.smtp = config.get('server', None)
+        self.port = int(config.get('port', None))
+        self._from = config.get('From', None)
+        self.to = config.get('To', None)
 
-        if config['credentials']:
+        if config.get('credentials', None):
             self.login = config['credentials']['login']
             self.password = config['credentials']['password']
             self.auth = True
@@ -46,6 +46,8 @@ class Mail(object):
         try:
             self.authenticate()
             self.smtp_server.send_message(message)
+        except Exception as e:
+            log.error("Mail error : %s" % e)
         finally:
             self.quit()
 
