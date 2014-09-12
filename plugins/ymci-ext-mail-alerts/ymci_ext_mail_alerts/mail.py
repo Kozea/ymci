@@ -33,7 +33,8 @@ class Mail(object):
 
     @property
     def smtp_server(self):
-        self.__smtp_server = self.__smtp_server or smtplib.SMTP(self.smtp, self.port)
+        self.__smtp_server = (
+            self.__smtp_server or smtplib.SMTP(self.smtp, self.port))
         return self.__smtp_server
 
     def quit(self):
@@ -79,7 +80,7 @@ class MailHook(BuildHook):
 
     @property
     def active(self):
-        return True
+        return os.path.exists(os.path.join(cur_dir, 'config.yaml'))
 
     def on_build_failure(self):
         mailer = Mail()
