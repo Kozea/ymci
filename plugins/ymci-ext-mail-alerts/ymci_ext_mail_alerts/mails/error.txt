@@ -1,0 +1,1 @@
+Une erreur est survenue sur le build {{ build.build_id }} du projet {{ project.name }}

@@ -1,0 +1,9 @@
+mails:
+  server:
+    smtp.server.org
+  port:
+    25
+  From:
+    ymci
+  To:
+    youraddress@server.org

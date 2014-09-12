@@ -125,6 +125,8 @@ class Task(Thread):
                 self.out('\nCommand %s returned %d' % (
                     e.command, -e.errno))
                 status = 'FAILED'
+                for hook in self.build_hooks:
+                    hook.on_build_failure()
             return status
 
         try:

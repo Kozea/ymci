@@ -26,3 +26,6 @@ class BuildHook(object):
 
     def post_build(self):
         pass
+
+    def on_build_failure(self):
+        pass
