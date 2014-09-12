@@ -40,7 +40,7 @@ class CoverageChart(Route):
         } for b in builds])
         if width and height:
             svg.x_labels = ['#%d' % b.build_id for b in builds]
-        svg.value_formatter = lambda x: '%.2fs %%' % (x or 0)
+        svg.value_formatter = lambda x: '%.2f %%' % (x or 0)
         svg.title = 'Test coverage'
         self.set_header("Content-Type", "image/svg+xml")
         self.write(svg.render())
