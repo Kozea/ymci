@@ -35,17 +35,15 @@
         <td>
           <div class="btn-group">
             <a class="btn btn-default" href="{{ reverse_url('ProjectView', project.project_id) }}">View</a>
-            {% for route in server.components.project_links %}
-              {% if project.last_non_running_build %}
-                <a class="btn btn-default" href="{{ reverse_url(route.__name__, project.project_id, project.last_non_running_build.build_id, '') }}">{{ route.__name__.title() }}</a>
-              {% else %}
-                <a class="btn btn-default" href="{{ reverse_url(route.__name__, project.project_id, '', '') }}">{{ route.__name__.title() }}</a>
-              {% end %}
-            {% end %}
             <a class="btn btn-default" href="{{ reverse_url('ProjectBuild', project.project_id) }}">Build</a>
-            <a class="btn btn-default" href="{{ reverse_url('ProjectLog', project.project_id, '') }}">Log</a>
+            <a class="btn btn-default" href="{{ reverse_url('ProjectBrowseLast', project.project_id) }}">Browse</a>
+            <a class="btn btn-default" href="{{ reverse_url('ProjectLogLast', project.project_id) }}">Log</a>
             <a class="btn btn-default" href="{{ reverse_url('ProjectEdit', project.project_id) }}">Edit</a>
             <a class="btn btn-default" href="{{ reverse_url('ProjectDelete', project.project_id) }}">Delete</a>
+
+            {% for route in server.components.project_links %}
+              <a class="btn btn-default" href="{{ reverse_url(route['route'], project.project_id) }}">{{ route['label'] }}</a>
+            {% end %}
           </div>
         </td>
       </tr>

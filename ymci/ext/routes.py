@@ -12,7 +12,11 @@ class DualLoader(Loader):
 
     def load(self, name, parent_path=None):
         """Loads a template."""
-        for root in self.roots:
+        roots = self.roots
+        if name.startswith('ymci:'):
+            roots = roots[-1:]
+            name = name[5:]
+        for root in roots:
             try:
                 self.root = root
                 return super().load(name, parent_path)

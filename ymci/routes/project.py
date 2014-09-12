@@ -171,9 +171,10 @@ class ProjectLogWebSocket(WebSocket):
             '%s-%s' % (self.id, self.idx)].remove(self)
 
 
-@url(r'/project/log/(\d+)/(\d*)')
+@url(r'/project/log/(\d+)/(\d+)')
+@url(r'/project/log/(\d+)', suffix='Last')
 class ProjectLog(Route):
-    def get(self, id, idx):
+    def get(self, id, idx=None):
         project = self.db.query(Project).get(id)
         if idx:
             build = self.db.query(Build).get((idx, id))

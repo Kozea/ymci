@@ -5,16 +5,14 @@ from pygments.lexers import guess_lexer_for_filename, get_lexer_by_name
 from pygments.util import ClassNotFound
 from tornado.web import HTTPError
 from xml.etree import ElementTree
+from ymci.routes.browse import ProjectBrowse
 from ymci.ext.routes import url, Route
-from ymci.ext.browse import Browse
 from ymci.model import Project, Build
 from ymci import server
 from ymci.routes import graph_config
 import pygal
 import os
 import yaml
-
-log = getLogger('ymci')
 
 
 @url(r'/project/chart/coverage/(\d+).svg')
@@ -79,26 +77,35 @@ server.components.project_charts.coveragechart = CoverageChart
 server.components.project_charts.coveragestatschart = StatsChart
 
 
-@url(r'/project/browse-coverage/(\d+)/(\d+)/(.*)')
-class BrowseCoverage(Browse):
+@url(r'/project/coverage/(\d+)/path/(.+)', suffix='LastPath')
+@url(r'/project/coverage/(\d+)', suffix='Last')
+@url(r'/project/coverage/(\d+)/build/(\d+)/path/(.+)')
+class BrowseCoverage(ProjectBrowse):
     """Overidden class that adds coverage highlighting of the code."""
 
-    def get(self, id, build_id, path):
+    def get(self, id, build_id=None, path=''):
+        if path is None and build_id is not None:
+            path = build_id
+            build_id = None
         code = ''
+
         project = self.db.query(Project).get(id)
-        build = self.db.query(Build).get((build_id, project.project_id))
+        if build_id:
+            build = self.db.query(Build).get((build_id, project.project_id))
+        else:
+            build = project.last_build
 
         config = os.path.join(build.dir, 'ymci_ext_coverage_config.yaml')
         coverage_file_path = ''
 
         if not os.path.exists(config):
-            log.error("Aucun fichier de couverture de code n'a été trouvé.")
+            self.log.error("Aucun fichier de couverture de code n'a été trouvé.")
             raise HTTPError(404)
 
         with open(config) as fd:
             coverage_file_path = yaml.load(fd).get('coverage_path')
         if not (coverage_file_path and os.path.exists(coverage_file_path)):
-            log.error("Aucun fichier de couverture de code n'a été trouvé.")
+            self.log.error("Aucun fichier de couverture de code n'a été trouvé.")
             raise HTTPError(404)
 
         if path and '..' not in path:
@@ -123,7 +130,7 @@ class BrowseCoverage(Browse):
             tree=self.recurse(
                 self.get_tree_dict(project.src_dir, path), id, build),
             project=project,
-            build_id=build_id,
+            build_id=build.build_id,
             path=path
         )
 
@@ -173,4 +180,7 @@ class BrowseCoverage(Browse):
         return HtmlFormatter(
             linenos=True, cssclass='code', hl_lines=coverage)
 
-server.components.project_links.coverage = BrowseCoverage
+server.components.project_links.coverage = {
+    'route': 'BrowseCoverageLast',
+    'label': 'Coverage'
+}
