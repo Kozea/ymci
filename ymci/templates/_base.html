@@ -28,9 +28,14 @@
             <li><a href="{{ reverse_url('ProjectEdit', project.project_id) }}">Edit {{ project.name }}</a></li>
             <li><a href="{{ reverse_url('ProjectDelete', project.project_id) }}">Delete {{ project.name }}</a></li>
           {% end %}
-          {% if globals().get('build', None) and build.status == 'RUNNING' %}
-            <li><a href="{{ reverse_url('ProjectBuildStop', project.project_id, build.build_id) }}">Stop</a></li>
-          {% end %}
+           {% if globals().get('build', None) and build.status == 'RUNNING' %}
+             <li><a href="{{ reverse_url('ProjectBuildStop', project.project_id, build.build_id) }}">Stop</a></li>
+           {% end %}
+             {% if current_user %}
+              <li><a href="{{ reverse_url('AuthLogout') }}">{{ "Se déconnecter" }}</a></li>
+            {% else %}
+              <li><a href="{{ reverse_url('AuthLogin') }}">{{ "Se connecter" }}</a></li>
+            {% end %}
           {% block nav %}{% end %}
         </ul>
         <ul class="nav navbar-nav navbar-right">
@@ -40,6 +45,11 @@
     </header>
 
     <main class="container">
+      {% for level, message in handler.get_flash_messages().items() %}
+        {% if message %}
+          <p class="bg-{{ level }}">{{ message }}</p>
+        {% end %}
+      {% end %}
       {% block main %}{% end %}
     </main>
 

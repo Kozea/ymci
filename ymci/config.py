@@ -15,7 +15,7 @@ class Config(object):
             'projects_realpath': os.path.realpath(
                 os.path.join(
                     os.path.dirname(os.path.dirname(__file__)), 'projects')),
-            'db_url': 'postgresql+psycopg2://ymci@localhost/ymci'
+            'db_url': 'postgresql+psycopg2://ymci@localhost/ymci',
         }
         self._read(path)
         self._sync()
