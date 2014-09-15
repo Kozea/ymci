@@ -32,7 +32,8 @@ class hooks.BuildHook
           $percent.removeClass 'progress-bar-warning'
         $percent.css 'width', "#{percent}%"
 
-      that.intervals.push setInterval update_progress, 100
+      if not isNaN(base)
+        that.intervals.push setInterval update_progress, 10
 
 
 $ =>

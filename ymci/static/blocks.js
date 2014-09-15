@@ -48,7 +48,9 @@
           }
           return $percent.css('width', "" + percent + "%");
         };
-        return that.intervals.push(setInterval(update_progress, 100));
+        if (!isNaN(base)) {
+          return that.intervals.push(setInterval(update_progress, 10));
+        }
       });
     };
 

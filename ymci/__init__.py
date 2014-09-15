@@ -6,7 +6,6 @@
 from tornado.web import (
     Application, RequestHandler, url as tornado_url, HTTPError)
 from sqlalchemy.orm import scoped_session, sessionmaker
-from tornado import gen
 from tornado.websocket import WebSocketHandler
 from tornado.options import define, parse_command_line, options
 from tornado.ioloop import IOLoop

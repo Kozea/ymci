@@ -7,32 +7,27 @@ import os
 import yaml
 
 
-class Config(object):
+class Config(dict):
 
     def __init__(self, path):
-        self._config = {
+        super().__init__()
+        self.update({
             'projects_path': 'projects',
             'projects_realpath': os.path.realpath(
                 os.path.join(
                     os.path.dirname(os.path.dirname(__file__)), 'projects')),
             'db_url': 'postgresql+psycopg2://ymci@localhost/ymci'
-        }
+        })
         self._read(path)
         self._sync()
 
     def _read(self, path):
         if os.path.exists(path):
             with open(path, 'r') as f:
-                self._config.update(yaml.load(f))
-        self._config['path'] = path
+                self.update(yaml.load(f))
+        self['path'] = path
 
     def _sync(self):
-        with open(self._config['path'], 'w') as f:
+        with open(self['path'], 'w') as f:
             f.write(yaml.safe_dump(
-                self._config, default_flow_style=False, allow_unicode=True))
-
-    def __getitem__(self, item):
-        return self._config.__getitem__(item)
-
-    def __setitem__(self, item, val):
-        return self._config.__setitem__(item, val)
+                dict(self), default_flow_style=False, allow_unicode=True))

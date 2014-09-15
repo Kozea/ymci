@@ -59,19 +59,20 @@ class Index(Route):
 class BuildBlock(BlockWebSocket):
     def render_block(self):
         builder = server.builder
-        if builder.current_task:
+        builds = []
+        for task in builder.tasks:
             build = self.db.query(Build).get(
-                (builder.current_task.build_id,
-                 builder.current_task.project_id))
-            if builder.current_task.start_time:
-                now = time() - builder.current_task.start_time
+                (task.build_id,
+                 task.project_id))
+            if task.start_time:
+                now = time() - task.start_time
             else:
-                now = 0
-        else:
-            build = None
-            now = None
-        return self.render_string('blocks/build.html',
-                                  current_build=build, now=now)
+                now = None
+            builds.append((now, build))
+
+        free_slots = builder.limit - len(builder.tasks)
+        return self.render_string(
+            'blocks/build.html', current_builds=builds, free_slots=free_slots)
 
 
 @url(r'/blocks/project')

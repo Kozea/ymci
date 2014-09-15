@@ -12,7 +12,8 @@ class BuildHook(object):
             if data:
                 self.out(data)
 
-        execute(cmd, cwd or self.build.project.src_dir, send)
+        execute(cmd, cwd or self.build.project.src_dir,
+                send, self.build.project_id, self.build.build_id)
 
     @property
     def active(self):

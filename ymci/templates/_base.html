@@ -24,6 +24,7 @@
           <li><a href="{{ reverse_url('ProjectList') }}">Project list</a></li>
           <li><a href="{{ reverse_url('ProjectAdd') }}">New project</a></li>
           {% if globals().get('project', None) %}
+            <li><a href="{{ reverse_url('ProjectView', project.project_id) }}">View {{ project.name }}</a></li>
             <li><a href="{{ reverse_url('ProjectBuild', project.project_id) }}">Build {{ project.name }}</a></li>
             <li><a href="{{ reverse_url('ProjectEdit', project.project_id) }}">Edit {{ project.name }}</a></li>
             <li><a href="{{ reverse_url('ProjectDelete', project.project_id) }}">Delete {{ project.name }}</a></li>

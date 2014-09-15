@@ -29,7 +29,9 @@ class Pool(object):
     def __init__(self, ioloop=None):
         self.log_streams = defaultdict(list)
         self.queue = []
-        self.current_task = None
+        self.tasks = []
+        self.limit = server.conf.get('slot_size', 5)
+        self.stop_flags = []
         self.ioloop = ioloop or IOLoop.instance()
 
     def add(self, build):
@@ -37,32 +39,35 @@ class Pool(object):
             build.build_id, build.project_id,
             self.log_streams['%s-%s' % (build.project_id, build.build_id)],
             build.project.name, self.ioloop)
-        if not len(self.queue) and not self.current_task:
+        if not len(self.queue) and len(self.tasks) < self.limit:
             self.build(task)
         else:
             self.queue.append(task)
         refresh(build.project_id)
 
     def stop(self, build):
-        if (self.current_task and
-                self.current_task.project_id == build.project_id and
-                self.current_task.build_id == build.build_id):
-            self.current_task.stop = True
-            return
+        for task in self.tasks:
+            if (task.project_id == build.project_id and
+                    task.build_id == build.build_id):
+                self.stop_flags.append((build.project_id, build.build_id))
+                # Set stop flag to keep the fact that it's manual stopping
+                task.stop = True
+
         for task in self.queue:
-            if (self.current_task.project_id == build.project_id and
-                    self.current_task.build_id == build.build_id):
+            if (task.project_id == build.project_id and
+                    task.build_id == build.build_id):
                 self.queue.remove(task)
+
         refresh(build.project_id)
 
     def build(self, task):
-        self.current_task = task
+        self.tasks.append(task)
         task.callback = self.next
         self.ioloop.add_callback(task.start)
 
-    def next(self):
-        project_id = self.current_task.project_id
-        self.current_task = None
+    def next(self, task):
+        project_id = task.project_id
+        self.tasks.remove(task)
         if len(self.queue):
             self.build(self.queue.pop(0))
         refresh(project_id)
@@ -148,11 +153,17 @@ class Task(Thread):
 
         self.build.duration = time() - self.start_time
         self.out('\n(Duration %fs)' % self.build.duration)
-        self.log.close()
         self.db.commit()
         for hook in self.build_hooks:
             hook.post_build()
-        self.ioloop.add_callback(self.callback)
+
+        def post_close():
+            log.info('Closing %r' % self.log)
+            self.log.close()
+
+        # Don't close the file too soon: (Too hackish?)
+        self.ioloop.add_timeout(time() + 5, post_close)
+        self.ioloop.add_callback(self.callback, self)
         server.scoped_session.remove()
 
     def run_task(self):
@@ -189,4 +200,5 @@ class Task(Thread):
 
         execute(
             ['/bin/bash', '-x', '-c', self.script],
-            self.build.dir, self.read)
+            self.build.dir, self.read,
+            self.build.project_id, self.build.build_id)

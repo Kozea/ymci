@@ -1,20 +1,21 @@
 {% include "./_base.html" %}
 
 <h3>Builder</h3>
-<ul class="list-group ">
-  {% if current_build %}
+<ul class="list-group">
+  {% for i in range(free_slots) %}
+    <li class="list-group-item">Empty slot</li>
+  {% end %}
+  {% for now, build in current_builds %}
     <li class="list-group-item">
-      {{ current_build.project.name }} <a class="badge" href="{{ reverse_url('ProjectLog', current_build.project.project_id, current_build.build_id) }}">{{ current_build.build_id }}</a>
+      {{ build.project.name }} <a class="badge" href="{{ reverse_url('ProjectLog', build.project.project_id, build.build_id) }}">{{ build.build_id }}</a>
 
         <div class="progress">
-          <div class="progress-bar build-progress progress-bar-striped active" data-now="{{ now }}" data-end="{{ current_build.project.average_build_duration }}" style="width: 100 * now / current_build.project.average_build_duration }}%;">
+          <div class="progress-bar build-progress progress-bar-striped active" data-now="{{ now }}" data-end="{{ build.project.average_build_duration }}" style="width: {{ (100 * now / build.project.average_build_duration) if now else 0 }}%;">
           </div>
         </div>
     </li>
-    {% for task in server.builder.queue %}
-      <li class="list-group-item"><a href="{{ reverse_url('ProjectView', task.project_id) }}">{{ task.name }}</a><span class="badge">{{ task.build_id }}</span></li>
-    {% end %}
-  {% else %}
-    <li class="list-group-item">Empty queue</li>
+  {% end %}
+  {% for task in server.builder.queue %}
+    <li class="list-group-item"><a href="{{ reverse_url('ProjectView', task.project_id) }}">{{ task.name }}</a><span class="badge">{{ task.build_id }}</span></li>
   {% end %}
 </ul>
