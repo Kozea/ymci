@@ -132,6 +132,15 @@ class Build(Table):
             None: 'default'
         }[self.status]
 
+
+class User(Table):
+    __tablename__ = 'user'
+
+    login = Column(String, primary_key=True)
+    password = Column(String)
+    last_login = Column(DateTime)
+
+
 plugin_tables = []
 
 for table in pkg_resources.iter_entry_points('ymci.ext.db.Table'):

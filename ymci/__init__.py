@@ -14,6 +14,7 @@ from tornado.web import StaticFileHandler
 from logging import getLogger
 from .config import Config
 import os.path
+import tornado
 
 __version__ = '0.0.1'
 
@@ -28,6 +29,8 @@ define("secret", default='secret', help="Secret key for cookies")
 
 parse_command_line()
 ioloop = IOLoop.instance()
+
+MESSAGE_LEVELS = ['primary', 'success', 'info', 'warning', 'danger']
 
 
 class ExtStaticFileHandler(StaticFileHandler):
@@ -53,7 +56,8 @@ server = Application(
     cookie_secret=options.secret,
     static_path=os.path.join(os.path.dirname(__file__), "static"),
     static_handler_class=ExtStaticFileHandler,
-    template_path=os.path.join(os.path.dirname(__file__), "templates"))
+    template_path=os.path.join(os.path.dirname(__file__), "templates"),
+    login_url="/auth/login")
 
 server.conf = Config(options.config)
 
@@ -119,6 +123,24 @@ class Route(Base, RequestHandler):
             # Cache it even if it's the same
             self._db = self.application.scoped_session()
         return self._db
+
+    def get_current_user(self):
+        user = self.get_cookie("user")
+        if not user:
+            return None
+        return user
+
+    def set_flash_message(self, key, message):
+        message = message
+        self.set_secure_cookie('flash_message_%s' % key, message)
+
+    def get_flash_messages(self):
+        messages = {}
+        for level in MESSAGE_LEVELS:
+            message = self.get_secure_cookie('flash_message_%s' % level)
+            messages.update({'%s' % level: message})
+            self.clear_cookie('flash_message_%s' % level)
+        return messages
 
     def on_finish(self):
         # Teardown of the current session

@@ -98,13 +98,14 @@ class HomeBlock(BlockWebSocket):
             'blocks/home.html',
             projects=self.db.query(Project).all())
 
-
 blocks = server.components.blocks
 blocks.build = BuildBlock
 blocks.project = ProjectBlock
 blocks.home = HomeBlock
 blocks.history = HistoryBlock
 import ymci.routes.project
+import ymci.routes.browse
+import ymci.routes.auth
 
 plugin_routes = []
 
