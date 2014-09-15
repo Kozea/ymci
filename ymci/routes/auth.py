@@ -8,8 +8,9 @@ from tornado.escape import json_encode
 
 
 class AuthForm(Form):
-    login = StringField('identifiant', validators=[InputRequired])
-    password = PasswordField('mot de passe', validators=[InputRequired])
+    form_name = 'Login'
+    login = StringField('login', validators=[InputRequired])
+    password = PasswordField('password', validators=[InputRequired])
 
 
 @url(r'/auth/login')
@@ -22,15 +23,15 @@ class AuthLogin(Route):
         form = AuthForm(self.posted)
         user = self.db.query(User).filter_by(login=form.login.data).first()
         if not user:
-            self.set_flash_message('danger', 'Erreur')
+            self.set_flash_message('danger', 'User/Password do not match')
             self.redirect(self.reverse_url('AuthLogin'))
         auth = check_login_credentials(user, form.password.data)
         if auth:
             self.set_current_user(user.login)
-            self.set_flash_message('success', 'Connexion réussie')
+            self.set_flash_message('success', 'Connection successful')
             self.redirect(self.get_argument("next", "/"))
         else:
-            self.set_flash_message('danger', 'Erreur')
+            self.set_flash_message('danger', 'User/Password do not match')
             self.redirect(self.reverse_url('AuthLogin'))
 
     def set_current_user(self, user):
@@ -44,5 +45,5 @@ class AuthLogin(Route):
 class AuthLogout(Route):
     def get(self):
         self.clear_cookie("user")
-        self.set_flash_message('success', 'Déconnexion réussie')
+        self.set_flash_message('success', 'Logout successful')
         self.redirect("/")

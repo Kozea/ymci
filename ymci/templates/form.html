@@ -3,7 +3,7 @@
 {% block main %}
   <form class="form-horizontal" method="post">
     <fieldset>
-      <legend>{{ form.__class__.__name__ }}</legend>
+      <legend>{{ getattr(form, 'form_name', form.__class__.__name__) }}</legend>
       {% raw render_form_recursively(form) %}
     </fieldset>
     <div class="form-group">
