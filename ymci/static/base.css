@@ -200,6 +200,10 @@ code.out {
   font-size: 1.2em; }
   .health-bar .healthy-heart {
     color: #ff4136; }
+  .health-bar .beating-heart {
+    animation-duration: 1s;
+    animation-name: heart;
+    animation-iteration-count: infinite; }
   .health-bar .broken-heart {
     color: rgba(255, 65, 54, 0.25); }
 
@@ -211,3 +215,19 @@ code.out {
     position: absolute;
     bottom: 0;
     right: 0; }
+
+@keyframes heart {
+  0% {
+    color: #ff4136; }
+
+  45% {
+    color: rgba(255, 65, 54, 0.25); }
+
+  90% {
+    color: #ff4136; }
+
+  95% {
+    color: rgba(255, 65, 54, 0.5); }
+
+  100% {
+    color: #ff4136; } }

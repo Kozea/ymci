@@ -25,6 +25,7 @@ span.badge
   width: 22%
   cursor: pointer
 
+
 code.out
   margin-bottom: 2em
 
@@ -42,6 +43,11 @@ code.out
   .healthy-heart
     color: rgba(255, 65, 54, 1)
 
+  .beating-heart
+    animation-duration: 1s
+    animation-name: heart
+    animation-iteration-count: infinite
+
   .broken-heart
     color: rgba(255, 65, 54, .25)
 
@@ -55,3 +61,19 @@ code.out
       position: absolute
       bottom: 0
       right: 0
+
+@keyframes heart
+  0%
+    color: rgba(255, 65, 54, 1)
+
+  45%
+    color: rgba(255, 65, 54, .25)
+
+  90%
+    color: rgba(255, 65, 54, 1)
+
+  95%
+    color: rgba(255, 65, 54, .5)
+
+  100%
+    color: rgba(255, 65, 54, 1)
