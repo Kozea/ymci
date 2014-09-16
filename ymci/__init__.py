@@ -30,7 +30,7 @@ define("upgrade", default=False, help="Upgrade DB")
 parse_command_line()
 ioloop = IOLoop.instance()
 
-MESSAGE_LEVELS = ['primary', 'success', 'info', 'warning', 'danger']
+MESSAGE_LEVELS = ['success', 'info', 'warning', 'danger']
 
 
 class ExtStaticFileHandler(StaticFileHandler):
