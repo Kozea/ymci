@@ -72,7 +72,7 @@ class Mail(object):
             try:
                 server.conf._config.update(yaml.load(fd))
             except Exception:
-                log.error('Problème de lecture de la configuration des mails.')
+                log.error('Error reading mail configuration.')
                 return False
             return True
 
