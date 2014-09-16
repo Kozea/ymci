@@ -11,7 +11,8 @@ class JunitHook(BuildHook):
 
     @property
     def active(self):
-        return True
+        return (self.build.project.junit and
+                self.build.project.junit.junit_path)
 
     def validate_build(self):
         results = os.path.join(self.build.dir, 'results.xml')

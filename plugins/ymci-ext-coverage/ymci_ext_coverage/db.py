@@ -1,5 +1,5 @@
 from ymci.ext.db import Table
-from sqlalchemy import Column, Integer, ForeignKeyConstraint
+from sqlalchemy import Column, Integer, ForeignKeyConstraint, String
 from sqlalchemy.orm import relationship, backref
 
 
@@ -55,3 +55,17 @@ class Coverage(Table):
 
     build = relationship(
         'Build', backref=backref('coverage', uselist=False, cascade='all'))
+
+
+class CoverageConfig(Table):
+    __tablename__ = 'ymci_ext_coverage__coverage_config'
+    __table_args__ = (
+        ForeignKeyConstraint(['project_id'], ['project.project_id']),
+    )
+    project_id = Column(Integer, primary_key=True, nullable=False)
+    coverage_path = Column('coverage_path', String)
+
+    columns_list = ['coverage_path']
+
+    project = relationship('Project', backref=backref(
+        'coverage', uselist=False, cascade='all'))

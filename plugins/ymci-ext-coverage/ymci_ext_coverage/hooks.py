@@ -1,4 +1,4 @@
-from ymci.ext.hooks import BuildHook
+from ymci.ext.hooks import BuildHook, FormHook
 from ymci import server
 from logging import getLogger
 from xml.etree import ElementTree
@@ -68,3 +68,9 @@ class CoverageHook(BuildHook):
                     coverage.branch_rate,
                     coverage.line_rate
                 ))
+
+class CoverageFormHook(FormHook):
+    def pre_populate(self, form):
+        form.coverage.coverage_path.data = (
+            form.coverage.coverage_path.data.lstrip('./'))
+        return True

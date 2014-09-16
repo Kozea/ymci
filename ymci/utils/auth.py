@@ -1,6 +1,6 @@
 import hashlib
 from base64 import b64decode
-from werkzeug.security import pbkdf2_bin
+#from werkzeug.security import pbkdf2_bin
 
 
 def check_login_credentials(user, password):

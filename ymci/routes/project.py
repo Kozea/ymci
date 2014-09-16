@@ -12,21 +12,16 @@ import os
 
 log = getLogger('ymci')
 
-config_tables = []
-for config_table in zip(
-        pkg_resources.iter_entry_points(
-            'ymci.ext.config.Config', name='config'),
-        pkg_resources.iter_entry_points(
-            'ymci.ext.config.Config', name='form')):
+config_forms = []
+for config_form in pkg_resources.iter_entry_points('ymci.ext.form.Form'):
     try:
-        config_tables.append(
-            (config_table[0].load(), config_table[1].load()))
+        config_forms.append(config_form.load())
     except Exception:
-        log.exception('Failed to load config from plugin %s' % config_table)
+        log.exception('Failed to load config from plugin %s' % config_form)
 
 config_hooks = []
 for config_hook in pkg_resources.iter_entry_points(
-        'ymci.ext.config.ConfigHook'):
+        'ymci.ext.hook.FormHook'):
     try:
         config_hooks.append(config_hook.load())
     except:
@@ -36,8 +31,13 @@ for config_hook in pkg_resources.iter_entry_points(
 class Meta(object):
     model = Project
 
-forms = {c[0].project.property.back_populates: ModelFormField(c[1])
-         for c in config_tables}
+forms = {
+    c.Meta.model.project.property.back_populates: ModelFormField(c)
+    for c in config_forms}
+
+for ufield in forms.values():
+    ufield.creation_counter += 10000
+
 forms.update({'Meta': Meta})
 ProjectForm = type('ProjectForm', (ModelForm,), forms)
 

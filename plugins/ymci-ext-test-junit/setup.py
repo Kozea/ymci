@@ -16,13 +16,17 @@ setup(
 
     entry_points={
         'ymci.ext.hooks.BuildHook': [
-            'junit = ymci_ext_test_junit.junit:JunitHook'
+            'junit = ymci_ext_test_junit.hooks:JunitHook'
         ],
         'ymci.ext.db.Table': [
-            'result = ymci_ext_test_junit.db:Result'
+            'result = ymci_ext_test_junit.db:Result',
+            'config = ymci_ext_test_junit.db:JUnitConfig'
         ],
         'ymci.ext.routes.Route': [
             'result_chart = ymci_ext_test_junit.routes:ResultChart'
         ],
+        'ymci.ext.form.Form': [
+            'form = ymci_ext_test_junit.form:JUnitForm'
+        ]
     }
 )

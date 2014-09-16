@@ -30,3 +30,18 @@ class BuildHook(object):
 
     def validate_build(self):
         pass
+
+
+class FormHook(object):
+    @property
+    def active(self):
+        return False
+
+    def pre_populate(self, form=None):
+        pass
+
+    def pre_commit(self, form=None):
+        pass
+
+    def pre_add(self):
+        pass

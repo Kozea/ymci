@@ -9,6 +9,7 @@ from ..utils import short_transaction
 from ..model import Build
 from .. import server
 import shutil
+import stat
 import os
 import pkg_resources
 
@@ -147,6 +148,10 @@ class Task(Thread):
             log.warn('Error during task execution %r' % self)
             self.build.status = treat(e)
 
+        # Don't close the file too soon: (Too hackish?)
+        self.ioloop.add_timeout(time() + .5, self.post_run)
+
+    def post_run(self):
         if self.build.status == 'RUNNING':
             self.out('Success !')
             self.build.status = 'SUCCESS'
@@ -157,12 +162,7 @@ class Task(Thread):
         for hook in self.build_hooks:
             hook.post_build()
 
-        def post_close():
-            log.info('Closing %r' % self.log)
-            self.log.close()
-
-        # Don't close the file too soon: (Too hackish?)
-        self.ioloop.add_timeout(time() + 5, post_close)
+        self.log.close()
         self.ioloop.add_callback(self.callback, self)
         server.scoped_session.remove()
 
@@ -198,7 +198,15 @@ class Task(Thread):
         for hook in self.build_hooks:
             hook.pre_build()
 
+        script_fn = os.path.abspath(os.path.join(self.build.dir, '.ymci.sh'))
+        script = self.script
+        if not script.startswith('#!'):
+            script = '#!/bin/sh\n' + script
+        with open(script_fn, 'w') as build_script:
+            build_script.write(script)
+        os.chmod(script_fn, 0o700)
+
         execute(
-            ['/bin/bash', '-x', '-c', self.script],
+            script_fn,
             self.build.dir, self.read,
             self.build.project_id, self.build.build_id)
