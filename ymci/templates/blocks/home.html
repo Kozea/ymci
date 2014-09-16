@@ -24,7 +24,7 @@
       <div>
         <span class="health-bar">
         {% for i in range(project.health(6)) %}
-          <i class="glyphicon glyphicon-heart healthy-heart"></i>
+          <i class="glyphicon glyphicon-heart healthy-heart{{ ' beating-heart'  if project.last_build.status == 'RUNNING' else '' }}"></i>
         {% end %}
         {% for i in range(6 - project.health(6)) %}
           <i class="glyphicon glyphicon-heart broken-heart"></i>
