@@ -1,2 +1,3 @@
 ymci.yaml
 projects/
+alembic/versions/*.py

@@ -14,7 +14,6 @@ from tornado.web import StaticFileHandler
 from logging import getLogger
 from .config import Config
 import os.path
-import tornado
 
 __version__ = '0.0.1'
 
@@ -26,6 +25,7 @@ define("host", default='ymci.l', help="Server host")
 define("port", default=7361, help="Server port")
 define("config", default='ymci.yaml', help="YMCI config file")
 define("secret", default='secret', help="Secret key for cookies")
+define("upgrade", default=False, help="Upgrade DB")
 
 parse_command_line()
 ioloop = IOLoop.instance()

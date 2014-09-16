@@ -5,5 +5,6 @@ wtforms
 sqlalchemy
 psycopg2
 wtforms_alchemy
+pbkdf2
 pygal
 hg+https://bitbucket.org/birkenfeld/pygments-main

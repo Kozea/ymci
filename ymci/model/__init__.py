@@ -139,6 +139,7 @@ class User(Table):
     login = Column(String, primary_key=True)
     password = Column(String)
     last_login = Column(DateTime)
+    login_count = Column(Integer)
 
 
 plugin_tables = []

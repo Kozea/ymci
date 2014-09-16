@@ -1,10 +1,11 @@
 from .. import url, Route
 from ..model import User
-from ..utils.auth import check_login_credentials
+from pbkdf2 import crypt
 from wtforms.form import Form
 from wtforms.fields import StringField, PasswordField
 from wtforms.validators import InputRequired
 from tornado.escape import json_encode
+from tornado.options import options
 
 
 class AuthForm(Form):
@@ -21,18 +22,21 @@ class AuthLogin(Route):
 
     def post(self):
         form = AuthForm(self.posted)
-        user = self.db.query(User).filter_by(login=form.login.data).first()
-        if not user:
-            self.set_flash_message('danger', 'User/Password do not match')
-            self.redirect(self.reverse_url('AuthLogin'))
-        auth = check_login_credentials(user, form.password.data)
-        if auth:
+        user = (self.db.query(User)
+                .filter(User.login == form.login.data)
+                .filter(User.password == crypt(
+                    form.password.data, salt=options.secret))
+                .first())
+
+        if user:
             self.set_current_user(user.login)
             self.set_flash_message('success', 'Connection successful')
-            self.redirect(self.get_argument("next", "/"))
-        else:
-            self.set_flash_message('danger', 'User/Password do not match')
-            self.redirect(self.reverse_url('AuthLogin'))
+            user.login_count = (user.login_count or 0) + 1
+            self.db.commit()
+            return self.redirect(self.get_argument("next", "/"))
+
+        self.set_flash_message('danger', 'User/Password do not match')
+        self.redirect(self.reverse_url('AuthLogin'))
 
     def set_current_user(self, user):
         if user:

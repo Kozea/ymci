@@ -32,15 +32,14 @@
            {% if globals().get('build', None) and build.status == 'RUNNING' %}
              <li><a href="{{ reverse_url('ProjectBuildStop', project.project_id, build.build_id) }}">Stop</a></li>
            {% end %}
-             {% if current_user %}
-              <li><a href="{{ reverse_url('AuthLogout') }}">{{ "Se déconnecter" }}</a></li>
-            {% else %}
-              <li><a href="{{ reverse_url('AuthLogin') }}">{{ "Se connecter" }}</a></li>
-            {% end %}
           {% block nav %}{% end %}
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          <li><a href="http://kozea.fr/">Kozea</a></li>
+          {% if current_user %}
+            <li><a href="{{ reverse_url('AuthLogout') }}">{{ "Se déconnecter" }}</a></li>
+          {% else %}
+            <li><a href="{{ reverse_url('AuthLogin') }}">{{ "Se connecter" }}</a></li>
+          {% end %}
         </ul>
       </nav>
     </header>
