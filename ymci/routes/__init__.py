@@ -1,7 +1,6 @@
 from .. import url, Route, BlockWebSocket, server
 from ..model import Project, Build
 from time import time
-import pkg_resources
 from logging import getLogger
 import pygal
 from pygal import Config
@@ -103,15 +102,7 @@ blocks.build = BuildBlock
 blocks.project = ProjectBlock
 blocks.home = HomeBlock
 blocks.history = HistoryBlock
+
 import ymci.routes.project
 import ymci.routes.browse
 import ymci.routes.auth
-
-plugin_routes = []
-
-for route in pkg_resources.iter_entry_points('ymci.ext.routes.Route'):
-    try:
-        plugin_routes.append(route.load())
-    except Exception:
-        log.exception('Failed to load plugin route %r' % route)
-        continue

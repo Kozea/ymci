@@ -9,7 +9,6 @@ from ..utils import short_transaction
 from ..model import Build
 from .. import server
 import shutil
-import stat
 import os
 import pkg_resources
 
@@ -169,14 +168,8 @@ class Task(Thread):
     def run_task(self):
         self.out('Starting build %d...\n' % self.build.build_id)
         self.build_hooks = []
-        for hook in pkg_resources.iter_entry_points(
-                'ymci.ext.hooks.BuildHook'):
-            try:
-                Hook = hook.load()
-            except Exception:
-                log.exception('Failed to load plugin %r' % hook)
-                continue
 
+        for Hook in server.plugins['ymci.ext.hooks.BuildHook']:
             def get_out(hook_name):
                 def out(message):
                     self.out('%s> %s\n' % (hook_name, message))
