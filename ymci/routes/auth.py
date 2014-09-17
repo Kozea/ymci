@@ -22,7 +22,7 @@ class AuthLogin(Route):
 
     def post(self):
         form = AuthForm(self.posted)
-        service = self.read_pam_config() or 'login'
+        service = self.read_pam_config()
         check = authenticate(form.login.data, form.password.data, service)
         if check:
             user = (self.db.query(User)
@@ -51,7 +51,7 @@ class AuthLogin(Route):
             self.clear_cookie("user")
 
     def read_pam_config(self):
-        return self.application.conf.get('pam_service', None)
+        return self.application.conf.get('pam_service', 'login')
 
 
 @url(r'/auth/logout')
