@@ -45,3 +45,12 @@ class FormHook(object):
 
     def pre_add(self):
         pass
+
+
+class PrepareHook(object):
+    @property
+    def active(self):
+        return False
+
+    def prepare(self, db=None):
+        pass

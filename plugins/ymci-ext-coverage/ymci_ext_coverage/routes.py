@@ -99,13 +99,13 @@ class BrowseCoverage(ProjectBrowse):
         coverage_file_path = ''
 
         if not os.path.exists(config):
-            self.log.error("Aucun fichier de couverture de code n'a été trouvé.")
+            self.log.error("Coverage file not found.")
             raise HTTPError(404)
 
         with open(config) as fd:
             coverage_file_path = yaml.load(fd).get('coverage_path')
         if not (coverage_file_path and os.path.exists(coverage_file_path)):
-            self.log.error("Aucun fichier de couverture de code n'a été trouvé.")
+            self.log.error("Coverage file not found.")
             raise HTTPError(404)
 
         if path and '..' not in path:
