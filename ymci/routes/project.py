@@ -5,27 +5,11 @@ from ..utils import short_transaction, secure_rmtree
 from datetime import datetime
 from logging import getLogger
 from wtforms_alchemy import ModelForm, ModelFormField
-import pkg_resources
 import pygal
 import os
 
 
 log = getLogger('ymci')
-
-config_forms = []
-for config_form in pkg_resources.iter_entry_points('ymci.ext.form.Form'):
-    try:
-        config_forms.append(config_form.load())
-    except Exception:
-        log.exception('Failed to load config from plugin %s' % config_form)
-
-config_hooks = []
-for config_hook in pkg_resources.iter_entry_points(
-        'ymci.ext.hook.FormHook'):
-    try:
-        config_hooks.append(config_hook.load())
-    except:
-        log.exception('Failed to load hook from plugin %s' % config_hook)
 
 
 class Meta(object):
@@ -33,7 +17,7 @@ class Meta(object):
 
 forms = {
     c.Meta.model.project.property.back_populates: ModelFormField(c)
-    for c in config_forms}
+    for c in server.plugins['ymci.ext.form.Form']}
 
 for ufield in forms.values():
     ufield.creation_counter += 10000
@@ -67,7 +51,7 @@ class ProjectAdd(Route):
         form = ProjectForm(self.posted)
         if form.validate():
             project = Project()
-            for hook in config_hooks:
+            for hook in self.application.plugins['ymci.ext.hook.FormHook']:
                 hook().pre_populate(form)
             form.populate_obj(project)
             self.db.add(project)
@@ -93,7 +77,7 @@ class ProjectEdit(Route):
         project = self.db.query(Project).get(id)
         form = ProjectForm(self.posted, project)
         if form.validate():
-            for hook in config_hooks:
+            for hook in self.application.plugins['ymci.ext.hook.FormHook']:
                 hook().pre_populate(form)
             old_dir = project.project_dir
             form.populate_obj(project)

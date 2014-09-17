@@ -154,12 +154,7 @@ class Route(Base, RequestHandler):
             render_form_recursively=self.render_form_recursively)
 
     def prepare(self):
-        prepare_hooks = []
-        for hook in pkg_resources.iter_entry_points(
-                'ymci.ext.hooks.PrepareHook'):
-            Hook = hook.load()
-            prepare_hooks.append(Hook())
-        for hook in prepare_hooks:
+        for hook in self.application.plugins['ymci.ext.hooks.PrepareHook']:
             hook.prepare(self)
 
 
@@ -220,5 +215,12 @@ class BlockWebSocket(WebSocket, metaclass=MetaBlock):
 
 from .builder import Pool
 server.builder = Pool()
+
+from .ext import Plugins
+server.plugins = Plugins()
+
+# Explicit loads
+server.plugins.load('ymci.ext.db.Table')
+server.plugins.load('ymci.ext.routes.Route')
 
 import ymci.routes

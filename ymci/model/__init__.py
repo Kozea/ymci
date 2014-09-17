@@ -140,13 +140,3 @@ class User(Table):
     password = Column(String)
     last_login = Column(DateTime)
     login_count = Column(Integer)
-
-
-plugin_tables = []
-
-for table in pkg_resources.iter_entry_points('ymci.ext.db.Table'):
-    try:
-        plugin_tables.append(table.load())
-    except Exception:
-        log.exception('Failed to load plugin db table %r' % table)
-        continue
