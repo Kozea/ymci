@@ -134,7 +134,7 @@ class Build(Table):
 
 
 class User(Table):
-    __tablename__ = 'user'
+    __tablename__ = 'ymci_user'
 
     login = Column(String, primary_key=True)
     password = Column(String)

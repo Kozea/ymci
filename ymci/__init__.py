@@ -6,6 +6,7 @@
 from tornado.web import (
     Application, RequestHandler, url as tornado_url, HTTPError)
 from sqlalchemy.orm import scoped_session, sessionmaker
+from tornado.escape import to_unicode
 from tornado.websocket import WebSocketHandler
 from tornado.options import define, parse_command_line, options
 from tornado.ioloop import IOLoop
@@ -14,6 +15,7 @@ from tornado.web import StaticFileHandler
 from logging import getLogger
 from .config import Config
 import os.path
+import pkg_resources
 
 __version__ = '0.0.1'
 
@@ -125,10 +127,10 @@ class Route(Base, RequestHandler):
         return self._db
 
     def get_current_user(self):
-        user = self.get_cookie("user")
+        user = self.get_secure_cookie("user")
         if not user:
             return None
-        return user
+        return to_unicode(user)
 
     def set_flash_message(self, key, message):
         message = message
@@ -150,6 +152,15 @@ class Route(Base, RequestHandler):
         return self.render_string(
             'fields.html', form=form,
             render_form_recursively=self.render_form_recursively)
+
+    def prepare(self):
+        prepare_hooks = []
+        for hook in pkg_resources.iter_entry_points(
+                'ymci.ext.hooks.PrepareHook'):
+            Hook = hook.load()
+            prepare_hooks.append(Hook())
+        for hook in prepare_hooks:
+            hook.prepare(self)
 
 
 class WebSocket(Base, WebSocketHandler):
