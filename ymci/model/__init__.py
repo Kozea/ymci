@@ -8,6 +8,7 @@ from logging import getLogger
 from .. import server
 import os
 import pkg_resources
+import datetime
 
 
 log = getLogger('ymci')
@@ -137,6 +138,5 @@ class User(Table):
     __tablename__ = 'ymci_user'
 
     login = Column(String, primary_key=True)
-    password = Column(String)
-    last_login = Column(DateTime)
+    last_login = Column(DateTime, default=datetime.datetime.now())
     login_count = Column(Integer)

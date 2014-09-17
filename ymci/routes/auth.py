@@ -1,11 +1,11 @@
 from .. import url, Route
 from ..model import User
-from pbkdf2 import crypt
 from wtforms.form import Form
 from wtforms.fields import StringField, PasswordField
 from wtforms.validators import InputRequired
 from tornado.escape import json_encode
-from tornado.options import options
+from simplepam import authenticate
+import datetime
 
 
 class AuthForm(Form):
@@ -22,16 +22,22 @@ class AuthLogin(Route):
 
     def post(self):
         form = AuthForm(self.posted)
-        user = (self.db.query(User)
-                .filter(User.login == form.login.data)
-                .filter(User.password == crypt(
-                    form.password.data, salt=options.secret))
-                .first())
+        service = self.read_pam_config() or 'login'
+        check = authenticate(form.login.data, form.password.data, service)
+        if check:
+            user = (self.db.query(User)
+                    .filter(User.login == form.login.data)
+                    .first())
 
-        if user:
+            if not user:
+                user = User(login=form.login.data)
+                self.db.add(user)
+                self.db.commit()
+
             self.set_current_user(user.login)
             self.set_flash_message('success', 'Connection successful')
             user.login_count = (user.login_count or 0) + 1
+            user.last_login = datetime.datetime.now()
             self.db.commit()
             return self.redirect(self.get_argument("next", "/"))
 
@@ -43,6 +49,9 @@ class AuthLogin(Route):
             self.set_secure_cookie("user", json_encode(user))
         else:
             self.clear_cookie("user")
+
+    def read_pam_config(self):
+        return self.application.conf.get('pam_service', None)
 
 
 @url(r'/auth/logout')
