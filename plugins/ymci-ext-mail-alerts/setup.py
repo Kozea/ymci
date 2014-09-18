@@ -15,6 +15,9 @@ setup(
     packages=find_packages(),
 
     entry_points={
+        'ymci.ext': [
+            'ymci-ext-mail-alerts = ymci_ext_mail_alerts'
+        ],
         'ymci.ext.hooks.BuildHook': [
             'mail_alerts = ymci_ext_mail_alerts.mail:MailHook'
         ],

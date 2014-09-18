@@ -154,9 +154,8 @@ class Route(Base, RequestHandler):
             render_form_recursively=self.render_form_recursively)
 
     def prepare(self):
-        for hook in self.application.plugins['ymci.ext.hooks.PrepareHook']:
-            hook.prepare(self)
-
+        for Hook in self.application.plugins['ymci.ext.hooks.PrepareHook']:
+            Hook().prepare(self)
 
 class WebSocket(Base, WebSocketHandler):
     pass
@@ -218,9 +217,7 @@ server.builder = Pool()
 
 from .ext import Plugins
 server.plugins = Plugins()
+server.plugins.init()
 
-# Explicit loads
-server.plugins.load('ymci.ext.db.Table')
-server.plugins.load('ymci.ext.routes.Route')
 
 import ymci.routes

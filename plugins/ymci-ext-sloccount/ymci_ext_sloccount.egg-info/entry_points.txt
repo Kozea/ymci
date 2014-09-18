@@ -1,3 +1,6 @@
+[ymci.ext]
+ymci-ext-sloccount = ymci_ext_sloccount
+
 [ymci.ext.db.Table]
 result = ymci_ext_sloccount.db:Sloccount
 

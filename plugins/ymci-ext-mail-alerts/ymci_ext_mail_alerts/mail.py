@@ -20,7 +20,9 @@ class Mail(object):
         config = server.conf['mails']
 
         self.smtp = config.get('server', None)
-        self.port = int(config.get('port', None))
+        self.port = config.get('port', None)
+        if self.port:
+            self.port = int(self.port)
         self._from = config.get('From', None)
         self.to = config.get('To', None)
 
@@ -46,10 +48,13 @@ class Mail(object):
         try:
             self.authenticate()
             self.smtp_server.send_message(message)
-        except Exception as e:
-            log.error("Mail error : %s" % e)
+        except Exception:
+            log.exception("Mail error")
         finally:
-            self.quit()
+            try:
+                self.quit()
+            except Exception:
+                log.exception("Quit error")
 
     def set_mail_headers(self, message, mtype):
         message['Subject'] = mtype
@@ -70,9 +75,9 @@ class Mail(object):
     def read_config(self):
         with open(os.path.join(cur_dir, 'config.yaml')) as fd:
             try:
-                server.conf._config.update(yaml.load(fd))
+                server.conf.update(yaml.load(fd))
             except Exception:
-                log.error('Error reading mail configuration.')
+                log.exception('Error reading mail configuration.')
                 return False
             return True
 
@@ -82,7 +87,7 @@ class MailHook(BuildHook):
 
     @property
     def active(self):
-        return os.path.exists(os.path.join(cur_dir, 'config.yaml'))
+        return server.conf.get('mails', None)
 
     def post_build(self):
         if not self.build.status == 'FAILED':

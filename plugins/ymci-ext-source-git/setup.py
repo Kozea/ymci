@@ -15,6 +15,9 @@ setup(
     packages=find_packages(),
 
     entry_points={
+        'ymci.ext': [
+            'ymci-ext-source-git = ymci_ext_source_git'
+        ],
         'ymci.ext.hooks.BuildHook': [
             'git = ymci_ext_source_git.git:GitHook'
         ],

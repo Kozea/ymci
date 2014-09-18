@@ -15,6 +15,9 @@ setup(
     packages=find_packages(),
 
     entry_points={
+        'ymci.ext': [
+            'ymci-ext-test-junit = ymci_ext_test_junit'
+        ],
         'ymci.ext.hooks.BuildHook': [
             'junit = ymci_ext_test_junit.hooks:JunitHook'
         ],

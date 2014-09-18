@@ -1,0 +1,31 @@
+{% include "_base.html" %}
+
+<h3>Plugins</h3>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Package</th>
+      <th>Description</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for plugin in plugins %}
+      <tr>
+        <td>
+          {{ plugin.__entry_name__ }}
+        </td>
+        <td>
+          {{ plugin.__name__ }}
+        </td>
+        <td>
+          {{ plugin.__doc__ or '' }}
+        </td>
+        <td>
+        </td>
+      </tr>
+    {% end %}
+  </tbody>
+</table>

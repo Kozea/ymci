@@ -1,0 +1,15 @@
+{% extends "../_base.html" %}
+
+{% block main %}
+  <h1>Admin</h1>
+  <section class="row">
+    <article class="col-md-10 block" data-block="plugins">
+    </article>
+
+    <article class="col-md-2">
+      <h3>Tools</h3>
+      <a href="{{ reverse_url('AdminPluginRefresh') }}" class="btn btn-info xhr">Refresh plugins</a>
+      <a href="{{ reverse_url('AdminDBUpgrade') }}" class="btn btn-warning xhr">Upgrade Database</a>
+    </article>
+  </section>
+{% end %}
