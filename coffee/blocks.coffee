@@ -39,22 +39,38 @@ class hooks.BuildHook
 $ =>
   @blocks = blocks = {}
   $('.block').each ->
-    block = $(@).attr 'data-block'
-    args = $(@).attr('data-args') or ''
+    $elt = $(@)
+    block = $elt.attr 'data-block'
+    args = $elt.attr('data-args') or ''
     blocks[block] = {}
     cc_block = block[0].toUpperCase() + block.slice(1)
     blocks[block].hook = (
       hooks["#{cc_block}Hook"]? and new hooks["#{cc_block}Hook"]())
 
-    blocks[block].ws = ws = new WebSocket(
-      "ws://#{location.host}/blocks/#{block}#{args}")
-    ws.onopen = -> console.log("#{block} ws open")
-    ws.onclose = -> console.log("#{block} ws closed", arguments)
-    ws.onerror = -> console.error("#{block} ws error", arguments)
+    delay = 100
 
-    ws.onmessage = (e) =>
-      $block = $(@)
-      blocks[block].hook?.before?($block)
-      console.debug("Refreshing block #{block}")
-      $block.html(e.data)
-      blocks[block].hook?.after?($block)
+    reconnect = (block, $elt) ->
+      console.log("#{block} ws connecting")
+      blocks[block].ws = ws = new WebSocket(
+        "ws://#{location.host}/blocks/#{block}#{args}")
+      ws.onopen = ->
+        delay = 100
+        console.log("#{block} ws open")
+
+      ws.onclose = ->
+        console.log("#{block} ws closed. Reconnecting", arguments)
+        setTimeout (-> reconnect(block, $elt)), delay
+
+
+      ws.onerror = ->
+        delay *= 2
+        console.error("#{block} ws error", arguments)
+
+      ws.onmessage = (e) ->
+        console.debug("Refreshing block #{block}", e)
+        $block = $elt
+        blocks[block].hook?.before?($block)
+        $block.html(e.data)
+        blocks[block].hook?.after?($block)
+
+    reconnect(block, $elt)

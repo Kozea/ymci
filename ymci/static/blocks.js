@@ -63,36 +63,46 @@
       var blocks;
       _this.blocks = blocks = {};
       return $('.block').each(function() {
-        var args, block, cc_block, ws;
-        block = $(this).attr('data-block');
-        args = $(this).attr('data-args') || '';
+        var $elt, args, block, cc_block, delay, reconnect;
+        $elt = $(this);
+        block = $elt.attr('data-block');
+        args = $elt.attr('data-args') || '';
         blocks[block] = {};
         cc_block = block[0].toUpperCase() + block.slice(1);
         blocks[block].hook = (hooks["" + cc_block + "Hook"] != null) && new hooks["" + cc_block + "Hook"]();
-        blocks[block].ws = ws = new WebSocket("ws://" + location.host + "/blocks/" + block + args);
-        ws.onopen = function() {
-          return console.log("" + block + " ws open");
-        };
-        ws.onclose = function() {
-          return console.log("" + block + " ws closed", arguments);
-        };
-        ws.onerror = function() {
-          return console.error("" + block + " ws error", arguments);
-        };
-        return ws.onmessage = (function(_this) {
-          return function(e) {
+        delay = 100;
+        reconnect = function(block, $elt) {
+          var ws;
+          console.log("" + block + " ws connecting");
+          blocks[block].ws = ws = new WebSocket("ws://" + location.host + "/blocks/" + block + args);
+          ws.onopen = function() {
+            delay = 100;
+            return console.log("" + block + " ws open");
+          };
+          ws.onclose = function() {
+            console.log("" + block + " ws closed. Reconnecting", arguments);
+            return setTimeout((function() {
+              return reconnect(block, $elt);
+            }), delay);
+          };
+          ws.onerror = function() {
+            delay *= 2;
+            return console.error("" + block + " ws error", arguments);
+          };
+          return ws.onmessage = function(e) {
             var $block, _ref, _ref1;
-            $block = $(_this);
+            console.debug("Refreshing block " + block, e);
+            $block = $elt;
             if ((_ref = blocks[block].hook) != null) {
               if (typeof _ref.before === "function") {
                 _ref.before($block);
               }
             }
-            console.debug("Refreshing block " + block);
             $block.html(e.data);
             return (_ref1 = blocks[block].hook) != null ? typeof _ref1.after === "function" ? _ref1.after($block) : void 0 : void 0;
           };
-        })(this);
+        };
+        return reconnect(block, $elt);
       });
     };
   })(this));

@@ -157,6 +157,7 @@ class Route(Base, RequestHandler):
         for Hook in self.application.plugins['ymci.ext.hooks.PrepareHook']:
             Hook().prepare(self)
 
+
 class WebSocket(Base, WebSocketHandler):
     pass
 
