@@ -58,7 +58,7 @@ $ =>
         console.log("#{block} ws open")
 
       ws.onclose = ->
-        console.log("#{block} ws closed. Reconnecting", arguments)
+        console.log("#{block} ws closed. Reconnecting in #{delay}ms", arguments)
         setTimeout (-> reconnect(block, $elt)), delay
 
 

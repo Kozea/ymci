@@ -80,7 +80,7 @@
             return console.log("" + block + " ws open");
           };
           ws.onclose = function() {
-            console.log("" + block + " ws closed. Reconnecting", arguments);
+            console.log("" + block + " ws closed. Reconnecting in " + delay + "ms", arguments);
             return setTimeout((function() {
               return reconnect(block, $elt);
             }), delay);
