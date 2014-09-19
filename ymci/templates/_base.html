@@ -36,10 +36,11 @@
         </ul>
         <ul class="nav navbar-nav navbar-right">
           {% if current_user %}
-            <li><a href="{{ reverse_url('AuthLogout') }}">{{ "Se déconnecter" }}</a></li>
+            <li><a href="{{ reverse_url('Admin') }}">Admin</a></li>
+            <li><a href="{{ reverse_url('AuthLogout') }}">Logout</a></li>
             <li><a href="{{ reverse_url('RightsList') }}">Rights</a></li>
           {% else %}
-            <li><a href="{{ reverse_url('AuthLogin') }}">{{ "Se connecter" }}</a></li>
+            <li><a href="{{ reverse_url('AuthLogin') }}">Login</a></li>
           {% end %}
         </ul>
       </nav>

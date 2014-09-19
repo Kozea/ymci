@@ -15,6 +15,9 @@ setup(
     packages=find_packages(),
 
     entry_points={
+        'ymci.ext': [
+            'ymci-ext-sloccount = ymci_ext_sloccount'
+        ],
         'ymci.ext.hooks.BuildHook': [
             'sloccount = ymci_ext_sloccount.sloccount:SloccountHook'
         ],

@@ -220,17 +220,17 @@ code.out {
     right: 0; }
 
 @keyframes heart {
-  0% {
-    color: #ff4136; }
+  30% {
+    transform: scale(1); }
 
-  45% {
-    color: rgba(255, 65, 54, 0.25); }
+  40% {
+    transform: scale(1.25); }
 
-  90% {
-    color: #ff4136; }
+  50% {
+    transform: scale(1); }
 
-  95% {
-    color: rgba(255, 65, 54, 0.5); }
+  60% {
+    transform: scale(1.25); }
 
-  100% {
-    color: #ff4136; } }
+  70% {
+    transform: scale(1); } }

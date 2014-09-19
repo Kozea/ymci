@@ -1,13 +1,18 @@
 from tornado.web import HTTPError
 from ymci.ext.hooks import PrepareHook
+<<<<<<< HEAD
 from ymci.model import User
+=======
+from tornado.web import HTTPError
+from tornado.escape import json_decode
+>>>>>>> 7c1faf749075b21da42c0b8d8c6fc60ba90da0b8
 from .db import Acl
 
 
 class AclHook(PrepareHook):
     @property
     def active(self):
-        return True
+        return route.db.query(Acl).count()
 
     def prepare(self, route):
         user = route.db.query(User).get(route.get_current_user())

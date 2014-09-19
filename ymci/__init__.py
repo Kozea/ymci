@@ -221,9 +221,7 @@ server.builder = Pool()
 
 from .ext import Plugins
 server.plugins = Plugins()
+server.plugins.init()
 
-# Explicit loads
-server.plugins.load('ymci.ext.db.Table')
-server.plugins.load('ymci.ext.routes.Route')
 
 import ymci.routes

@@ -7,7 +7,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from logging import getLogger
 from .. import server
 import os
-import pkg_resources
 import datetime
 
 
@@ -89,7 +88,9 @@ class Project(Table):
                     func.avg(Build.duration)).scalar() or 60 * 10)
 
     def health(self, over=10):
-        count = self.builds.count()
+        count = self.builds.filter(
+            Build.status.in_(('SUCCESS', 'FAILED'))).count()
+
         if not count:
             return 0
 
@@ -97,7 +98,8 @@ class Project(Table):
             count = over
 
         ok = len(list(filter(
-            lambda b: b.status == 'SUCCESS', self.builds[:count])))
+            lambda b: b.status == 'SUCCESS', self.builds.filter(
+                Build.status.in_(('SUCCESS', 'FAILED')))[:count])))
         return int((ok / count) * over)
 
 

@@ -19,6 +19,9 @@ setup(
         'ymci.ext.routes.Route': [
             'acl_route = ymci_ext_acl.routes:RightsList'
         ],
+        'ymci.ext': [
+            'ymci-ext-acl = ymci_ext_acl'
+        ],
         'ymci.ext.db.Table': [
             'acl_table = ymci_ext_acl.db:Acl'
         ],
