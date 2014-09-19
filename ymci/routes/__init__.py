@@ -81,7 +81,6 @@ class ProjectBlock(BlockWebSocket):
             'blocks/project.html',
             projects=self.db.query(Project).all())
 
-
 @url(r'/blocks/history/([^\/]+)')
 class HistoryBlock(BlockWebSocket):
     def render_block(self, id):

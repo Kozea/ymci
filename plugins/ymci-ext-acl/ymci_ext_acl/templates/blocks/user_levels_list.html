@@ -1,0 +1,31 @@
+{% extends "ymci:blocks/_base.html" %}
+
+{% block block %}
+<h1>User levels list</h1>
+<section class="row">
+  <a href="{{ reverse_url('RightsAddUserLevel') }}" class="btn btn-default">Assign level to user</a>
+</section>
+<table class="table table-striped">
+  <thead>
+    <th>Level</th>
+    <th>User</th>
+    <th>Actions</th>
+  </thead>
+  <tbody>
+    {% for level in levels %}
+    <tr>
+      <td>
+        {{ level.acl_level.name }}
+      </td>
+      <td>
+        {{ level.login }}
+      </td>
+      <td>
+        <a href="{{ reverse_url('RightsEditUserLevel', level.login, level.level_id) }}" class="btn btn-default">Edit level</a>
+        <a href="{{ reverse_url('RightsDeleteUserLevel', level.login, level.level_id) }}" class="btn btn-default">Delete level</a>
+      </td>
+    </tr>
+    {% end %}
+  </tbody>
+</table>
+{% end %}

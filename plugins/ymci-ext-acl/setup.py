@@ -13,8 +13,12 @@ setup(
 
     provides=['ymci_ext_acl'],
     packages=find_packages(),
+    package_data={'ymci_ext_acl': ['templates/*', 'static/*']},
 
     entry_points={
+        'ymci.ext.routes.Route': [
+            'acl_route = ymci_ext_acl.routes:RightsList'
+        ],
         'ymci.ext.db.Table': [
             'acl_table = ymci_ext_acl.db:Acl'
         ],

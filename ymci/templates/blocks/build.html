@@ -1,5 +1,6 @@
-{% include "./_base.html" %}
+{% extends "./_base.html" %}
 
+{% block block %}
 <h3>Builder</h3>
 <ul class="list-group">
   {% for i in range(free_slots) %}
@@ -19,3 +20,4 @@
     <li class="list-group-item"><a href="{{ reverse_url('ProjectView', task.project_id) }}">{{ task.name }}</a><span class="badge">{{ task.build_id }}</span></li>
   {% end %}
 </ul>
+{% end %}

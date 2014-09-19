@@ -33,10 +33,10 @@ class ProjectList(Route):
             'project/list.html', projects=self.db.query(Project).all())
 
 
-@url(r'/project/view/(\d+)')
+@url(r'/project/view/(?P<project_id>\d+)')
 class ProjectView(Route):
-    def get(self, id):
-        project = self.db.query(Project).get(id)
+    def get(self, project_id):
+        project = self.db.query(Project).get(project_id)
         self.render('project/view.html', project=project)
 
 
@@ -65,16 +65,16 @@ class ProjectAdd(Route):
             render_form_recursively=self.render_form_recursively)
 
 
-@url(r'/project/edit/(\d+)')
+@url(r'/project/edit/(?P<project_id>\d+)')
 class ProjectEdit(Route):
-    def get(self, id):
-        project = self.db.query(Project).get(id)
+    def get(self, project_id):
+        project = self.db.query(Project).get(project_id)
         self.render(
             'form.html', form=ProjectForm(obj=project),
             render_form_recursively=self.render_form_recursively)
 
-    def post(self, id):
-        project = self.db.query(Project).get(id)
+    def post(self, project_id):
+        project = self.db.query(Project).get(project_id)
         form = ProjectForm(self.posted, project)
         if form.validate():
             for hook in self.application.plugins['ymci.ext.hook.FormHook']:
@@ -93,16 +93,16 @@ class ProjectEdit(Route):
             render_form_recursively=self.render_form_recursively)
 
 
-@url(r'/project/delete/(\d+)')
+@url(r'/project/delete/(?P<project_id>\d+)')
 class ProjectDelete(Route):
-    def get(self, id):
-        project = self.db.query(Project).get(id)
+    def get(self, project_id):
+        project = self.db.query(Project).get(project_id)
         self.render(
-            'ask.html', message="Do you really want to delete project %s" %
+            'ask.html', confirm="Do you really want to delete project %s" %
             project.name)
 
-    def post(self, id):
-        project = self.db.query(Project).get(id)
+    def post(self, project_id):
+        project = self.db.query(Project).get(project_id)
         self.db.delete(project)
         secure_rmtree(
             os.path.join(server.conf['projects_realpath'], project.dir_name))
@@ -112,10 +112,10 @@ class ProjectDelete(Route):
         self.redirect(self.reverse_url('ProjectList'))
 
 
-@url(r'/project/build/(\d+)')
+@url(r'/project/build/(?P<project_id>\d+)')
 class ProjectBuild(Route):
-    def get(self, id):
-        project = self.db.query(Project).get(id)
+    def get(self, project_id):
+        project = self.db.query(Project).get(project_id)
         build = Build()
         build.timestamp = datetime.now()
         build.build_id = (
@@ -155,13 +155,13 @@ class ProjectLogWebSocket(WebSocket):
             '%s-%s' % (self.id, self.idx)].remove(self)
 
 
-@url(r'/project/log/(\d+)/(\d+)')
-@url(r'/project/log/(\d+)', suffix='Last')
+@url(r'/project/log/(?P<project_id>\d+)/(?P<idx>\d+)')
+@url(r'/project/log/(?P<project_id>\d+)', suffix='Last')
 class ProjectLog(Route):
-    def get(self, id, idx=None):
-        project = self.db.query(Project).get(id)
+    def get(self, project_id, idx=None):
+        project = self.db.query(Project).get(project_id)
         if idx:
-            build = self.db.query(Build).get((idx, id))
+            build = self.db.query(Build).get((idx, project_id))
         else:
             build = project.last_build
         if build.status != 'RUNNING' and os.path.exists(build.log_file):
@@ -173,27 +173,29 @@ class ProjectLog(Route):
             'project/log.html', project=project, build=build, log=log)
 
 
-@url(r'/project/build/(\d+)/(\d+)/stop')
+@url(r'/project/build/(?P<project_id>\d+)/(?P<idx>\d+)/stop')
 class ProjectBuildStop(Route):
-    def get(self, id, idx):
-        build = self.db.query(Build).get((idx, id))
+    def get(self, project_id, idx):
+        build = self.db.query(Build).get((idx, project_id))
         self.application.builder.stop(build)
 
         self.redirect(self.reverse_url(
             'ProjectLog', build.project_id, build.build_id))
 
 
-@url(r'/project/chart/time/(\d+).svg')
-@url(r'/project/chart/time/(\d+)_(\d+)_(\d+).svg', suffix='Size')
+@url(r'/project/chart/time/(?P<project_id>\d+).svg')
+@url(r'/project/chart/time/'
+     '(?P<project_id>\d+)_(?P<width>\d+)_(?P<height>\d+).svg',
+     suffix='Size')
 class ProjectChartTime(Route):
-    def get(self, id, width=None, height=None):
-        project = self.db.query(Project).get(id)
+    def get(self, project_id, width=None, height=None):
+        project = self.db.query(Project).get(project_id)
         config = graph_config(width, height)
         config.style = ymci_style
         svg = pygal.Line(config)
         builds = project.builds.filter(Build.status == 'SUCCESS').all()[::-1]
         svg.add('Success', [{
-            'xlink': self.reverse_url('ProjectLog', id, b.build_id),
+            'xlink': self.reverse_url('ProjectLog', project_id, b.build_id),
             'value': b.duration} for b in builds])
         if width and height:
             svg.x_labels = ['#%d' % b.build_id for b in builds]

@@ -6,7 +6,7 @@
 from tornado.web import (
     Application, RequestHandler, url as tornado_url, HTTPError)
 from sqlalchemy.orm import scoped_session, sessionmaker
-from tornado.escape import to_unicode
+from tornado.escape import json_decode, to_unicode
 from tornado.websocket import WebSocketHandler
 from tornado.options import define, parse_command_line, options
 from tornado.ioloop import IOLoop
@@ -130,10 +130,13 @@ class Route(Base, RequestHandler):
         user = self.get_secure_cookie("user")
         if not user:
             return None
-        return to_unicode(user)
+        return json_decode(to_unicode(user))
 
     def set_flash_message(self, key, message):
         message = message
+        if key not in MESSAGE_LEVELS:
+            log.error("This flash message will not appear because the key '%s'"
+                      " doesn't match any class of bootstrap" % key)
         self.set_secure_cookie('flash_message_%s' % key, message)
 
     def get_flash_messages(self):
@@ -154,8 +157,8 @@ class Route(Base, RequestHandler):
             render_form_recursively=self.render_form_recursively)
 
     def prepare(self):
-        for hook in self.application.plugins['ymci.ext.hooks.PrepareHook']:
-            hook.prepare(self)
+        for Hook in self.application.plugins['ymci.ext.hooks.PrepareHook']:
+            Hook().prepare(self)
 
 
 class WebSocket(Base, WebSocketHandler):

@@ -1,7 +1,12 @@
 import sys
 import os
-from .. import url, Route as BaseRoute, ExtStaticFileHandler
+from .. import (
+    url, BlockWebSocket as BaseBlockWebSocket, Route as BaseRoute,
+    ExtStaticFileHandler, MetaBlock as BaseMetaBlock)
 from tornado.template import Template, BaseLoader, Loader
+from logging import getLogger
+
+log = getLogger('ymci')
 
 
 class DualLoader(Loader):
@@ -16,6 +21,7 @@ class DualLoader(Loader):
         if name.startswith('ymci:'):
             roots = roots[-1:]
             name = name[5:]
+            parent_path = None
         for root in roots:
             try:
                 self.root = root
@@ -23,11 +29,11 @@ class DualLoader(Loader):
             except FileNotFoundError:
                 pass
             finally:
-                self.root = root
+                self.root = self.roots[-1]
         raise FileNotFoundError(name, parent_path, self.roots)
 
 
-class ExtRouteClass(type):
+class ExtPluginClass(type):
     def __init__(cls,  *args, **kwargs):
         super().__init__(*args, **kwargs)
         root_module = sys.modules.get(cls.__module__.split('.')[0])
@@ -44,7 +50,13 @@ class ExtRouteClass(type):
             cls._ext_dir, 'static')
 
 
-class Route(BaseRoute, metaclass=ExtRouteClass):
+class PathHandler(object):
+    def get_template_path(self):
+        # Look for plugin template path
+        path = os.path.join(self._ext_dir, 'templates')
+        if os.path.exists(path):
+            return path
+
     def get_template_namespace(self):
         namespace = super().get_template_namespace()
         namespace.update(dict(
@@ -60,12 +72,18 @@ class Route(BaseRoute, metaclass=ExtRouteClass):
             file = os.path.join(self._key, file)
         return self.static_url(file, *args, **kwargs)
 
-    def get_template_path(self):
-        # Look for plugin template path
-        path = os.path.join(self._ext_dir, 'templates')
-        if os.path.exists(path):
-            return path
-
     def create_template_loader(self, template_path):
         return DualLoader([
             template_path, self.application.settings.get("template_path")])
+
+
+class Route(PathHandler, BaseRoute, metaclass=ExtPluginClass):
+    pass
+
+
+class ExtBlockClass(BaseMetaBlock, ExtPluginClass):
+    pass
+
+
+class BlockWebSocket(PathHandler, BaseBlockWebSocket, metaclass=ExtBlockClass):
+    pass
