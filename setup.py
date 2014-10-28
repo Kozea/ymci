@@ -20,6 +20,7 @@ setup(
     author="Florian Mounier, Kozea",
     author_email="florian.mounier@kozea.fr",
     platforms="Linux",
+    scripts=['ymci.py'],
     packages=['ymci'],
     provides=['ymci'],
     install_requires=['tornado', 'tornado_systemd', 'pyyaml', 'wtforms',
