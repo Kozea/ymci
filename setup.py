@@ -32,6 +32,6 @@ setup(
         "Development Status :: 3 - Alpha",
         "Environment :: Web Environment",
         "Intended Audience :: Developers",
-        "Operating System :: Linux",
+        "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 3",
         "Topic :: Software Development :: Build Tools"])
