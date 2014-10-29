@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# ymci - Your Modern Continous Integration server
+# ymci - Your Modern Continuous Integration server
 # Copyright © 2014 Florian Mounier, Kozea
 
 import os
 import re
 
-from setuptools import setup
+from setuptools import setup, find_packages
 ROOT = os.path.dirname(__file__)
 
 with open(os.path.join(ROOT, 'ymci', '__init__.py'), encoding='utf-8') as fd:
@@ -16,12 +16,12 @@ with open(os.path.join(ROOT, 'ymci', '__init__.py'), encoding='utf-8') as fd:
 setup(
     name="ymci",
     version=__version__,
-    description="Your Modern Continous Integration server",
+    description="Your Modern Continuous Integration server",
     author="Florian Mounier, Kozea",
     author_email="florian.mounier@kozea.fr",
     platforms="Linux",
-    scripts=['ymci.py'],
-    packages=['ymci'],
+    scripts=['ymci.server.py'],
+    packages=find_packages(),
     provides=['ymci'],
     install_requires=['tornado', 'tornado_systemd', 'pyyaml', 'wtforms',
                       'sqlalchemy', 'psycopg2', 'wtforms_alchemy', 'pygal',

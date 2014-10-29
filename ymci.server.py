@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# ymci - You Modern Continous Integration server
+# ymci - You Modern Continuous Integration server
 # Copyright © 2014 Florian Mounier, Kozea
 
 
