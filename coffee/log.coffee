@@ -1,6 +1,7 @@
 $ ->
   $code = $('code.out')
-  ws = new WebSocket("ws://#{location.host}/log/#{
+  ws = new WebSocket("ws#{location.protocol.replace('http', '')}//#{
+    location.host}/log/#{
     $code.attr('data-id')}/#{$code.attr('data-idx')}/pipe")
   ws.onopen = -> console.log('ws opened')
   ws.onclose = -> console.log('ws closed', arguments)

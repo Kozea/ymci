@@ -2,7 +2,7 @@
   $(function() {
     var $code, autoscroll, ws;
     $code = $('code.out');
-    ws = new WebSocket("ws://" + location.host + "/log/" + ($code.attr('data-id')) + "/" + ($code.attr('data-idx')) + "/pipe");
+    ws = new WebSocket("ws" + (location.protocol.replace('http', '')) + "//" + location.host + "/log/" + ($code.attr('data-id')) + "/" + ($code.attr('data-idx')) + "/pipe");
     ws.onopen = function() {
       return console.log('ws opened');
     };

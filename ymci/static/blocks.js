@@ -74,7 +74,7 @@
         reconnect = function(block, $elt) {
           var ws;
           console.log("" + block + " ws connecting");
-          blocks[block].ws = ws = new WebSocket("ws://" + location.host + "/blocks/" + block + args);
+          blocks[block].ws = ws = new WebSocket("ws" + (location.protocol.replace('http', '')) + "//" + location.host + "/blocks/" + block + args);
           ws.onopen = function() {
             delay = 100;
             return console.log("" + block + " ws open");

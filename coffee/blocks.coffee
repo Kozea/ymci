@@ -52,7 +52,8 @@ $ =>
     reconnect = (block, $elt) ->
       console.log("#{block} ws connecting")
       blocks[block].ws = ws = new WebSocket(
-        "ws://#{location.host}/blocks/#{block}#{args}")
+        "ws#{location.protocol.replace('http', '')}//#{
+          location.host}/blocks/#{block}#{args}")
       ws.onopen = ->
         delay = 100
         console.log("#{block} ws open")
