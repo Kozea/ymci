@@ -1,20 +1,18 @@
 from tornado.web import HTTPError
 from ymci.ext.hooks import PrepareHook
 from ymci.model import User
-from tornado.web import HTTPError
-from tornado.escape import json_decode
 from .db import Acl
 
 
 class AclHook(PrepareHook):
     @property
     def active(self):
-        return route.db.query(Acl).count()
+        return self.db.query(Acl).count()
 
     def prepare(self, route):
-        user = route.db.query(User).get(route.get_current_user())
+        user = self.db.query(User).get(route.get_current_user())
         query = (
-            route.db
+            self.db
             .query(Acl)
             .filter_by(login=user.login or 'anonymous')
             .all())
@@ -30,7 +28,7 @@ class AclHook(PrepareHook):
             # Last chance to access the page if user is in acl group
             if acl.user.groups:
                 gacl = (
-                    route.db.query(Acl)
+                    self.db.query(Acl)
                     .filter(Acl.group_id.in_(
                         [x.group_id for x in acl.user.groups]))
                     .first())

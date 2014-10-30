@@ -48,9 +48,12 @@ class FormHook(object):
 
 
 class PrepareHook(object):
+    def __init__(self, db):
+        self.db = db
+
     @property
     def active(self):
         return False
 
-    def prepare(self, db=None):
+    def prepare(self):
         pass

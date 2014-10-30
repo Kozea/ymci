@@ -16,7 +16,6 @@ class CoverageHook(BuildHook):
                 self.build.project.coverage.coverage_path)
 
     def validate_build(self):
-
         projects_path = server.conf['projects_realpath']
         with open(os.path.join(self.build.dir,
                                'ymci_ext_coverage_config.yaml'), 'w') as fd:
@@ -68,6 +67,7 @@ class CoverageHook(BuildHook):
                     coverage.branch_rate,
                     coverage.line_rate
                 ))
+
 
 class CoverageFormHook(FormHook):
     def pre_populate(self, form):
