@@ -1,11 +1,8 @@
 from tornado.web import HTTPError
 from ymci.ext.hooks import PrepareHook
-<<<<<<< HEAD
 from ymci.model import User
-=======
 from tornado.web import HTTPError
 from tornado.escape import json_decode
->>>>>>> 7c1faf749075b21da42c0b8d8c6fc60ba90da0b8
 from .db import Acl
 
 
