@@ -9,8 +9,12 @@ class AclHook(PrepareHook):
     def active(self):
         return self.db.query(Acl).count()
 
-    def prepare(self):
-        user = self.db.query(User).get(route.get_current_user())
+    def prepare(self, route):
+        current_user = route.get_current_user()
+        if not current_user:
+            raise HTTPError(403)
+
+        user = self.db.query(User).get(current_user)
         query = (
             self.db
             .query(Acl)

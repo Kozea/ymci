@@ -55,5 +55,5 @@ class PrepareHook(object):
     def active(self):
         return False
 
-    def prepare(self):
+    def prepare(self, route):
         pass

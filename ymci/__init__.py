@@ -133,7 +133,6 @@ class Route(Base, RequestHandler):
         return json_decode(to_unicode(user))
 
     def set_flash_message(self, key, message):
-        message = message
         if key not in MESSAGE_LEVELS:
             log.error("This flash message will not appear because the key '%s'"
                       " doesn't match any class of bootstrap" % key)
@@ -158,7 +157,7 @@ class Route(Base, RequestHandler):
 
     def prepare(self):
         for Hook in self.application.plugins['ymci.ext.hooks.PrepareHook']:
-            Hook(self.db).prepare()
+            Hook(self.db).prepare(self)
 
 
 class WebSocket(Base, WebSocketHandler):
