@@ -27,7 +27,11 @@ setup(
                       'sqlalchemy', 'psycopg2', 'wtforms_alchemy', 'pygal',
                       'pbkdf2', 'pygments', 'simplepam'],
     tests_require=["pytest"],
-    package_data={'ymci': ['static/*', 'templates/*']},
+    package_data={'ymci': [
+        'static/*.*',
+        'static/*/*.*',
+        'templates/*.*',
+        'templates/*/*.*']},
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Web Environment",
