@@ -13,7 +13,7 @@ from logging import getLogger
 import sys
 
 log = getLogger('ymci')
-log.setLevel(10 if options.debug else 30)
+log.setLevel(10 if options.debug else 20)
 
 if options.upgrade:
     upgrade()

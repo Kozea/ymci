@@ -23,7 +23,7 @@ class Plugins(dict):
                 cls = entry.load()
                 cls.__entry_name__ = entry.name
                 self[key].append(cls)
-                log.debug(
+                log.info(
                     'Plugin %r for %s successfully loaded' % (entry, key))
             except Exception:
                 log.exception('Failed to load plugin %r for %s' % (entry, key))

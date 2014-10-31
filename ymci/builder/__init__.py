@@ -10,7 +10,6 @@ from ..model import Build
 from .. import server
 import shutil
 import os
-import pkg_resources
 
 
 log = getLogger('ymci')
@@ -18,6 +17,7 @@ blocks = server.components.blocks
 
 
 def refresh(id):
+    log.debug('Refreshing build/project/home/history')
     blocks.build.refresh()
     blocks.project.refresh()
     blocks.home.refresh()
@@ -132,6 +132,7 @@ class Task(Thread):
                 status = 'FAILED'
             return status
 
+        log.debug('Running task %r' % self)
         try:
             self.run_task()
         except ExecutionException as e:
@@ -139,7 +140,7 @@ class Task(Thread):
             self.build.status = treat(e)
 
         self.out('\n')
-
+        log.debug('Task %r ran. Validating build' % self)
         try:
             for hook in self.build_hooks:
                 hook.validate_build()
@@ -147,20 +148,21 @@ class Task(Thread):
             log.warn('Error during task execution %r' % self)
             self.build.status = treat(e)
 
-        # Don't close the file too soon: (Too hackish?)
-        self.ioloop.add_timeout(time() + .5, self.post_run)
-
-    def post_run(self):
+        log.debug('Checking status after validation for %r ' % self)
         if self.build.status == 'RUNNING':
             self.out('Success !')
             self.build.status = 'SUCCESS'
 
         self.build.duration = time() - self.start_time
         self.out('\n(Duration %fs)' % self.build.duration)
+        log.debug('Persisting state for %r ' % self)
         self.db.commit()
+
+        log.debug('Running post build for %r ' % self)
         for hook in self.build_hooks:
             hook.post_build()
 
+        log.debug('Closing log file and calling callback %r ' % self)
         self.log.close()
         self.ioloop.add_callback(self.callback, self)
         server.scoped_session.remove()
@@ -180,26 +182,35 @@ class Task(Thread):
                 self.build_hooks.append(hook)
 
         src = self.build.project.src_dir
-
+        log.debug('Running pre copy hooks for %r' % self)
         for hook in self.build_hooks:
             hook.pre_copy()
 
         assert not os.path.exists(self.build.dir)
 
+        log.debug('Copying tree for %r' % self)
         shutil.copytree(src, self.build.dir, symlinks=True)
 
+        log.debug('Running pre build hooks for %r' % self)
         for hook in self.build_hooks:
             hook.pre_build()
 
         script_fn = os.path.abspath(os.path.join(self.build.dir, '.ymci.sh'))
         script = self.script
         if not script.startswith('#!'):
-            script = '#!/bin/sh\n' + script
+            # This is not sexy
+            script = (
+                '#!/bin/sh\n' +
+                script
+            )
+
         with open(script_fn, 'w') as build_script:
             build_script.write(script)
         os.chmod(script_fn, 0o700)
 
+        log.debug('Executing %s for %r' % (script_fn, self))
         execute(
             script_fn,
             self.build.dir, self.read,
             self.build.project_id, self.build.build_id)
+        log.debug('Execution complete for %r' % self)
