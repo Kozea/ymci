@@ -8,6 +8,7 @@ from .util import execute, ExecutionException
 from ..utils import short_transaction
 from ..model import Build
 from .. import server
+import traceback
 import shutil
 import os
 
@@ -102,6 +103,21 @@ class Task(Thread):
             self.out(data)
 
     def run(self):
+        try:
+            self.safe_run()
+        except Exception as e:
+            try:
+                log.exception('Error during task run')
+                self.out('YMCI Internal error %s' % (
+                    ', '.join(traceback.format_exception_only(type(e), e))))
+            except Exception:
+                pass
+            with short_transaction() as db:
+                build = db.query(Build).get((self.build_id, self.project_id))
+                build.status = 'STOPPED'
+            self.ioloop.add_callback(self.callback, self)
+
+    def safe_run(self):
         log.info('Starting run for task %r on %s' % (self, datetime.now()))
 
         self.start_time = time()
