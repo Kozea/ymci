@@ -30,6 +30,13 @@ module.exports = (grunt) ->
         dest: 'ymci/static/'
         ext: '.css'
 
+    autoprefixer:
+      hydra:
+        expand: true
+        cwd: 'ymci/static/'
+        src: '*.css'
+        dest: 'ymci/static/'
+
     coffee:
       options:
         sourceMap: true
@@ -65,10 +72,12 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-contrib-cssmin'
+  grunt.loadNpmTasks 'grunt-autoprefixer'
   grunt.loadNpmTasks 'grunt-coffeelint'
   grunt.loadNpmTasks 'grunt-sass'
 
   grunt.registerTask 'dev', [
     'coffeelint', 'coffee', 'sass', 'watch']
   grunt.registerTask 'css', ['sass']
-  grunt.registerTask 'default', [ 'coffeelint', 'coffee', 'sass', 'uglify']
+  grunt.registerTask 'default', [
+    'coffeelint', 'coffee', 'sass', 'autoprefixer', 'uglify']
