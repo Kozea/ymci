@@ -22,7 +22,7 @@ class Result(Table):
 
     @hybrid_property
     def success(self):
-        return self.total - self.fail - self.error
+        return self.total - self.fail - self.error - self.skip
 
     build = relationship('Build', backref='results')
 

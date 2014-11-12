@@ -17,14 +17,17 @@ class CoverageHook(BuildHook):
 
     def validate_build(self):
         projects_path = server.conf['projects_realpath']
-        with open(os.path.join(self.build.dir,
-                               'ymci_ext_coverage_config.yaml'), 'w') as fd:
-            fd.write('coverage_path:\n')
-            fd.write(
-                '%s%s' % (' '*4, os.path.join(
-                    projects_path, self.build.project.dir_name,
-                    'build_%d' % self.build.build_id,
-                    self.build.project.coverage.coverage_path)))
+        try:
+            with open(os.path.join(self.build.dir,
+                                   'ymci_ext_coverage_config.yaml'), 'w') as fd:
+                fd.write('coverage_path:\n')
+                fd.write(
+                    '%s%s' % (' '*4, os.path.join(
+                        projects_path, self.build.project.dir_name,
+                        'build_%d' % self.build.build_id,
+                        self.build.project.coverage.coverage_path)))
+        except Exception:
+            log.warning('Error with coverage.ymal', exc_info=True)
 
         results = os.path.join(self.build.dir,
                                self.build.project.coverage.coverage_path)

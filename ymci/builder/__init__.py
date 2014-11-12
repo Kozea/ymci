@@ -145,7 +145,7 @@ class Task(Thread):
             else:
                 self.out('\nCommand %s returned %d' % (
                     e.command, -e.errno))
-                status = 'FAILED'
+                status = 'BROKEN'
             return status
 
         log.debug('Running task %r' % self)

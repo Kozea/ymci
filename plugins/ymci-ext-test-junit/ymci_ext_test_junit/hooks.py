@@ -19,14 +19,26 @@ class JunitHook(BuildHook):
         results = glob(os.path.join(
             self.build.dir, self.build.project.junit.junit_path))
         for result_file in results:
-            tree = ElementTree.parse(result_file)
-            node = tree.getroot()
             result = Result()
             result.filename = result_file
-            result.error = int(node.get('errors', 0))
-            result.fail = int(node.get('failures', 0))
-            result.skip = int(node.get('skips', node.get('skip', 0)))
-            result.total = int(node.get('tests', 0))
+            result.error = 0
+            result.fail = 0
+            result.skip = 0
+            result.total = 0
+
+            tree = ElementTree.parse(result_file)
+            testsuite = tree.getroot()
+            for testcase in testsuite:
+                if len(testcase):
+                    failtype = testcase[0].tag
+                    if failtype == 'failure':
+                        result.fail += 1
+                    elif failtype == 'error':
+                        result.error += 1
+                    elif failtype == 'skipped':
+                        result.skip += 1
+
+                result.total += 1
 
             if result.fail + result.error != 0:
                 self.build.status = 'FAILED'

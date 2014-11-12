@@ -128,10 +128,10 @@ class Build(Table):
         return {
             'SUCCESS': 'success',
             'RUNNING': 'primary',
-            'FAILED': 'danger',
+            'BROKEN': 'danger',
+            'FAILED': 'warning',
             'STOPPED': 'default',
             'PENDING': 'info',
-            'WARNING': 'warning',
             None: 'default'
         }[self.status]
 
