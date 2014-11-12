@@ -11,7 +11,7 @@ def graph(route, project_id, width, height, title, value_type='normal'):
     svg = pygal.Line(config)
     builds = project.builds[::-1]
     languages = list(set(
-            [s.language for b in builds for s in b.sloccounts]))
+        [s.language for b in builds for s in b.sloccounts]))
     data = {language: [] for language in languages}
     for language in languages:
         for build in builds:

@@ -16,7 +16,7 @@ from logging import getLogger
 from .config import Config
 import os.path
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 log = getLogger('ymci')
 

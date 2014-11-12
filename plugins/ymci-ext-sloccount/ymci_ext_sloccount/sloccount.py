@@ -17,9 +17,12 @@ class SloccountHook(BuildHook):
         if os.path.exists(sloccount_file):
             values = defaultdict(int)
             with open(sloccount_file, 'r') as sloc:
-                for line in sloc.readlines():
-                    count, language = line.split('\t')[0:2]
-                    values[language] += int(count)
+                lines = sloc.read()
+            _, sloc = lines.split('\n\n\n')
+
+            for line in sloc.splitlines():
+                count, language = line.split('\t')[0:2]
+                values[language] += int(count)
             for language in values.keys():
                 self.build.sloccounts.append(Sloccount(
                     language=language, count=values[language]))

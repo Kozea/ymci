@@ -152,7 +152,7 @@ class Task(Thread):
         try:
             self.run_task()
         except ExecutionException as e:
-            log.warn('Error during task execution %r' % self)
+            log.warn('Error during task execution %r' % self, exc_info=True)
             self.build.status = treat(e)
 
         self.out('\n')
@@ -161,7 +161,7 @@ class Task(Thread):
             for hook in self.build_hooks:
                 hook.validate_build()
         except ExecutionException as e:
-            log.warn('Error during task execution %r' % self)
+            log.warn('Error during task execution %r' % self, exc_info=True)
             self.build.status = treat(e)
 
         log.debug('Checking status after validation for %r ' % self)
