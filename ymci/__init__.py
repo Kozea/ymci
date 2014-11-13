@@ -16,7 +16,7 @@ from logging import getLogger
 from .config import Config
 import os.path
 
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 log = getLogger('ymci')
 
@@ -156,7 +156,9 @@ class Route(Base, RequestHandler):
 
     def prepare(self):
         for Hook in self.application.plugins['ymci.ext.hooks.PrepareHook']:
-            Hook(self.db).prepare(self)
+            hook = Hook(self.db)
+            if hook.active:
+                hook.prepare(self)
 
 
 class WebSocket(Base, WebSocketHandler):

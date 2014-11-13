@@ -2,6 +2,7 @@ from ymci.ext.hooks import BuildHook, FormHook
 from ymci import server
 from logging import getLogger
 from xml.etree import ElementTree
+from glob import glob
 from .db import Coverage
 import os
 
@@ -18,8 +19,9 @@ class CoverageHook(BuildHook):
     def validate_build(self):
         projects_path = server.conf['projects_realpath']
         try:
-            with open(os.path.join(self.build.dir,
-                                   'ymci_ext_coverage_config.yaml'), 'w') as fd:
+            with open(os.path.join(
+                    self.build.dir,
+                    'ymci_ext_coverage_config.yaml'), 'w') as fd:
                 fd.write('coverage_path:\n')
                 fd.write(
                     '%s%s' % (' '*4, os.path.join(
@@ -29,12 +31,14 @@ class CoverageHook(BuildHook):
         except Exception:
             log.warning('Error with coverage.ymal', exc_info=True)
 
-        results = os.path.join(self.build.dir,
-                               self.build.project.coverage.coverage_path)
-        if os.path.exists(results):
-            tree = ElementTree.parse(results)
+        results = glob(
+            os.path.join(self.build.dir,
+                         self.build.project.coverage.coverage_path))
+        for result_file in results:
+            tree = ElementTree.parse(result_file)
             root = tree.getroot()
             coverage = Coverage()
+            coverage.filename = result_file
             packages = root.find('packages')
             for attr in (
                     'cls', 'missed_cls', 'branches', 'missed_branches',
@@ -60,7 +64,7 @@ class CoverageHook(BuildHook):
                                     if line.get('hits', '0') == '0':
                                         coverage.missed_branches += 1
 
-            self.build.coverage = coverage
+            self.build.coverages.append(coverage)
 
             self.out(
                 'Test coverage: %.2f%% files, %.2f%% classes,'

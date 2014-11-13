@@ -8,7 +8,7 @@ class Set(Table):
     __tablename__ = 'ymci_ext_acl_set'
     __table_args__ = (
         ForeignKeyConstraint(['group_id'], ['ymci_ext_acl_group.group_id']),
-        ForeignKeyConstraint(['login'], ['ymci_user.login']))
+        ForeignKeyConstraint(['login'], ['user.login']))
 
     group_id = Column(Integer, primary_key=True)
     login = Column(String, primary_key=True)
@@ -40,7 +40,7 @@ class AclLevel(Table):
 class UserLevel(Table):
     __tablename__ = 'ymci_ext_acl_user_level'
     __table_args__ = (
-        ForeignKeyConstraint(['login'], ['ymci_user.login']),
+        ForeignKeyConstraint(['login'], ['user.login']),
         ForeignKeyConstraint(['level_id'], ['ymci_ext_acl_level.level_id']))
 
     login = Column(String, primary_key=True)
@@ -53,7 +53,7 @@ class UserLevel(Table):
 class Acl(Table):
     __tablename__ = "ymci_ext_acl"
     __table_args__ = (
-        ForeignKeyConstraint(['login'], ['ymci_user.login']),
+        ForeignKeyConstraint(['login'], ['user.login']),
         ForeignKeyConstraint(['group_id'], ['ymci_ext_acl_group.group_id']),
         ForeignKeyConstraint(['project_id'], ['project.project_id']),
         ForeignKeyConstraint(['level_id'], ['ymci_ext_acl_level.level_id']),

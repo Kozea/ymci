@@ -1,6 +1,6 @@
 from ymci.ext.routes import url, Route
 from .db import Result
-from ymci.model import Project, Build
+from ymci.model import Build
 from ymci import server
 from ymci.routes import graph_config
 from sqlalchemy import func
@@ -31,16 +31,16 @@ class ResultChart(Route):
 
         svg.add('Errors', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.errors} for b in builds])
+            'value': b.errors or 0} for b in builds])
         svg.add('Failures', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.fails} for b in builds])
+            'value': b.fails or 0} for b in builds])
         svg.add('Skips', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.skips} for b in builds])
+            'value': b.skips or 0} for b in builds])
         svg.add('Success', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.success} for b in builds])
+            'value': b.success or 0} for b in builds])
         if width and height:
             svg.x_labels = ['#%d' % b.build_id for b in builds]
 

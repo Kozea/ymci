@@ -137,7 +137,7 @@ class Build(Table):
 
 
 class User(Table):
-    __tablename__ = 'ymci_user'
+    __tablename__ = 'user'
 
     login = Column(String, primary_key=True)
     last_login = Column(DateTime, default=datetime.datetime.now())

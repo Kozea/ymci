@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ymci-ext-acl',
-    version='1.0',
+    version='1.1',
     description='ACL rights plugin for ymci',
     author='Jean-Marc Martins, Kozea',
     author_email='jmartins@kozea.fr',

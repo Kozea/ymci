@@ -1,13 +1,14 @@
-from logging import getLogger
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import guess_lexer_for_filename, get_lexer_by_name
 from pygments.util import ClassNotFound
+from sqlalchemy import func
 from tornado.web import HTTPError
 from xml.etree import ElementTree
 from ymci.routes.browse import ProjectBrowse
 from ymci.ext.routes import url, Route
 from ymci.model import Project, Build
+from .db import Coverage
 from ymci import server
 from ymci.routes import graph_config
 import pygal
@@ -19,24 +20,36 @@ import yaml
 @url(r'/project/chart/coverage/(\d+)_(\d+)_(\d+).svg', suffix='Size')
 class CoverageChart(Route):
     def get(self, id, width=None, height=None):
-        project = self.db.query(Project).get(id)
         svg = pygal.Line(graph_config(width, height))
-        builds = project.builds[::-1]
+        builds = (
+            self.db.query(
+                Build.build_id,
+                func.avg(Coverage.line_rate).label('line'),
+                func.avg(Coverage.branch_rate).label('branch'),
+                func.avg(Coverage.cls_rate).label('cls'),
+                func.avg(Coverage.file_rate).label('file'))
+            .select_from(Build)
+            .join(Coverage, Build.coverages)
+            .filter(Build.project_id == id)
+            .group_by(Build.build_id)
+            .order_by(Build.build_id)
+            .all())
+
         svg.add('Lines', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.coverage.line_rate if b.coverage else 0
+            'value': b.line
         } for b in builds])
         svg.add('Branches', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.coverage.branch_rate if b.coverage else 0
+            'value': b.branch
         } for b in builds])
         svg.add('Classes', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.coverage.cls_rate if b.coverage else 0
+            'value': b.cls
         } for b in builds])
         svg.add('Files', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.coverage.file_rate if b.coverage else 0
+            'value': b.file
         } for b in builds])
         if width and height:
             svg.x_labels = ['#%d' % b.build_id for b in builds]
@@ -50,19 +63,29 @@ class CoverageChart(Route):
 @url(r'/project/chart/coverage/stats/(\d+)_(\d+)_(\d+).svg', suffix='Size')
 class StatsChart(Route):
     def get(self, id, width=None, height=None):
-        project = self.db.query(Project).get(id)
         config = graph_config(width, height)
         config.logarithmic = True
         svg = pygal.Line(config)
-        builds = project.builds[::-1]
+        builds = (
+            self.db.query(
+                Build.build_id,
+                func.sum(Coverage.lines).label('lines'),
+                func.sum(Coverage.cls).label('cls'))
+            .select_from(Build)
+            .join(Coverage, Build.coverages)
+            .filter(Build.project_id == id)
+            .group_by(Build.build_id)
+            .order_by(Build.build_id)
+            .all())
+
         svg.add('Lines', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.coverage.lines if b.coverage else 0
+            'value': b.lines or None
         } for b in builds])
 
         svg.add('Classes', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.coverage.cls if b.coverage else 0
+            'value': b.cls or None
         } for b in builds])
 
         if width and height:

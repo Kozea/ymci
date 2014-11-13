@@ -110,11 +110,12 @@ class Task(Thread):
                 log.exception('Error during task run')
                 self.out('YMCI Internal error %s' % (
                     ', '.join(traceback.format_exception_only(type(e), e))))
+                self.db.rollback()
             except Exception:
                 pass
             with short_transaction() as db:
                 build = db.query(Build).get((self.build_id, self.project_id))
-                build.status = 'STOPPED'
+                build.status = 'BROKEN'
             self.ioloop.add_callback(self.callback, self)
 
     def safe_run(self):
