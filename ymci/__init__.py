@@ -15,7 +15,7 @@ from logging import getLogger
 from .config import Config
 import os.path
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
 
 log = getLogger('ymci')
 
@@ -23,6 +23,7 @@ log = getLogger('ymci')
 define("debug", default=False, help="Debug mode")
 define("host", default='ymci.l', help="Server host")
 define("port", default=7361, help="Server port")
+define("protocol", default='http', help="Protocol used if different (proxy)")
 define("config", default='ymci.yaml', help="YMCI config file")
 define("secret", default='secret', help="Secret key for cookies")
 define("upgrade", default=False, help="Upgrade DB")
@@ -53,6 +54,7 @@ class ExtStaticFileHandler(StaticFileHandler):
 
 server = Application(
     debug=options.debug,
+    protocol=options.protocol,
     cookie_secret=options.secret,
     static_path=os.path.join(os.path.dirname(__file__), "static"),
     static_handler_class=ExtStaticFileHandler,
