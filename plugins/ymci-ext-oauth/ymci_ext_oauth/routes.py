@@ -14,7 +14,8 @@ class GoogleOAuth2LoginHandler(Route, GoogleOAuth2Mixin):
     @property
     def oauth_url(self):
         return '%s://%s/_oauth2callback' % (
-            self.application.settings.protocol, self.request.host
+            self.application.settings.get('protocol', 'http'),
+            self.request.host
         )
 
     @coroutine
