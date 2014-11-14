@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ymci-ext-coverage',
-    version='1.2',
+    version='1.3',
     description='Coverage (cobertura) plugin for ymci',
     author="Florian Mounier, Kozea",
     author_email="florian.mounier@kozea.fr",
@@ -30,7 +30,7 @@ setup(
         ],
         'ymci.ext.routes.Route': [
             'result_chart = ymci_ext_coverage.routes:CoverageChart',
-            'browse_coverage = ymci_ext_coverage.routes:BrowseCoverage'
+            'browse_coverage = ymci_ext_coverage.routes:ProjectBrowseCoverage'
         ],
         'ymci.ext.form.Form': [
             'form = ymci_ext_coverage.form:CoverageForm'

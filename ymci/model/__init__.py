@@ -7,7 +7,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from logging import getLogger
 from .. import server
 import os
-import datetime
 
 
 log = getLogger('ymci')
@@ -134,11 +133,3 @@ class Build(Table):
             'PENDING': 'info',
             None: 'default'
         }[self.status]
-
-
-class User(Table):
-    __tablename__ = 'user'
-
-    login = Column(String, primary_key=True)
-    last_login = Column(DateTime, default=datetime.datetime.now())
-    login_count = Column(Integer)

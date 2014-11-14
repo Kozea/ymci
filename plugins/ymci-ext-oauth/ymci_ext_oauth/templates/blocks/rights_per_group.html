@@ -1,0 +1,37 @@
+{% extends "ymci:blocks/_base.html" %}
+
+{% block block %}
+<h1>Group rights list</h1>
+<section class="row">
+  <a href="{{ reverse_url('RightsAddGroup') }}" class="btn btn-default">Add group</a>
+</section>
+<table class="table table-striped">
+  <thead>
+    <th>Name</th>
+    <th>Actions</th>
+    <th>Route</th>
+  </thead>
+  <tbody>
+    {% for group in groups %}
+    <tr>
+      <td>
+        {{ group.name }}
+      </td>
+      <td>
+        <a href="{{ reverse_url('RightsEditGroup', group.group_id) }}" class="btn btn-default">Edit group</a>
+        <a href="{{ reverse_url('RightsDeleteGroup', group.group_id) }}" class="btn btn-default">Delete group</a>
+      </td>
+      <td colspan="{{ len(group.acls) }}">
+        {% for right in group.acls %}
+        <p>
+          {{ right.route }}
+          <a href="{{ reverse_url('RightsEdit', right.acl_id) }}" class="btn btn-default">Edit right</a>
+          <a href="{{ reverse_url('RightsDelete', right.acl_id) }}" class="btn btn-default">Delete right</a>
+        </p>
+        {% end %}
+      </td>
+    </tr>
+    {% end %}
+  </tbody>
+</table>
+{% end %}

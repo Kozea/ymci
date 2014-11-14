@@ -35,12 +35,14 @@
           {% block nav %}{% end %}
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          {% if current_user %}
-            <li><a href="{{ reverse_url('Admin') }}">Admin</a></li>
-            <li><a href="{{ reverse_url('AuthLogout') }}">Logout</a></li>
-            <li><a href="{{ reverse_url('RightsList') }}">Rights</a></li>
+          {% if get_secure_cookie('user') %}
+            {% for route in server.components.project_auth %}
+              <a class="btn btn-default" href="{{ reverse_url(route['route']) }}">{{ route['label'] }}</a>
+            {% end %}
           {% else %}
-            <li><a href="{{ reverse_url('AuthLogin') }}">Login</a></li>
+            {% for route in server.components.project_unauth %}
+              <a class="btn btn-default" href="{{ reverse_url(route['route']) }}">{{ route['label'] }}</a>
+            {% end %}
           {% end %}
         </ul>
       </nav>

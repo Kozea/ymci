@@ -55,5 +55,4 @@ class Index(Route):
 import ymci.routes.blocks
 import ymci.routes.project
 import ymci.routes.browse
-import ymci.routes.auth
 import ymci.routes.admin

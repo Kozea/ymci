@@ -100,19 +100,21 @@ server.components.project_charts.coveragechart = CoverageChart
 server.components.project_charts.coveragestatschart = StatsChart
 
 
-@url(r'/project/coverage/(\d+)/path/(.+)', suffix='LastPath')
-@url(r'/project/coverage/(\d+)', suffix='Last')
-@url(r'/project/coverage/(\d+)/build/(\d+)/path/(.+)')
-class BrowseCoverage(ProjectBrowse):
+@url(r'/project/coverage/(?P<project_id>\d+)/path/(?P<path>.+)',
+     suffix='LastPath')
+@url(r'/project/coverage/(?P<project_id>\d+)', suffix='Last')
+@url(r'/project/coverage/(?P<project_id>\d+)/build/'
+     '(?P<build_id>\d+)/path/(?P<path>.+)')
+class ProjectBrowseCoverage(ProjectBrowse):
     """Overidden class that adds coverage highlighting of the code."""
 
-    def get(self, id, build_id=None, path=''):
+    def get(self, project_id, build_id=None, path=''):
         if path is None and build_id is not None:
             path = build_id
             build_id = None
         code = ''
 
-        project = self.db.query(Project).get(id)
+        project = self.db.query(Project).get(project_id)
         if build_id:
             build = self.db.query(Build).get((build_id, project.project_id))
         else:
@@ -175,7 +177,7 @@ class BrowseCoverage(ProjectBrowse):
             out += '<label>'
             if not active:
                 out += '<a href="%s">' % self.reverse_url(
-                    'BrowseCoverage', id, build.build_id,
+                    'ProjectBrowseCoverage', id, build.build_id,
                     os.path.join(dct['name'], file))
             out += '<i class="glyphicon glyphicon-file"></i>%s' % file
             if not active:
@@ -204,6 +206,6 @@ class BrowseCoverage(ProjectBrowse):
             linenos=True, cssclass='code', hl_lines=coverage)
 
 server.components.project_links.coverage = {
-    'route': 'BrowseCoverageLast',
+    'route': 'ProjectBrowseCoverageLast',
     'label': 'Coverage'
 }

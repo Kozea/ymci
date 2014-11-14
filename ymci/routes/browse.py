@@ -8,9 +8,11 @@ from ..model import Build, Project
 import os
 
 
-@url(r'/project/browse/(\d+)/path/(.+)', suffix='LastPath')
-@url(r'/project/browse/(\d+)', suffix='Last')
-@url(r'/project/browse/(\d+)/build/(\d+)/path/(.+)')
+@url(r'/project/browse/(?P<project_id>\d+)/path/(?P<path>.+)',
+     suffix='LastPath')
+@url(r'/project/browse/(?P<project_id>\d+)', suffix='Last')
+@url(r'/project/browse/(?P<project_id>\d+)/build/'
+     '(?P<build_id>\d+)/path/(?P<path>.+)')
 class ProjectBrowse(Route):
     def get_tree_dict(self, directory, path):
         tree_dict = {}
@@ -60,14 +62,14 @@ class ProjectBrowse(Route):
 
         return out + '</ul>'
 
-    def get(self, id, build_id=None, path=''):
+    def get(self, project_id, build_id=None, path=''):
         if path is None and build_id is not None:
             path = build_id
             build_id = None
         code = ''
         formatter = HtmlFormatter(linenos=True, cssclass='code')
 
-        project = self.db.query(Project).get(id)
+        project = self.db.query(Project).get(project_id)
         if build_id:
             build = self.db.query(Build).get((build_id, project.project_id))
         else:

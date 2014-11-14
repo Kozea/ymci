@@ -5,7 +5,7 @@
 <li>
   <select name="build-select">
     {% for b in project.builds %}
-      <option value="{{ reverse_url('BrowseCoverage', project.project_id, b.build_id, path) }}" {% raw "selected=\"selected\"" if b.build_id == int(build_id) else '' %}>Build {{ b.build_id }}</option></li>
+      <option value="{{ reverse_url('ProjectBrowseCoverage', project.project_id, b.build_id, path) }}" {% raw "selected=\"selected\"" if b.build_id == int(build_id) else '' %}>Build {{ b.build_id }}</option></li>
     {% end %}
   </select>
 </li>

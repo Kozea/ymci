@@ -1,0 +1,44 @@
+{% extends "ymci:blocks/_base.html" %}
+
+{% block block %}
+  <h1>User rights list</h1>
+  <section class="row">
+    <a href="{{ reverse_url('RightsAdd') }}" class="btn btn-default">Add right</a>
+  </section>
+  <table class="table table-striped">
+    <thead>
+      <th>Name</th>
+      <th>Level</th>
+      <th>Project</th>
+      <th>Route</th>
+    </thead>
+    <tbody>
+      {% for user in users %}
+        {% if user.acls %}
+          <tr>
+            <td>
+              {{ user.login }}
+            </td>
+            <td>
+                {{ user.acls[0].level.name if user.acls[0].level else '' }}
+            </td>
+            <td>
+              {% for right in user.acls %}
+                <p>{{ right.project_id }}</p>
+              {% end %}
+            </td>
+            <td>
+              {% for right in user.acls %}
+                <p>
+                  {{ right.route }}
+                  <a href="{{ reverse_url('RightsEdit', right.acl_id) }}" class="btn btn-default">Edit</a>
+                  <a href="{{ reverse_url('RightsDelete', right.acl_id) }}" class="btn btn-default">Delete</a>
+                </p>
+              {% end %}
+            </td>
+          </tr>
+        {% end %}
+      {% end %}
+    </tbody>
+  </table>
+{% end %}

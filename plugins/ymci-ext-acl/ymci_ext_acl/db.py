@@ -72,3 +72,10 @@ class Acl(Table):
     level = relationship('AclLevel', backref='acls', uselist=False)
     user = relationship('User', backref='acls')
     group = relationship('Group', backref='acls')
+
+# class User(Table):
+#     __tablename__ = 'user'
+
+#     login = Column(String, primary_key=True)
+#     last_login = Column(DateTime, default=datetime.datetime.now())
+#     login_count = Column(Integer)

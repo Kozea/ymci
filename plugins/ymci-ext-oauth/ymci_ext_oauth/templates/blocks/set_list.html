@@ -1,0 +1,37 @@
+{% extends "ymci:blocks/_base.html" %}
+
+{% block block %}
+  <h1>Set list</h1>
+  <section class="row">
+    <a href="{{ reverse_url('RightsAddSet') }}" class="btn btn-default">Add Set</a>
+  </section>
+  <table class="table table-striped">
+    <thead>
+      <th>Group id</th>
+      <th>Name</th>
+      <th>Login</th>
+      <th>Actions</th>
+    </thead>
+    <tbody>
+      {% for set in sets %}
+      <tr>
+        <td>
+          {{ set.group.group_id }}
+        </td>
+        <td>
+          {{ set.group.name }}
+        </td>
+        <td>
+          {{ set.login }}
+        </td>
+        <td>
+          <a href="{{ reverse_url('RightsEditSet', set.group.group_id, set.login) }}" class="btn btn-default">Edit Set</a>
+        </td>
+        <td>
+          <a href="{{ reverse_url('RightsDeleteSet', set.group.group_id, set.login) }} " class="btn btn-default">Delete Set</a>
+        </td>
+      </tr>
+      {% end %}
+    </tbody>
+  </table>
+{% end %}

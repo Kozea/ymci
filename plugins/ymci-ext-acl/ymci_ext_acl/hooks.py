@@ -1,4 +1,5 @@
 from tornado.web import HTTPError
+from tornado.escape import json_decode, to_unicode
 from ymci.ext.hooks import PrepareHook
 from ymci.model import User
 from .db import Acl
@@ -10,7 +11,7 @@ class AclHook(PrepareHook):
         return self.db.query(Acl).count()
 
     def prepare(self, route):
-        current_user = route.get_current_user()
+        current_user = self.get_current_user(route)
         if not current_user:
             raise HTTPError(403)
 
@@ -46,3 +47,9 @@ class AclHook(PrepareHook):
             break
         else:
             raise HTTPError(403)
+
+    def get_current_user(self, route):
+        user = route.get_secure_cookie("user")
+        if not user:
+            return None
+        return json_decode(to_unicode(user))

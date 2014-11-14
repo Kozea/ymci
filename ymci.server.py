@@ -24,7 +24,10 @@ if options.debug:
     from wdb.ext import wdb_tornado
     wdb_tornado(server, start_disabled=True)
 
-http_server = SystemdHTTPServer(server)
+http_server = SystemdHTTPServer(server, ssl_options={
+    'certfile': '/etc/butterfly/ssl/butterfly_ca.crt',
+    'keyfile': '/etc/butterfly/ssl/butterfly_ca.key',
+})
 
 log.debug('Listening')
 http_server.listen(options.port)

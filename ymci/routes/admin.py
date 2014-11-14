@@ -1,4 +1,4 @@
-from .. import url, Route
+from .. import url, Route, server
 from ..utils.db import upgrade
 
 
@@ -25,3 +25,9 @@ class AdminPluginRefresh(Route):
         self.application.plugins.reload()
         self.application.components.blocks.plugins.refresh()
         self.redirect(self.reverse_url('Admin'))
+
+
+server.components.project_auth.admin = {
+    'route': 'Admin',
+    'label': 'Admin'
+}

@@ -6,7 +6,6 @@
 from tornado.web import (
     Application, RequestHandler, url as tornado_url, HTTPError)
 from sqlalchemy.orm import scoped_session, sessionmaker
-from tornado.escape import json_decode, to_unicode
 from tornado.websocket import WebSocketHandler
 from tornado.options import define, parse_command_line, options
 from tornado.ioloop import IOLoop
@@ -96,7 +95,8 @@ class Base(object):
         namespace = super().get_template_namespace()
         namespace.update(dict(
             server=self.application,
-            utils=utils
+            utils=utils,
+            get_secure_cookie=self.get_secure_cookie
         ))
         return namespace
 
@@ -110,6 +110,11 @@ class Base(object):
 
 
 class Route(Base, RequestHandler):
+    def write_error(self, status_code, **kwargs):
+        self.render(
+            'error.html', status_code=status_code,
+            reason=self._reason)
+
     @property
     def posted(self):
         return MultiDict(self.request.arguments)
@@ -125,12 +130,6 @@ class Route(Base, RequestHandler):
             self._db = self.application.scoped_session()
         return self._db
 
-    def get_current_user(self):
-        user = self.get_secure_cookie("user")
-        if not user:
-            return None
-        return json_decode(to_unicode(user))
-
     def set_flash_message(self, key, message):
         if key not in MESSAGE_LEVELS:
             log.error("This flash message will not appear because the key '%s'"
@@ -143,6 +142,7 @@ class Route(Base, RequestHandler):
             message = self.get_secure_cookie('flash_message_%s' % level)
             messages.update({'%s' % level: message})
             self.clear_cookie('flash_message_%s' % level)
+
         return messages
 
     def on_finish(self):
@@ -177,6 +177,8 @@ class Components(object):
         self.blocks = Container()
         self.project_charts = Container()
         self.project_links = Container()
+        self.project_unauth = Container()
+        self.project_auth = Container()
 
 server.components = Components()
 
