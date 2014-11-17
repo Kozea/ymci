@@ -115,6 +115,14 @@ class ProjectDelete(Route):
 @url(r'/project/build/(?P<project_id>\d+)')
 class ProjectBuild(Route):
     def get(self, project_id):
+        self.redirect(self.build(project_id))
+
+    def post(self, project_id):
+        self.build(project_id)
+        self.write('OK')
+        self.finish()
+
+    def build(self, project_id):
         project = self.db.query(Project).get(project_id)
         build = Build()
         build.timestamp = datetime.now()
@@ -128,18 +136,17 @@ class ProjectBuild(Route):
         self.db.commit()
 
         self.application.builder.add(build)
+        return self.reverse_url(
+            'ProjectLog', project.project_id, build.build_id)
 
-        self.redirect(self.reverse_url(
-            'ProjectLog', project.project_id, build.build_id))
 
-
-@url(r'/log/(\d+)/(\d+)/pipe')
+@url(r'/log/(?P<project_id>\d+)/(?P<build_id>\d+)/pipe')
 class ProjectLogWebSocket(WebSocket):
-    def open(self, id, idx):
-        self.id = id
-        self.idx = idx
+    def open(self, project_id, build_id):
+        self.id = project_id
+        self.idx = build_id
         with short_transaction() as db:
-            self.build = db.query(Build).get((idx, id))
+            self.build = db.query(Build).get((build_id, project_id))
             self.application.builder.log_streams['%s-%s' % (
                 self.build.project_id,
                 self.build.build_id
@@ -155,13 +162,13 @@ class ProjectLogWebSocket(WebSocket):
             '%s-%s' % (self.id, self.idx)].remove(self)
 
 
-@url(r'/project/log/(?P<project_id>\d+)/(?P<idx>\d+)')
+@url(r'/project/log/(?P<project_id>\d+)/(?P<build_id>\d+)')
 @url(r'/project/log/(?P<project_id>\d+)', suffix='Last')
 class ProjectLog(Route):
-    def get(self, project_id, idx=None):
+    def get(self, project_id, build_id=None):
         project = self.db.query(Project).get(project_id)
-        if idx:
-            build = self.db.query(Build).get((idx, project_id))
+        if build_id:
+            build = self.db.query(Build).get((build_id, project_id))
         else:
             build = project.last_build
         if build.status != 'RUNNING' and os.path.exists(build.log_file):
@@ -173,10 +180,10 @@ class ProjectLog(Route):
             'project/log.html', project=project, build=build, log=log)
 
 
-@url(r'/project/build/(?P<project_id>\d+)/(?P<idx>\d+)/stop')
+@url(r'/project/build/(?P<project_id>\d+)/(?P<build_id>\d+)/stop')
 class ProjectBuildStop(Route):
-    def get(self, project_id, idx):
-        build = self.db.query(Build).get((idx, project_id))
+    def get(self, project_id, build_id):
+        build = self.db.query(Build).get((build_id, project_id))
         self.application.builder.stop(build)
 
         self.redirect(self.reverse_url(

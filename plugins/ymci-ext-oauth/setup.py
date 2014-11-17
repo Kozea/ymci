@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ymci-ext-oauth',
-    version='1.2',
+    version='1.3',
     description='OAuth plugin for ymci',
     author='Florian Mounier, Kozea',
     author_email='florian.mounier@kozea.fr',

@@ -20,6 +20,12 @@ class GoogleOAuth2LoginHandler(Route, GoogleOAuth2Mixin):
 
     @coroutine
     def get(self):
+        referer = self.request.headers.get('Referer', '/')
+        if self.application.settings.get('debug', False):
+            self.set_secure_cookie('user', json_encode('debug'))
+            self.set_flash_message('success', 'Debug login successful')
+            return self.redirect(referer)
+
         if self.get_argument('code', False):
             user = yield self.get_authenticated_user(
                 redirect_uri=self.oauth_url,
@@ -33,7 +39,7 @@ class GoogleOAuth2LoginHandler(Route, GoogleOAuth2Mixin):
             if not self.settings['google_oauth'].get('domain', ''):
                 self.set_secure_cookie('user', json_encode(user))
                 self.set_flash_message('success', 'Login successful')
-                return self.redirect('/')
+                return self.redirect(referer)
 
             access_token = str(user['access_token'])
             response = yield AsyncHTTPClient().fetch(
@@ -59,7 +65,7 @@ class GoogleOAuth2LoginHandler(Route, GoogleOAuth2Mixin):
             self.set_secure_cookie('user', email, expires_days=1)
             self.set_flash_message(
                 'success', 'Login successful for %s' % email)
-            return self.redirect('/')
+            return self.redirect(referer)
 
         yield self.authorize_redirect(
             redirect_uri=self.oauth_url,

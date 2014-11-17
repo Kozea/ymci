@@ -15,7 +15,7 @@ from logging import getLogger
 from .config import Config
 import os.path
 
-__version__ = '0.0.9'
+__version__ = '0.1.0'
 
 log = getLogger('ymci')
 
@@ -92,15 +92,24 @@ class MultiDict(dict):
 
 
 class Base(object):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._auth_funs = []
+
     def get_template_namespace(self):
         from . import utils
         namespace = super().get_template_namespace()
         namespace.update(dict(
             server=self.application,
             utils=utils,
-            get_secure_cookie=self.get_secure_cookie
+            auth=self.auth
         ))
         return namespace
+
+    def auth(self, *args, **kwargs):
+        return all([
+            fun(*args, **kwargs) for fun in self._auth_funs
+        ])
 
     @property
     def log(self):
@@ -109,6 +118,22 @@ class Base(object):
     @property
     def blocks(self):
         return server.components.blocks
+
+    @property
+    def db(self):
+        # Explicit creation of the request session
+        if not getattr(self, '_db', None):
+            # Cache it even if it's the same
+            self._db = self.application.scoped_session()
+        return self._db
+
+    def prepare(self):
+        for Hook in self.application.plugins['ymci.ext.hooks.PrepareHook']:
+            hook = Hook(self.db)
+            if hook.active:
+                hook.prepare(self)
+                if 'auth_url' in dir(hook):
+                    self._auth_funs.append(hook.auth_url)
 
 
 class Route(Base, RequestHandler):
@@ -123,14 +148,6 @@ class Route(Base, RequestHandler):
 
     def abort(self, code):
         raise HTTPError(code)
-
-    @property
-    def db(self):
-        # Explicit creation of the request session
-        if not getattr(self, '_db', None):
-            # Cache it even if it's the same
-            self._db = self.application.scoped_session()
-        return self._db
 
     def set_flash_message(self, key, message):
         if key not in MESSAGE_LEVELS:
@@ -155,12 +172,6 @@ class Route(Base, RequestHandler):
         return self.render_string(
             'fields.html', form=form,
             render_form_recursively=self.render_form_recursively)
-
-    def prepare(self):
-        for Hook in self.application.plugins['ymci.ext.hooks.PrepareHook']:
-            hook = Hook(self.db)
-            if hook.active:
-                hook.prepare(self)
 
 
 class WebSocket(Base, WebSocketHandler):
@@ -213,7 +224,7 @@ class BlockWebSocket(WebSocket, metaclass=MetaBlock):
 
     def render(self):
         # Scope the session in the request
-        self.db = self.application.scoped_session()
+        # self.db = self.application.scoped_session()
         self.write_message(self.render_block(*self.args))
         self.application.scoped_session.remove()
 

@@ -21,21 +21,42 @@
           <a class="navbar-brand" href="/">YMCI</a>
         </div>
         <ul class="nav navbar-nav">
-          <li><a href="{{ reverse_url('ProjectList') }}">Project list</a></li>
-          <li><a href="{{ reverse_url('ProjectAdd') }}">New project</a></li>
-          {% if globals().get('project', None) %}
-            <li><a href="{{ reverse_url('ProjectView', project.project_id) }}">View {{ project.name }}</a></li>
-            <li><a href="{{ reverse_url('ProjectBuild', project.project_id) }}">Build {{ project.name }}</a></li>
-            <li><a href="{{ reverse_url('ProjectEdit', project.project_id) }}">Edit {{ project.name }}</a></li>
-            <li><a href="{{ reverse_url('ProjectDelete', project.project_id) }}">Delete {{ project.name }}</a></li>
+          {% if auth('ProjectList') %}
+            <li><a href="{{ reverse_url('ProjectList') }}">Project list</a></li>
           {% end %}
-           {% if globals().get('build', None) and build.status == 'RUNNING' %}
-             <li><a href="{{ reverse_url('ProjectBuildStop', project.project_id, build.build_id) }}">Stop</a></li>
-           {% end %}
+
+          {% if auth('ProjectList') %}
+            <li><a href="{{ reverse_url('ProjectList') }}">New project</a></li>
+          {% end %}
+
+          {% if globals().get('project', None) %}
+            {% if auth('ProjectView', project_id=project.project_id) %}
+              <li><a href="{{ reverse_url('ProjectView', project.project_id) }}">View {{ project.name }}</a></li>
+            {% end %}
+
+            {% if auth('ProjectBuild', project_id=project.project_id) %}
+              <li><a href="{{ reverse_url('ProjectBuild', project.project_id) }}">Build {{ project.name }}</a></li>
+            {% end %}
+
+            {% if auth('ProjectEdit', project_id=project.project_id) %}
+              <li><a href="{{ reverse_url('ProjectEdit', project.project_id) }}">Edit {{ project.name }}</a></li>
+            {% end %}
+
+            {% if auth('ProjectDelete', project_id=project.project_id) %}
+              <li><a href="{{ reverse_url('ProjectDelete', project.project_id) }}">Delete {{ project.name }}</a></li>
+            {% end %}
+
+            {% if globals().get('build', None) and build.status == 'RUNNING' %}
+              {% if auth('ProjectBuildStop', project_id=project.project_id, build_id=build.build_id) %}
+                <li><a href="{{ reverse_url('ProjectBuildStop', project.project_id, build.build_id) }}">Stop</a></li>
+              {% end %}
+            {% end %}
+          {% end %}
+
           {% block nav %}{% end %}
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          {% if get_secure_cookie('user') %}
+          {% if handler.get_secure_cookie('user') %}
             {% for route in server.components.project_auth %}
               <a class="btn btn-default" href="{{ reverse_url(route['route']) }}">{{ route['label'] }}</a>
             {% end %}

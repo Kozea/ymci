@@ -1,48 +1,50 @@
 {% extends "./_base.html" %}
 
 {% block block %}
-<h3>Projects</h3>
-<div class="grid">
+  <h3>Projects</h3>
+  <div class="grid">
 
-  {% for project in projects %}
-    <div class="grid-elt">
-      <h4><a href="{{ reverse_url('ProjectView', project.project_id) }}">{{ project.name }}</a></h4>
+    {% for project in projects %}
+      {% if auth('ProjectView', project_id=project.project_id) %}
+      <div class="grid-elt">
+          <h4><a href="{{ reverse_url('ProjectView', project.project_id) }}">{{ project.name }}</a></h4>
 
-      <div>
-        {% if project.last_non_running_build %}
-          <a class="badge" href="{{ reverse_url('ProjectLog', project.project_id, project.last_non_running_build.build_id) }}">{{ project.last_non_running_build.build_id }}</a>
-        {% end %}
-      </div>
+          <div>
+            {% if project.last_non_running_build %}
+              <a class="badge" href="{{ reverse_url('ProjectLog', project.project_id, project.last_non_running_build.build_id) }}">{{ project.last_non_running_build.build_id }}</a>
+            {% end %}
+          </div>
 
-      <div>
-        {% if project.last_build %}
-          <span class="label label-{{ project.last_build.bootstrap_status }}">{{ project.last_build.status.title() }}</span>
-        {% else %}
-          <span class="label label-info">New</span>
-        {% end %}
-      </div>
+          <div>
+            {% if project.last_build %}
+              <span class="label label-{{ project.last_build.bootstrap_status }}">{{ project.last_build.status.title() }}</span>
+            {% else %}
+              <span class="label label-info">New</span>
+            {% end %}
+          </div>
 
-      <div>
-        <span class="health-bar">
-        {% for i in range(project.health(6)) %}
-          <i class="glyphicon glyphicon-heart healthy-heart{{ ' beating-heart'  if project.last_build.status == 'RUNNING' else '' }}"></i>
-        {% end %}
-        {% for i in range(6 - project.health(6)) %}
-          <i class="glyphicon glyphicon-heart broken-heart"></i>
-        {% end %}
-        </span>
-      </div>
+          <div>
+            <span class="health-bar">
+            {% for i in range(project.health(6)) %}
+              <i class="glyphicon glyphicon-heart healthy-heart{{ ' beating-heart'  if project.last_build.status == 'RUNNING' else '' }}"></i>
+            {% end %}
+            {% for i in range(6 - project.health(6)) %}
+              <i class="glyphicon glyphicon-heart broken-heart"></i>
+            {% end %}
+            </span>
+          </div>
 
-      <div>
-        {% if project.last_non_running_build %}
-          Duration: <abbr title="{{ utils.pretty_duration(project.last_non_running_build.duration) }}">{{ utils.pretty_duration_round(project.last_non_running_build.duration) }}</abbr>
-        {% end %}
-      </div>
+          <div>
+            {% if project.last_non_running_build %}
+              Duration: <abbr title="{{ utils.pretty_duration(project.last_non_running_build.duration) }}">{{ utils.pretty_duration_round(project.last_non_running_build.duration) }}</abbr>
+            {% end %}
+          </div>
 
-      <div class="btn-group bottom-right">
-        <a class="btn btn-default xhr" href="{{ reverse_url('ProjectBuild', project.project_id) }}"><i class="glyphicon glyphicon-play-circle"></i></a>
-      </div>
-    </div>
-  {% end %}
-</div>
+          <div class="btn-group bottom-right">
+            <a class="btn btn-default xhr" href="{{ reverse_url('ProjectBuild', project.project_id) }}"><i class="glyphicon glyphicon-play-circle"></i></a>
+          </div>
+        </div>
+      {% end %}
+    {% end %}
+  </div>
 {% end %}

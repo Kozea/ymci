@@ -1,6 +1,6 @@
 from tornado.web import HTTPError
 from ymci.ext.hooks import PrepareHook
-from ymci.model import Project, Build
+from ymci.model import Project
 from ymci import server
 
 
@@ -14,37 +14,48 @@ class OAuthHook(PrepareHook):
     def active(self):
         return oauth
 
-    def prepare(self, route):
-        name = route.__class__.__name__
-        current_user = route.get_secure_cookie("user")
-        if current_user or not name.startswith('Project') or name in (
-                'ProjectList',
-        ):
-            return
-        if not current_user and name == 'ProjectAdd':
-            return route.redirect(
-                route.reverse_url('GoogleOAuth2LoginHandler'))
+    def _auth(self, user, endpoint, *args, **kwargs):
+        if user or not endpoint.startswith('Project') or endpoint in (
+                'ProjectList',):
+            return True
+        if not user and endpoint == 'ProjectAdd':
+            return False
 
         project = None
-        if 'project_id' in route.path_kwargs:
+        if 'project_id' in kwargs:
             project = self.db.query(Project).get(
-                route.path_kwargs['project_id'])
-        # if 'build_id' in route.path_kwargs:
-        #     project = self.db.query(Build).get(
-        #         route.path_kwargs['build_id']).project
+                kwargs['project_id'])
 
         if not project:
-            return
+            return True
 
-        if getattr(project.oauth_config, 'public_read', False) and name in (
-                'ProjectView', 'ProjectLog', 'ProjectBuildLog'
-        ):
-            return
+        if getattr(
+                project.oauth_config, 'public_read', False) and endpoint in (
+                'ProjectView', 'ProjectLog', 'ProjectBuildLog'):
+            return True
 
-        if getattr(project.oauth_config, 'public_build', False) and name in (
-                'ProjectBuild', 'ProjectBuildStop'
-        ):
-            return
+        if getattr(
+                project.oauth_config, 'public_build', False) and endpoint in (
+                'ProjectBuild', 'ProjectBuildStop'):
+            return True
 
-        return route.redirect(
-            route.reverse_url('GoogleOAuth2LoginHandler'))
+        return False
+
+    def prepare(self, route):
+        self._route = route
+        if self._auth(
+                route.get_secure_cookie("user"),
+                route.__class__.__name__,
+                *route.path_args,
+                **route.path_kwargs):
+            return
+        raise HTTPError(403)
+
+    def auth_url(self, endpoint, *args, **kwargs):
+        if not hasattr(self, '_route'):
+            raise Exception(
+                'Prepare must be called before using auth_reverse_url')
+
+        return self._auth(
+            self._route.get_secure_cookie('user'),
+            endpoint, *args, **kwargs)
