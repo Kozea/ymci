@@ -50,7 +50,8 @@ def graph_config(width, height):
 class Index(Route):
     def get(self):
         return self.render(
-            'index.html', projects=self.db.query(Project).all())
+            'index.html',
+            projects=self.db.query(Project).order_by(Project.name).all())
 
 import ymci.routes.blocks
 import ymci.routes.project

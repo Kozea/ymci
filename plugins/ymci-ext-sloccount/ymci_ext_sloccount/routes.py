@@ -64,35 +64,38 @@ class SloccountDeltaChart(Route):
         config.print_values = False
         svg = pygal.StackedBar(config)
         builds = project.builds[::-1]
-        first_build, remain_builds = builds[0], builds[1:]
-        languages = list(set(
-            [s.language for b in builds for s in b.sloccounts]))
-        data = {language: [
-            {'xlink': self.reverse_url('ProjectLog', id, first_build.build_id),
-             'value': 0}] for language in languages}
+        if len(builds):
+            first_build, remain_builds = builds[0], builds[1:]
+            languages = list(set(
+                [s.language for b in builds for s in b.sloccounts]))
+            data = {language: [
+                {'xlink': self.reverse_url(
+                    'ProjectLog', id, first_build.build_id),
+                 'value': 0}] for language in languages}
 
-        def delta(language, previous_build, build):
-            prev_count = (
-                [s.count for s in previous_build.sloccounts if
-                 s.language == language] or [0])
-            current_count = (
-                [s.count for s in build.sloccounts if s.language == language]
-                or [0])
-            return current_count[0] - prev_count[0]
+            def delta(language, previous_build, build):
+                prev_count = (
+                    [s.count for s in previous_build.sloccounts if
+                     s.language == language] or [0])
+                current_count = (
+                    [s.count for s in build.sloccounts
+                     if s.language == language]
+                    or [0])
+                return current_count[0] - prev_count[0]
 
-        for language in languages:
-            previous_build = first_build
-            for build in remain_builds:
-                data[language].append({
-                    'xlink': self.reverse_url(
-                        'ProjectLog', id, build.build_id),
-                    'value': delta(language, previous_build, build)})
-                previous_build = build
-        if width and height:
-            svg.x_labels = ['#%d' % b.build_id for b in builds]
+            for language in languages:
+                previous_build = first_build
+                for build in remain_builds:
+                    data[language].append({
+                        'xlink': self.reverse_url(
+                            'ProjectLog', id, build.build_id),
+                        'value': delta(language, previous_build, build)})
+                    previous_build = build
+            if width and height:
+                svg.x_labels = ['#%d' % b.build_id for b in builds]
 
-        for language in data.keys():
-            svg.add(language, data[language])
+            for language in data.keys():
+                svg.add(language, data[language])
         svg.value_formatter = lambda x: '%d' % (x or 0)
         svg.title = 'Sloccount delta'
         self.set_header("Content-Type", "image/svg+xml")

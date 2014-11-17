@@ -28,7 +28,7 @@ class ProjectBlock(BlockWebSocket):
     def render_block(self):
         return self.render_string(
             'blocks/project.html',
-            projects=self.db.query(Project).all())
+            projects=self.db.query(Project).order_by(Project.name).all())
 
 
 @url(r'/blocks/history/([^\/]+)')
@@ -44,7 +44,7 @@ class HomeBlock(BlockWebSocket):
     def render_block(self):
         return self.render_string(
             'blocks/home.html',
-            projects=self.db.query(Project).all())
+            projects=self.db.query(Project).order_by(Project.name).all())
 
 
 @url(r'/blocks/plugins')

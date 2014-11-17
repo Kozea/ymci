@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ymci-ext-sloccount',
-    version='1.2',
+    version='1.3.0',
     description='Sloccount plugin for ymci',
     author="Clément Plasse, Kozea",
     author_email="clement.plasse@kozea.fr",

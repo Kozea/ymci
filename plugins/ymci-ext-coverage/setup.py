@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ymci-ext-coverage',
-    version='1.3',
+    version='1.4.0',
     description='Coverage (cobertura) plugin for ymci',
     author="Florian Mounier, Kozea",
     author_email="florian.mounier@kozea.fr",

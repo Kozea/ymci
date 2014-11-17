@@ -31,7 +31,8 @@ class OAuthHook(PrepareHook):
 
         if getattr(
                 project.oauth_config, 'public_read', False) and endpoint in (
-                'ProjectView', 'ProjectLog', 'ProjectBuildLog'):
+                    'ProjectView', 'ProjectLog', 'ProjectBuildLog',
+                    'ProjectChartTime'):
             return True
 
         if getattr(

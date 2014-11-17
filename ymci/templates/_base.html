@@ -25,8 +25,8 @@
             <li><a href="{{ reverse_url('ProjectList') }}">Project list</a></li>
           {% end %}
 
-          {% if auth('ProjectList') %}
-            <li><a href="{{ reverse_url('ProjectList') }}">New project</a></li>
+          {% if auth('ProjectAdd') %}
+            <li><a href="{{ reverse_url('ProjectAdd') }}">New project</a></li>
           {% end %}
 
           {% if globals().get('project', None) %}

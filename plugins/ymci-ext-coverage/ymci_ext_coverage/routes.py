@@ -37,19 +37,19 @@ class CoverageChart(Route):
 
         svg.add('Lines', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.line
+            'value': float(b.line)
         } for b in builds])
         svg.add('Branches', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.branch
+            'value': float(b.branch)
         } for b in builds])
         svg.add('Classes', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.cls
+            'value': float(b.cls)
         } for b in builds])
         svg.add('Files', [{
             'xlink': self.reverse_url('ProjectLog', id, b.build_id),
-            'value': b.file
+            'value': float(b.file)
         } for b in builds])
         if width and height:
             svg.x_labels = ['#%d' % b.build_id for b in builds]
