@@ -15,7 +15,7 @@ from logging import getLogger
 from .config import Config
 import os.path
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 log = getLogger('ymci')
 
@@ -27,6 +27,8 @@ define("protocol", default='http', help="Protocol used if different (proxy)")
 define("config", default='ymci.yaml', help="YMCI config file")
 define("secret", default='secret', help="Secret key for cookies")
 define("upgrade", default=False, help="Upgrade DB")
+define("external_url", default='http://ymci.l:7361',
+       help="External url if different from host port... (proxy)")
 
 parse_command_line()
 ioloop = IOLoop.instance()

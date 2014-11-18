@@ -4,6 +4,7 @@ from tornado.gen import coroutine
 from tornado.escape import json_encode, json_decode
 from tornado.web import HTTPError
 from tornado.httpclient import AsyncHTTPClient
+from tornado.options import options
 from ymci import server
 
 
@@ -13,10 +14,7 @@ class GoogleOAuth2LoginHandler(Route, GoogleOAuth2Mixin):
 
     @property
     def oauth_url(self):
-        return '%s://%s/_oauth2callback' % (
-            self.application.settings.get('protocol', 'http'),
-            self.request.host
-        )
+        return '%s/_oauth2callback' % options.external_url
 
     @coroutine
     def get(self):

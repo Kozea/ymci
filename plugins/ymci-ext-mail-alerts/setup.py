@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ymci-ext-mail-alerts',
-    version='1.0',
+    version='1.1.0',
     description='Mail alert plugin for ymci',
     author='Jean-Marc Martins, Kozea',
     author_email='jmartins@kozea.fr',

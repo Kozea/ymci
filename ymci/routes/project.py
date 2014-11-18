@@ -200,15 +200,23 @@ class ProjectChartTime(Route):
         config = graph_config(width, height)
         config.style = ymci_style
         svg = pygal.Line(config)
-        builds = project.builds.filter(Build.status == 'SUCCESS').all()[::-1]
-        svg.add('Success', [{
-            'xlink': self.reverse_url('ProjectLog', project_id, b.build_id),
-            'value': b.duration} for b in builds])
-        if width and height:
-            svg.x_labels = ['#%d' % b.build_id for b in builds]
+        builds = project.builds.all()[::-1]
+        for status in [
+                'SUCCESS',
+                'RUNNING',
+                'BROKEN',
+                'FAILED',
+                'STOPPED',
+                'PENDING']:
+            svg.add(status.lower(), {'#%d' % b.build_id: {
+                'xlink': self.reverse_url(
+                    'ProjectLog', project_id, b.build_id),
+                'value': b.duration} for b in builds if b.status == status})
+        svg.x_labels = ['#%d' % b.build_id for b in builds]
         svg.value_formatter = lambda x: '%.2fs' % (x or 0)
         svg.interpolate = 'cubic'
         svg.show_legend = False
+        svg.show_labels = False
         svg.title = 'Build duration in seconds'
         self.set_header("Content-Type", "image/svg+xml")
         self.write(svg.render())

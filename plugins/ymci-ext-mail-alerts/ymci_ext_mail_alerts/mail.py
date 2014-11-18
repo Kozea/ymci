@@ -1,103 +1,86 @@
 import os
 import smtplib
-import yaml
 import logging
 from email.mime.text import MIMEText
 from ymci import server
+from ymci.model import Build
 from ymci.ext.hooks import BuildHook
 from .utils import MailGenerator
+from tornado.options import options
 
 cur_dir = os.path.dirname(__file__)
 log = logging.getLogger('ymci')
 
 
-class Mail(object):
-    """Handles mails in plain text type."""
-    auth = False
-
-    def __init__(self):
-        self.read_config()
-        config = server.conf['mails']
-
-        self.smtp = config.get('server', None)
-        self.port = config.get('port', None)
-        if self.port:
-            self.port = int(self.port)
-        self._from = config.get('From', None)
-        self.to = config.get('To', None)
-
-        if config.get('credentials', None):
-            self.login = config['credentials']['login']
-            self.password = config['credentials']['password']
-            self.auth = True
-
-        self.__smtp_server = None
-
-    @property
-    def smtp_server(self):
-        self.__smtp_server = (
-            self.__smtp_server or smtplib.SMTP(self.smtp, self.port))
-        return self.__smtp_server
-
-    def quit(self):
-        if self.__smtp_server:
-            self.__smtp_server.quit()
-
-    def send_mail(self, message, mtype):
-        message = self.set_mail_headers(message, mtype)
-        try:
-            self.authenticate()
-            self.smtp_server.send_message(message)
-        except Exception:
-            log.exception("Mail error")
-        finally:
-            try:
-                self.quit()
-            except Exception:
-                log.exception("Quit error")
-
-    def set_mail_headers(self, message, mtype):
-        message['Subject'] = mtype
-        message['From'] = self._from
-        message['To'] = self.to
-        return message
-
-    def authenticate(self):
-        self.smtp_server.ehlo()
-
-        if self.smtp_server.has_extn('STARTTLS'):
-            self.smtp_server.starttls()
-            self.smtp_server.ehlo()
-
-        if self.auth and self.login and self.password:
-            self.smtp_server.login(self.login, self.password)
-
-    def read_config(self):
-        with open(os.path.join(cur_dir, 'config.yaml')) as fd:
-            try:
-                server.conf.update(yaml.load(fd))
-            except Exception:
-                log.exception('Error reading mail configuration.')
-                return False
-            return True
-
-
 class MailHook(BuildHook):
     """Defines hooks for mail actions."""
-
     @property
     def active(self):
-        return server.conf.get('mails', None)
+        return server.conf.get('mail_alert', None)
+
+    def __init__(self, build, out):
+        self.conf = server.conf.get('mail_alert')
+        self.smtp = self.conf.get('server', None)
+        self.port = self.conf.get('port', smtplib.SMTP_PORT)
+        self.port = int(self.port)
+        self.from_ = self.conf.get('From', None)
+        self.to = self.conf.get('To', None)
+        self.login = self.conf.get('credentials', {}).get('login', None)
+        self.password = self.conf.get('credentials', {}).get('password', None)
+        self.key = self.conf.get('credentials', {}).get('key', None)
+        self.cert = self.conf.get('credentials', {}).get('cert', None)
+        super().__init__(build, out)
+
+    def send_mail(self, subject, message, to=None):
+        to = to or self.to
+        self.out('Sending mail to %s' % to)
+        smtp = smtplib.SMTP(self.smtp, self.port)
+
+        message['Subject'] = subject
+        message['From'] = self.from_
+        message['To'] = to
+
+        smtp.ehlo()
+        if smtp.has_extn('STARTTLS'):
+            smtp.starttls(self.key, self.cert)
+            smtp.ehlo()
+            if self.login and self.password:
+                smtp.login(self.login, self.password)
+
+        smtp.send_message(message)
+        smtp.quit()
+
+    def render_mail(self, path, **kwargs):
+        generator = MailGenerator()
+        message = MIMEText(generator.gen_template(path, **kwargs), 'html')
+        return message
 
     def post_build(self):
-        if not self.build.status == 'FAILED':
+        if self.build.status not in ('FAILED', 'BROKEN'):
             return
-        mailer = Mail()
-        message = self.read_mail('mails/error.txt')
-        mailer.send_mail(message=message, mtype='error')
+        if self.build.build_id > 1:
+            previous_build = self.build._sa_instance_state.session.query(
+                Build).get((
+                    self.build.build_id - 1, self.build.project_id))
+        else:
+            previous_build = None
+        if previous_build and previous_build.status == self.build.status:
+            return
 
-    def read_mail(self, path):
-        generator = MailGenerator()
-        message = MIMEText(generator.gen_template(
-            path, build=self.build, project=self.build.project), 'html')
-        return message
+        log_url = '%s%s' % (
+            options.external_url,
+            server.reverse_url(
+                'ProjectLog',
+                self.build.project.project_id,
+                self.build.build_id))
+        try:
+            self.send_mail(
+                'YMCI build #%d is %s for project %s' % (
+                    self.build.build_id,
+                    self.build.status.lower(),
+                    self.build.project.name),
+                self.render_mail('mails/error.txt',
+                                 build=self.build, log_url=log_url),
+                getattr(self.build, '_author', None))
+        except Exception:
+            log.exception('Error on mail send')
