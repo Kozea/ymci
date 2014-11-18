@@ -13,7 +13,9 @@ setup(
 
     provides=['ymci_ext_mail_alerts'],
     packages=find_packages(),
-
+    package_data={'ymci_ext_mail_alerts': [
+        'mails/*.txt'
+    ]},
     entry_points={
         'ymci.ext': [
             'ymci-ext-mail-alerts = ymci_ext_mail_alerts'
