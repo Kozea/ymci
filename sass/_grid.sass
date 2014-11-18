@@ -6,10 +6,17 @@
 
   .grid-elt
     background-color: #fafafa
-    flex-basis: 30%
     text-align: center
     margin: 1em
     padding: .25em
 
     div
       padding: .5em
+
+    flex-basis: 30%
+
+    @media (max-width: 1200px)
+      flex-basis: 45%
+
+    @media (max-width: 590px)
+      flex-basis: 100%
