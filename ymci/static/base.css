@@ -194,6 +194,10 @@ span.badge {
 embed {
   display: block; }
 
+textarea[name=script] {
+  font-family: monospace;
+  min-height: 350px; }
+
 code.out {
   margin-bottom: 2em; }
 
