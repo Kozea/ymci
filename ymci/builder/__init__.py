@@ -40,7 +40,8 @@ class Pool(object):
             build.build_id, build.project_id,
             self.log_streams['%s-%s' % (build.project_id, build.build_id)],
             build.project.name, self.ioloop)
-        if not len(self.queue) and len(self.tasks) < self.limit:
+        if len(self.tasks) < self.limit and (
+                task.project_id not in [t.project_id for t in self.tasks]):
             self.build(task)
         else:
             self.queue.append(task)
@@ -69,8 +70,14 @@ class Pool(object):
     def next(self, task):
         project_id = task.project_id
         self.tasks.remove(task)
-        if len(self.queue):
-            self.build(self.queue.pop(0))
+
+        for queued_task in self.queue[:]:
+            if queued_task.project_id not in [
+                    running_task.project_id
+                    for running_task in self.tasks]:
+                self.queue.remove(queued_task)
+                self.build(queued_task)
+                break
         refresh(project_id)
 
 
