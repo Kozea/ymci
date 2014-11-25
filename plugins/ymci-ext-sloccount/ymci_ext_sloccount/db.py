@@ -18,11 +18,6 @@ class Sloccount(Table):
 
     build = relationship('Build', backref='sloccounts')
 
-    @property
-    def percent(self):
-        total = sum([s.count for s in self.build.sloccounts])
-        return round(self.count * 100 / total, 2)
-
 
 class SloccountConfig(Table):
     __tablename__ = 'ymci_ext_sloccount__sloccount_config'
