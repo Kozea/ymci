@@ -17,7 +17,6 @@ class CoverageHook(BuildHook):
                 self.build.project.coverage.coverage_path)
 
     def validate_build(self):
-        projects_path = server.conf['projects_realpath']
         try:
             with open(os.path.join(
                     self.build.dir,
@@ -25,7 +24,7 @@ class CoverageHook(BuildHook):
                 fd.write('coverage_path:\n')
                 fd.write(
                     '%s%s' % (' '*4, os.path.join(
-                        projects_path, self.build.project.dir_name,
+                        server.projects_path, self.build.project.dir_name,
                         'build_%d' % self.build.build_id,
                         self.build.project.coverage.coverage_path)))
         except Exception:

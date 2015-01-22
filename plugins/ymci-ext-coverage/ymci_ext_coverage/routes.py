@@ -19,7 +19,7 @@ import yaml
 @url(r'/project/chart/coverage/(\d+).svg')
 @url(r'/project/chart/coverage/(\d+)_(\d+)_(\d+).svg', suffix='Size')
 class CoverageChart(Route):
-    def get(self, id, width=None, height=None):
+    def get(self, project_id, width=None, height=None):
         svg = pygal.Line(graph_config(width, height))
         builds = (
             self.db.query(
@@ -30,25 +30,25 @@ class CoverageChart(Route):
                 func.avg(Coverage.file_rate).label('file'))
             .select_from(Build)
             .join(Coverage, Build.coverages)
-            .filter(Build.project_id == id)
+            .filter(Build.project_id == project_id)
             .group_by(Build.build_id)
             .order_by(Build.build_id)
             .all())
 
         svg.add('Lines', [{
-            'xlink': self.reverse_url('ProjectLog', id, b.build_id),
+            'xlink': self.reverse_url('ProjectLog', project_id, b.build_id),
             'value': float(b.line)
         } for b in builds])
         svg.add('Branches', [{
-            'xlink': self.reverse_url('ProjectLog', id, b.build_id),
+            'xlink': self.reverse_url('ProjectLog', project_id, b.build_id),
             'value': float(b.branch)
         } for b in builds])
         svg.add('Classes', [{
-            'xlink': self.reverse_url('ProjectLog', id, b.build_id),
+            'xlink': self.reverse_url('ProjectLog', project_id, b.build_id),
             'value': float(b.cls)
         } for b in builds])
         svg.add('Files', [{
-            'xlink': self.reverse_url('ProjectLog', id, b.build_id),
+            'xlink': self.reverse_url('ProjectLog', project_id, b.build_id),
             'value': float(b.file)
         } for b in builds])
         if width and height:
@@ -62,7 +62,7 @@ class CoverageChart(Route):
 @url(r'/project/chart/coverage/stats/(\d+).svg')
 @url(r'/project/chart/coverage/stats/(\d+)_(\d+)_(\d+).svg', suffix='Size')
 class StatsChart(Route):
-    def get(self, id, width=None, height=None):
+    def get(self, project_id, width=None, height=None):
         config = graph_config(width, height)
         config.logarithmic = True
         svg = pygal.Line(config)
@@ -73,18 +73,18 @@ class StatsChart(Route):
                 func.sum(Coverage.cls).label('cls'))
             .select_from(Build)
             .join(Coverage, Build.coverages)
-            .filter(Build.project_id == id)
+            .filter(Build.project_id == project_id)
             .group_by(Build.build_id)
             .order_by(Build.build_id)
             .all())
 
         svg.add('Lines', [{
-            'xlink': self.reverse_url('ProjectLog', id, b.build_id),
+            'xlink': self.reverse_url('ProjectLog', project_id, b.build_id),
             'value': b.lines or None
         } for b in builds])
 
         svg.add('Classes', [{
-            'xlink': self.reverse_url('ProjectLog', id, b.build_id),
+            'xlink': self.reverse_url('ProjectLog', project_id, b.build_id),
             'value': b.cls or None
         } for b in builds])
 
@@ -136,7 +136,7 @@ class ProjectBrowseCoverage(ProjectBrowse):
         if path and '..' not in path:
             file = os.path.join(project.src_dir, path)
             formatter = self.get_coverage_formatter(
-                id, build, file, coverage_file_path)
+                project_id, build, file, coverage_file_path)
             if os.path.exists(file):
                 try:
                     with open(file, 'r') as f:
@@ -153,13 +153,13 @@ class ProjectBrowseCoverage(ProjectBrowse):
         self.render(
             'source.html', code=code,
             tree=self.recurse(
-                self.get_tree_dict(project.src_dir, path), id, build),
+                self.get_tree_dict(project.src_dir, path), project_id, build),
             project=project,
             build_id=build.build_id,
             path=path
         )
 
-    def recurse(self, dct, id, build):
+    def recurse(self, dct, project_id, build):
         out = '<ul>'
         for name, dirdct in sorted(dct['dirs'].items()):
             out += '<li class="dir">'
@@ -169,7 +169,7 @@ class ProjectBrowseCoverage(ProjectBrowse):
             out += '<label class="dir_title" for="node_%s">' % (
                 dirdct['name'].replace('/', ':'))
             out += '<i class="glyphicon"></i> %s' % name
-            out += '</label>%s' % self.recurse(dirdct, id, build)
+            out += '</label>%s' % self.recurse(dirdct, project_id, build)
             out += '</li>'
 
         for file, active in sorted(dct['files'].items()):
@@ -177,7 +177,7 @@ class ProjectBrowseCoverage(ProjectBrowse):
             out += '<label>'
             if not active:
                 out += '<a href="%s">' % self.reverse_url(
-                    'ProjectBrowseCoverage', id, build.build_id,
+                    'ProjectBrowseCoverage', project_id, build.build_id,
                     os.path.join(dct['name'], file))
             out += '<i class="glyphicon glyphicon-file"></i>%s' % file
             if not active:
@@ -187,8 +187,8 @@ class ProjectBrowseCoverage(ProjectBrowse):
 
         return out + '</ul>'
 
-    def get_coverage_formatter(self, id, build, file, coverage_file):
-        project = self.db.query(Project).get(id)
+    def get_coverage_formatter(self, project_id, build, file, coverage_file):
+        project = self.db.query(Project).get(project_id)
         build = self.db.query(Build).get((build.build_id, project.project_id))
         tree = ElementTree.parse(coverage_file)
         root = tree.getroot()

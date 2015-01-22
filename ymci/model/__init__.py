@@ -29,7 +29,7 @@ class Project(Table):
     description = Column(Text)
     repository = Column(String)
     script = Column(Text)
-
+    kept_builds = Column(Integer, default=5)
     builds = relationship('Build', cascade='all, delete-orphan',
                           backref='project', lazy='dynamic',
                           order_by='Build.build_id.desc()')
@@ -45,7 +45,7 @@ class Project(Table):
 
     @property
     def project_dir(self):
-        path = os.path.join(server.conf['projects_path'], self.dir_name)
+        path = os.path.join(server.projects_path, self.dir_name)
         if not os.path.exists(path):
             os.mkdir(path)
         return path
@@ -131,5 +131,17 @@ class Build(Table):
             'FAILED': 'warning',
             'STOPPED': 'default',
             'PENDING': 'info',
+            'KILLED': 'danger',
             None: 'default'
         }[self.status]
+
+    @property
+    def bootstrap_status_color(self):
+        return {
+            'default': '#eeeeee',
+            'primary': '#158cba',
+            'success': '#28b62c',
+            'info': '#75caeb',
+            'warning': '#ff851b',
+            'danger': '#ff4136',
+        }[self.bootstrap_status]

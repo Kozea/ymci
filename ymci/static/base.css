@@ -25,7 +25,9 @@
   display: none; }
 .tree li {
   -webkit-user-select: none;
-  user-select: none; }
+  -moz-user-select: none;
+   -ms-user-select: none;
+       user-select: none; }
   .tree li ul {
     margin: 0 0 0 1em; }
 .tree label[for] {
@@ -151,23 +153,37 @@
   color: #009999; }
 
 .grid {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  flex-flow: row wrap;
-  justify-content: space-between; }
+  -webkit-flex-flow: row wrap;
+      -ms-flex-flow: row wrap;
+          flex-flow: row wrap;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between; }
   .grid .grid-elt {
     background-color: #fafafa;
     text-align: center;
     margin: 1em;
     padding: 0.25em;
-    flex-basis: 30%; }
+    -webkit-flex-basis: 30%;
+        -ms-flex-preferred-size: 30%;
+            flex-basis: 30%; }
     .grid .grid-elt div {
       padding: 0.5em; }
     @media (max-width: 1200px) {
       .grid .grid-elt {
-        flex-basis: 45%; } }
+        -webkit-flex-basis: 45%;
+            -ms-flex-preferred-size: 45%;
+                flex-basis: 45%; } }
     @media (max-width: 590px) {
       .grid .grid-elt {
-        flex-basis: 100%; } }
+        -webkit-flex-basis: 100%;
+            -ms-flex-preferred-size: 100%;
+                flex-basis: 100%; } }
 
 code {
   display: block;
@@ -214,9 +230,12 @@ code.out {
   .health-bar .healthy-heart {
     color: #ff4136; }
   .health-bar .beating-heart {
-    animation-duration: 1s;
-    animation-name: heart;
-    animation-iteration-count: infinite; }
+    -webkit-animation-duration: 1s;
+            animation-duration: 1s;
+    -webkit-animation-name: heart;
+            animation-name: heart;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite; }
   .health-bar .broken-heart {
     color: rgba(255, 65, 54, 0.25); }
 
@@ -229,18 +248,45 @@ code.out {
     bottom: 0;
     right: 0; }
 
-@keyframes heart {
+@-webkit-keyframes heart {
+
   30% {
-    transform: scale(1); }
+    -webkit-transform: scale(1);
+            transform: scale(1); }
 
   40% {
-    transform: scale(1.25); }
+    -webkit-transform: scale(1.25);
+            transform: scale(1.25); }
 
   50% {
-    transform: scale(1); }
+    -webkit-transform: scale(1);
+            transform: scale(1); }
 
   60% {
-    transform: scale(1.25); }
+    -webkit-transform: scale(1.25);
+            transform: scale(1.25); }
 
   70% {
-    transform: scale(1); } }
+    -webkit-transform: scale(1);
+            transform: scale(1); } }
+
+@keyframes heart {
+  30% {
+    -webkit-transform: scale(1);
+            transform: scale(1); }
+
+  40% {
+    -webkit-transform: scale(1.25);
+            transform: scale(1.25); }
+
+  50% {
+    -webkit-transform: scale(1);
+            transform: scale(1); }
+
+  60% {
+    -webkit-transform: scale(1.25);
+            transform: scale(1.25); }
+
+  70% {
+    -webkit-transform: scale(1);
+            transform: scale(1); } }

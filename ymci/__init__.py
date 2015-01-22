@@ -23,6 +23,7 @@ log = getLogger('ymci')
 define("debug", default=False, help="Debug mode")
 define("host", default='ymci.l', help="Server host")
 define("port", default=7361, help="Server port")
+define("unix_socket", default=None, help="Bind to unix socket")
 define("protocol", default='http', help="Protocol used if different (proxy)")
 define("config", default='ymci.yaml', help="YMCI config file")
 define("secret", default='secret', help="Secret key for cookies")
@@ -64,6 +65,14 @@ server = Application(
     login_url="/auth/login")
 
 server.conf = Config(options.config)
+
+path = server.conf['projects_path']
+path = os.path.expanduser(path)
+path = os.path.expandvars(path)
+path = os.path.realpath(path)
+server.projects_path = path
+
+log.info('Project path is %s' % path)
 
 from .model import engine, Query
 server.scoped_session = scoped_session(
@@ -171,6 +180,9 @@ class Route(Base, RequestHandler):
         return self.application.scoped_session.remove()
 
     def render_form_recursively(self, form):
+        for field in form._fields.values():
+            field.label.text = field.label.text.replace('_', ' ').title()
+
         return self.render_string(
             'fields.html', form=form,
             render_form_recursively=self.render_form_recursively)

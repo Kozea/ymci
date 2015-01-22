@@ -6,6 +6,7 @@
 
 
 from tornado.options import options
+from tornado.netutil import bind_unix_socket
 from tornado_systemd import SystemdHTTPServer
 from ymci import server, ioloop
 from ymci.utils.db import upgrade
@@ -26,7 +27,10 @@ if options.debug:
 
 http_server = SystemdHTTPServer(server)
 
+if options.unix_socket:
+    http_server.add_socket(bind_unix_socket(options.unix_socket))
+else:
+    http_server.listen(options.port)
 log.debug('Listening')
-http_server.listen(options.port)
 
 ioloop.start()

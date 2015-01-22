@@ -58,5 +58,5 @@ def secure_rmtree(path):
     """Checks a path before deleting it."""
     path = os.path.realpath(path)
     if (os.path.exists(path) and os.path.isdir(path) and
-            server.conf['projects_realpath'] in path):
+            server.projects_path in path):
         shutil.rmtree(path)

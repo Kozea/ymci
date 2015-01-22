@@ -5,7 +5,7 @@ from threading import Thread
 from time import time
 from datetime import datetime
 from .util import execute, ExecutionException
-from ..utils import short_transaction
+from ..utils import short_transaction, secure_rmtree
 from ..model import Build
 from .. import server
 import traceback
@@ -210,7 +210,8 @@ class Task(Thread):
         for hook in self.build_hooks:
             hook.pre_copy()
 
-        assert not os.path.exists(self.build.dir)
+        assert not os.path.exists(self.build.dir), (
+            '%s already exists' % self.build.dir)
 
         log.debug('Copying tree for %r' % self)
         shutil.copytree(src, self.build.dir, symlinks=True)
@@ -238,3 +239,14 @@ class Task(Thread):
             self.build.dir, self.read,
             self.build.project_id, self.build.build_id)
         log.debug('Execution complete for %r' % self)
+
+        kept = self.build.project.kept_builds
+        if kept is not None and kept > 0:
+            self.out('Cleaning... (Keeping %d project builds)\n' % kept)
+            if self.build.build_id - kept > 0:
+                for build_id in range(1, self.build.build_id - kept + 1):
+                    build_dir = os.path.join(
+                        self.build.project.project_dir, 'build_%d' % build_id)
+                    if os.path.exists(build_dir):
+                        self.out('Removing %s\n' % build_dir)
+                        secure_rmtree(build_dir)

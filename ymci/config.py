@@ -13,9 +13,6 @@ class Config(dict):
         super().__init__()
         self.update({
             'projects_path': 'projects',
-            'projects_realpath': os.path.realpath(
-                os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)), 'projects')),
             'db_url': 'postgresql+psycopg2://ymci@localhost/ymci'
         })
 

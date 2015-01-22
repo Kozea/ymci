@@ -104,8 +104,7 @@ class ProjectDelete(Route):
     def post(self, project_id):
         project = self.db.query(Project).get(project_id)
         self.db.delete(project)
-        secure_rmtree(
-            os.path.join(server.conf['projects_realpath'], project.dir_name))
+        secure_rmtree(project.project_dir)
         self.db.commit()
         self.blocks.project.refresh()
         self.blocks.home.refresh()
@@ -201,20 +200,15 @@ class ProjectChartTime(Route):
         config.style = ymci_style
         svg = pygal.Line(config)
         builds = project.builds.all()[::-1]
-        for status in [
-                'SUCCESS',
-                'RUNNING',
-                'BROKEN',
-                'FAILED',
-                'STOPPED',
-                'PENDING']:
-            svg.add(status.lower(), {'#%d' % b.build_id: {
+        svg.add('Build times', {
+            '#%d' % b.build_id: {
                 'xlink': self.reverse_url(
                     'ProjectLog', project_id, b.build_id),
-                'value': b.duration} for b in builds if b.status == status})
+                'color': b.bootstrap_status_color,
+                'value': b.duration
+            } for b in builds if b.status != 'STOPPED'})
         svg.x_labels = ['#%d' % b.build_id for b in builds]
         svg.value_formatter = lambda x: '%.2fs' % (x or 0)
-        svg.interpolate = 'cubic'
         svg.show_legend = False
         svg.show_labels = False
         svg.title = 'Build duration in seconds'
