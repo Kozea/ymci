@@ -13,7 +13,8 @@ setup(
 
     provides=['ymci_ext_oauth'],
     packages=find_packages(),
-    package_data={'ymci_ext_oauth': ['templates/*', 'static/*']},
+    package_data={'ymci_ext_oauth': [
+        'templates/index.html', 'templates/blocks/*', 'static/*']},
 
     entry_points={
         'ymci.ext': [
