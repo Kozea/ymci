@@ -7,10 +7,13 @@ import json
 @url(r'/github/hook')
 class GithubHook(Route):
     def get(self):
-        self.write('OK')
+        self.write('GET OK')
 
     def post(self):
         hook = json.loads(self.request.body.decode('utf-8'))
+        if not hook['repository']:
+            self.write('VOID POST OK')
+            return
         repos = [
             hook['repository'].get('url'),
             hook['repository'].get('ssh_url'),
@@ -48,4 +51,4 @@ class GithubHook(Route):
         for build in builds:
             self.application.builder.add(build)
 
-        self.write('OK')
+        self.write('POST OK')
