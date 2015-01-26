@@ -11,7 +11,7 @@ class GithubHook(Route):
 
     def post(self):
         hook = json.loads(self.request.body.decode('utf-8'))
-        if not hook['repository']:
+        if not hook.get('repository') or not hook.get('ref'):
             self.write('VOID POST OK')
             return
         repos = [
