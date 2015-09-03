@@ -17,12 +17,16 @@
   padding: 0;
   margin: 0;
   list-style: none; }
+
 .tree input[type="checkbox"] {
   display: none; }
+
 .tree input[type="checkbox"]:checked ~ label i.glyphicon::before {
   content: "\e118"; }
+
 .tree input[type="checkbox"]:not(:checked) ~ ul {
   display: none; }
+
 .tree li {
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -30,125 +34,171 @@
        user-select: none; }
   .tree li ul {
     margin: 0 0 0 1em; }
+
 .tree label[for] {
   cursor: pointer; }
   .tree label[for] i.glyphicon::before {
     content: "\e117";
     color: #777; }
+
 .tree label {
   white-space: nowrap; }
   .tree label i.glyphicon::before {
-    padding-right: 0.25em; }
+    padding-right: .25em; }
 
 .codetable pre {
   font-family: "Source Code Pro"; }
+
 .codetable .code pre {
   background-color: transparent;
   border: none; }
+
 .codetable .linenos pre {
   border-left: none;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0; }
+
 .codetable .hll {
   background-color: #ffffcc; }
+
 .codetable .c {
   color: #999988;
   font-style: italic; }
+
 .codetable .err {
   color: #a61717;
   background-color: #e3d2d2; }
+
 .codetable .k, .codetable .o {
   color: #000000;
   font-weight: bold; }
+
 .codetable .cm {
   color: #999988;
   font-style: italic; }
+
 .codetable .cp {
   color: #999999;
   font-weight: bold;
   font-style: italic; }
+
 .codetable .c1 {
   color: #999988;
   font-style: italic; }
+
 .codetable .cs {
   color: #999999;
   font-weight: bold;
   font-style: italic; }
+
 .codetable .gd {
   color: #000000;
   background-color: #ffdddd; }
+
 .codetable .ge {
   color: #000000;
   font-style: italic; }
+
 .codetable .gr {
   color: #aa0000; }
+
 .codetable .gh {
   color: #999999; }
+
 .codetable .gi {
   color: #000000;
   background-color: #ddffdd; }
+
 .codetable .go {
   color: #888888; }
+
 .codetable .gp {
   color: #555555; }
+
 .codetable .gs {
   font-weight: bold; }
+
 .codetable .gu {
   color: #aaaaaa; }
+
 .codetable .gt {
   color: #aa0000; }
+
 .codetable .kc, .codetable .kd, .codetable .kn, .codetable .kp, .codetable .kr {
   color: #000000;
   font-weight: bold; }
+
 .codetable .kt {
   color: #445588;
   font-weight: bold; }
+
 .codetable .m {
   color: #009999; }
+
 .codetable .s {
   color: #d01040; }
+
 .codetable .na {
   color: #008080; }
+
 .codetable .nb {
   color: #0086B3; }
+
 .codetable .nc {
   color: #445588;
   font-weight: bold; }
+
 .codetable .no {
   color: #008080; }
+
 .codetable .nd {
   color: #3c5d5d;
   font-weight: bold; }
+
 .codetable .ni {
   color: #800080; }
+
 .codetable .ne, .codetable .nf, .codetable .nl {
   color: #990000;
   font-weight: bold; }
+
 .codetable .nn {
   color: #555555; }
+
 .codetable .nt {
   color: #000080; }
+
 .codetable .nv {
   color: #008080; }
+
 .codetable .ow {
   color: #000000;
   font-weight: bold; }
+
 .codetable .w {
   color: #bbbbbb; }
+
 .codetable .mf, .codetable .mh, .codetable .mi, .codetable .mo {
   color: #009999; }
+
 .codetable .sb, .codetable .sc, .codetable .sd, .codetable .s2, .codetable .se, .codetable .sh, .codetable .si, .codetable .sx {
   color: #d01040; }
+
 .codetable .sr {
   color: #009926; }
+
 .codetable .s1 {
   color: #d01040; }
+
 .codetable .ss {
   color: #990073; }
+
 .codetable .bp {
   color: #999999; }
+
 .codetable .vc, .codetable .vg, .codetable .vi {
   color: #008080; }
+
 .codetable .il {
   color: #009999; }
 
@@ -168,12 +218,12 @@
     background-color: #fafafa;
     text-align: center;
     margin: 1em;
-    padding: 0.25em;
+    padding: .25em;
     -webkit-flex-basis: 30%;
         -ms-flex-preferred-size: 30%;
             flex-basis: 30%; }
     .grid .grid-elt div {
-      padding: 0.5em; }
+      padding: .5em; }
     @media (max-width: 1200px) {
       .grid .grid-elt {
         -webkit-flex-basis: 45%;
@@ -241,7 +291,7 @@ code.out {
 
 [data-block="home"] .grid-elt {
   position: relative;
-  padding-top: 0.5em;
+  padding-top: .5em;
   padding-bottom: 1em; }
   [data-block="home"] .grid-elt .bottom-right {
     position: absolute;
@@ -249,23 +299,18 @@ code.out {
     right: 0; }
 
 @-webkit-keyframes heart {
-
   30% {
     -webkit-transform: scale(1);
             transform: scale(1); }
-
   40% {
     -webkit-transform: scale(1.25);
             transform: scale(1.25); }
-
   50% {
     -webkit-transform: scale(1);
             transform: scale(1); }
-
   60% {
     -webkit-transform: scale(1.25);
             transform: scale(1.25); }
-
   70% {
     -webkit-transform: scale(1);
             transform: scale(1); } }
@@ -274,19 +319,15 @@ code.out {
   30% {
     -webkit-transform: scale(1);
             transform: scale(1); }
-
   40% {
     -webkit-transform: scale(1.25);
             transform: scale(1.25); }
-
   50% {
     -webkit-transform: scale(1);
             transform: scale(1); }
-
   60% {
     -webkit-transform: scale(1.25);
             transform: scale(1.25); }
-
   70% {
     -webkit-transform: scale(1);
             transform: scale(1); } }

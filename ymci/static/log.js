@@ -24,7 +24,7 @@
       return setTimeout(function() {
         $code.get(0).innerHTML += e.data;
         if (autoscroll) {
-          return $('html').scrollTop($('body').height() - window.innerHeight);
+          return $(window).scrollTop($('body').height() - window.innerHeight);
         }
       }, 100);
     };

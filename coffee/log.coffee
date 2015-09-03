@@ -19,5 +19,5 @@ $ ->
     setTimeout ->
       $code.get(0).innerHTML += e.data
       if autoscroll
-        $('html').scrollTop($('body').height() - window.innerHeight)
+        $(window).scrollTop($('body').height() - window.innerHeight)
     , 100

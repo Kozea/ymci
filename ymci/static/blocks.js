@@ -13,10 +13,10 @@
     }
 
     BuildHook.prototype.before = function($block) {
-      var interval, _i, _len, _ref;
-      _ref = this.intervals;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        interval = _ref[_i];
+      var i, interval, len, ref;
+      ref = this.intervals;
+      for (i = 0, len = ref.length; i < len; i++) {
+        interval = ref[i];
         clearInterval(interval);
       }
       return this.intervals = [];
@@ -46,7 +46,7 @@
             $percent.removeClass('progress-bar-danger');
             $percent.removeClass('progress-bar-warning');
           }
-          return $percent.css('width', "" + percent + "%");
+          return $percent.css('width', percent + "%");
         };
         if (!isNaN(base)) {
           return that.intervals.push(setInterval(update_progress, 10));
@@ -69,37 +69,37 @@
         args = $elt.attr('data-args') || '';
         blocks[block] = {};
         cc_block = block[0].toUpperCase() + block.slice(1);
-        blocks[block].hook = (hooks["" + cc_block + "Hook"] != null) && new hooks["" + cc_block + "Hook"]();
+        blocks[block].hook = (hooks[cc_block + "Hook"] != null) && new hooks[cc_block + "Hook"]();
         delay = 100;
         reconnect = function(block, $elt) {
           var ws;
-          console.log("" + block + " ws connecting");
+          console.log(block + " ws connecting");
           blocks[block].ws = ws = new WebSocket("ws" + (location.protocol.replace('http', '')) + "//" + location.host + "/blocks/" + block + args);
           ws.onopen = function() {
             delay = 100;
-            return console.log("" + block + " ws open");
+            return console.log(block + " ws open");
           };
           ws.onclose = function() {
-            console.log("" + block + " ws closed. Reconnecting in " + delay + "ms", arguments);
+            console.log(block + " ws closed. Reconnecting in " + delay + "ms", arguments);
             return setTimeout((function() {
               return reconnect(block, $elt);
             }), delay);
           };
           ws.onerror = function() {
             delay *= 2;
-            return console.error("" + block + " ws error", arguments);
+            return console.error(block + " ws error", arguments);
           };
           return ws.onmessage = function(e) {
-            var $block, _ref, _ref1;
+            var $block, ref, ref1;
             console.debug("Refreshing block " + block, e);
             $block = $elt;
-            if ((_ref = blocks[block].hook) != null) {
-              if (typeof _ref.before === "function") {
-                _ref.before($block);
+            if ((ref = blocks[block].hook) != null) {
+              if (typeof ref.before === "function") {
+                ref.before($block);
               }
             }
             $block.html(e.data);
-            return (_ref1 = blocks[block].hook) != null ? typeof _ref1.after === "function" ? _ref1.after($block) : void 0 : void 0;
+            return (ref1 = blocks[block].hook) != null ? typeof ref1.after === "function" ? ref1.after($block) : void 0 : void 0;
           };
         };
         return reconnect(block, $elt);
