@@ -58,6 +58,16 @@ class Project(Table):
         return path
 
     @property
+    def latest_dir(self):
+        return os.path.join(
+            self.project_dir, 'latest')
+
+    @property
+    def latest_success_dir(self):
+        return os.path.join(
+            self.project_dir, 'latest_success')
+
+    @property
     def last_build(self):
         return self.builds.order_by(Build.build_id.desc()).first()
 

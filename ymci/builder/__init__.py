@@ -140,6 +140,8 @@ class Task(Thread):
 
         self.log = open(self.build.log_file, 'w')
         self.script = self.build.project.script
+        self.latest_dir = self.build.project.latest_dir
+        self.latest_success_dir = self.build.project.latest_success_dir
 
         def treat(e):
             if e.errno < 0:
@@ -186,6 +188,14 @@ class Task(Thread):
         for hook in self.build_hooks:
             hook.post_build()
 
+        if self.build.status == 'SUCCESS':
+            log.debug('Symlinking to latest_success_dir for %r ' % self)
+            if os.path.exists(self.latest_success_dir):
+                assert os.path.islink(self.latest_success_dir)
+                os.remove(self.latest_success_dir)
+
+            os.symlink(self.build.dir, self.latest_success_dir)
+
         log.debug('Closing log file and calling callback %r ' % self)
         self.log.close()
         self.ioloop.add_callback(self.callback, self)
@@ -216,11 +226,17 @@ class Task(Thread):
         log.debug('Copying tree for %r' % self)
         shutil.copytree(src, self.build.dir, symlinks=True)
 
+        log.debug('Linking to latest %r' % self)
+        if os.path.exists(self.latest_dir):
+            assert os.path.islink(self.latest_dir)
+            os.remove(self.latest_dir)
+
+        os.symlink(self.build.dir, self.latest_dir)
         log.debug('Running pre build hooks for %r' % self)
         for hook in self.build_hooks:
             hook.pre_build()
 
-        script_fn = os.path.abspath(os.path.join(self.build.dir, '.ymci.sh'))
+        script_fn = os.path.abspath(os.path.join(self.latest_dir, '.ymci.sh'))
         script = self.script
         if not script.startswith('#!'):
             # This is not sexy
@@ -236,7 +252,7 @@ class Task(Thread):
         log.debug('Executing %s for %r' % (script_fn, self))
         execute(
             script_fn,
-            self.build.dir, self.read,
+            self.latest_dir, self.read,
             self.build.project_id, self.build.build_id)
         log.debug('Execution complete for %r' % self)
 
