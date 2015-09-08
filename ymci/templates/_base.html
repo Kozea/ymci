@@ -7,14 +7,13 @@
     <meta name="description" content="Your Modern Continous Integration server">
     <meta name="author" content="Florian Mounier, Kozea">
     <link rel="shortcut icon" href="{{ static_url('images/favicon.png') }}">
+    <link rel="stylesheet" id="style" data-href="{{ static_url('_style_') }}">
     {% block css %}{% end %}
-    <link rel="stylesheet" href="{{ static_url('lumen-bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ static_url('base.css') }}">
 
     <title>YMCI server</title>
   </head>
-
-  <body data-page="{{ handler.__class__.__name__ }}">
+  {% import os %}
+  <body data-page="{{ handler.__class__.__name__ }}" data-styles="{{ ','.join([style for style in os.listdir('ymci/static/') if style.endswith('.css')]) }}">
     <header class="navbar navbar-default">
       <nav class="container">
         <div class="nav navbar-header">
@@ -65,6 +64,7 @@
               <a class="btn btn-default" href="{{ reverse_url(route['route']) }}">{{ route['label'] }}</a>
             {% end %}
           {% end %}
+          <a class="btn btn-default theme-switcher">Theme</a>
         </ul>
       </nav>
     </header>
@@ -86,6 +86,7 @@
     </main>
 
     <script src="{{ static_url('deps.min.js') }}"></script>
+    <script src="{{ static_url('style.js') }}"></script>
     <script src="{{ static_url('blocks.js') }}"></script>
     <script src="{{ static_url('main.js') }}"></script>
     <script src="{{ static_url('graph.js') }}"></script>

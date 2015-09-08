@@ -93,7 +93,7 @@ class ProjectBrowse(Route):
         self.render(
             'source.html', code=code,
             tree=self.recurse(
-                self.get_tree_dict(project.src_dir, path), id, build),
+                self.get_tree_dict(project.src_dir, path), project_id, build),
             project=project,
             build_id=build.build_id,
             path=path

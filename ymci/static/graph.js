@@ -15,5 +15,3 @@
   });
 
 }).call(this);
-
-//# sourceMappingURL=graph.js.map

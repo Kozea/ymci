@@ -8,7 +8,9 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "bootstrap-sass": "~3.3.0",
+    "jquery": "~3.0.0",
     "jquery-popup-overlay": "~1.6.0",
-    "jquery": "~2.1.1"
+    "js-cookie": "~2.0.3"
   }
 }

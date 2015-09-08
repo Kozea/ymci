@@ -108,5 +108,3 @@
   })(this));
 
 }).call(this);
-
-//# sourceMappingURL=blocks.js.map

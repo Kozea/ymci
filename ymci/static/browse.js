@@ -8,5 +8,3 @@
   });
 
 }).call(this);
-
-//# sourceMappingURL=browse.js.map

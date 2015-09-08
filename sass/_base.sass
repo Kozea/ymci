@@ -15,6 +15,9 @@ code
 .scroll-y
   overflow-y: auto
 
+.label
+  font-weight: normal
+
 a.badge
   text-decoration: none !important
 
@@ -48,7 +51,7 @@ code.out
   font-size: 1.2em
 
   .healthy-heart
-    color: rgba(255, 65, 54, 1)
+    color: rgba($brand-danger, 1)
 
   .beating-heart
     animation-duration: 1s
@@ -56,19 +59,7 @@ code.out
     animation-iteration-count: infinite
 
   .broken-heart
-    color: rgba(255, 65, 54, .25)
-
-[data-block="home"]
-  .grid-elt
-    position: relative
-    padding-top: .5em
-    padding-bottom: 1em
-
-    .bottom-right
-      position: absolute
-      bottom: 0
-      right: 0
-
+    color: rgba($brand-danger, .25)
 
 @keyframes heart
   30%

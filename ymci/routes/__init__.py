@@ -24,7 +24,6 @@ ymci_style = pygal.style.RotateStyle('#28b62c', base_style=base_style)
 def graph_config(width, height):
     class GraphConfig(Config):
         """Config for minimal graph."""
-        js = ['/static/svg.jquery.js?://', '/static/pygal-tooltips.js?://']
         style = pygal.style.Style(**ymci_style.__dict__)
         show_minor_x_labels = False
         x_labels_major_count = 20

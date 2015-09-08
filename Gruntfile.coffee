@@ -2,17 +2,20 @@ module.exports = (grunt) ->
 
   jsdeps = [
     'jquery/dist/jquery'
+    'js-cookie/src/js.cookie'
     'jquery-popup-overlay/jquery.popupoverlay'
   ].map (js) -> "#{['bower_components', js].join '/'}.js"
 
   grunt.initConfig
     pkg: grunt.file.readJSON('package.json')
 
+    fileExists:
+      js: jsdeps
+
     uglify:
       options:
         banner: '/*! <%= pkg.name %>
            <%= grunt.template.today("yyyy-mm-dd") %> */\n'
-        sourceMap: true
 
       ymci:
         files:
@@ -23,6 +26,11 @@ module.exports = (grunt) ->
           'ymci/static/deps.min.js': jsdeps
 
     sass:
+      options:
+        includePaths: [
+          'bower_components/bootstrap-sass/assets/stylesheets/'
+        ]
+
       ymci:
         expand: true
         cwd: 'sass'
@@ -38,9 +46,6 @@ module.exports = (grunt) ->
         dest: 'ymci/static/'
 
     coffee:
-      options:
-        sourceMap: true
-
       ymci:
         expand: true
         cwd: 'coffee'
@@ -72,6 +77,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-contrib-cssmin'
+  grunt.loadNpmTasks 'grunt-file-exists'
   grunt.loadNpmTasks 'grunt-autoprefixer'
   grunt.loadNpmTasks 'grunt-coffeelint'
   grunt.loadNpmTasks 'grunt-sass'
@@ -80,4 +86,4 @@ module.exports = (grunt) ->
     'coffeelint', 'coffee', 'sass', 'watch']
   grunt.registerTask 'css', ['sass']
   grunt.registerTask 'default', [
-    'coffeelint', 'coffee', 'sass', 'autoprefixer', 'uglify']
+    'fileExists', 'coffeelint', 'coffee', 'sass', 'autoprefixer', 'uglify']
