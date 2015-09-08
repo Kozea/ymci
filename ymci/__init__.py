@@ -154,6 +154,14 @@ class Route(Base, RequestHandler):
             reason=self._reason)
 
     @property
+    def styles(self):
+        return ','.join([
+            style
+            for style in os.listdir(
+                    self.application.settings.get('static_path'))
+            if style.endswith('.css')])
+
+    @property
     def posted(self):
         return MultiDict(self.request.arguments)
 

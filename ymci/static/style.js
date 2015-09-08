@@ -1,5 +1,5 @@
 (function() {
-  var $style, base, change_style, index, style, styles;
+  var $style, change_style, index, style, styles;
 
   style = Cookies.get('style') || 'lumen.css';
 
@@ -9,10 +9,8 @@
 
   index = styles.indexOf(style);
 
-  base = $style.attr('data-href');
-
   change_style = function() {
-    return $style.attr('href', base.replace('_style_', styles[index % styles.length]));
+    return $style.attr('href', '/static/' + styles[index % styles.length]);
   };
 
   change_style();

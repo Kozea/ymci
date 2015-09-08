@@ -3,10 +3,9 @@ style = Cookies.get('style') or 'lumen.css'
 $style = $('#style')
 styles = $('body').attr('data-styles').split(',')
 index = styles.indexOf(style)
-base = $style.attr('data-href')
 
 change_style = ->
-  $style.attr('href', base.replace('_style_', styles[index % styles.length]))
+  $style.attr('href', '/static/' + styles[index % styles.length])
 
 change_style()
 

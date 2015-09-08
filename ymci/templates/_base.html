@@ -7,13 +7,13 @@
     <meta name="description" content="Your Modern Continous Integration server">
     <meta name="author" content="Florian Mounier, Kozea">
     <link rel="shortcut icon" href="{{ static_url('images/favicon.png') }}">
-    <link rel="stylesheet" id="style" data-href="{{ static_url('_style_') }}">
+    <link rel="stylesheet" id="style">
     {% block css %}{% end %}
 
     <title>YMCI server</title>
   </head>
   {% import os %}
-  <body data-page="{{ handler.__class__.__name__ }}" data-styles="{{ ','.join([style for style in os.listdir('ymci/static/') if style.endswith('.css')]) }}">
+  <body data-page="{{ handler.__class__.__name__ }}" data-styles="{{ handler.styles }}">
     <header class="navbar navbar-default">
       <nav class="container">
         <div class="nav navbar-header">
