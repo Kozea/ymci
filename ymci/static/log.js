@@ -1,7 +1,15 @@
 (function() {
   $(function() {
-    var $code, autoscroll, ws;
+    var $code, ansi, autoscroll, code, ws;
     $code = $('code.out');
+    ansi = new Ansi();
+    code = $code.get(0);
+    if (code.innerHTML) {
+      code.innerHTML = ansi.feed(code.innerHTML);
+    }
+    if (!$code.attr('data-id')) {
+      return;
+    }
     ws = new WebSocket("ws" + (location.protocol.replace('http', '')) + "//" + location.host + "/log/" + ($code.attr('data-id')) + "/" + ($code.attr('data-idx')) + "/pipe");
     ws.onopen = function() {
       return console.log('ws opened');
@@ -22,11 +30,11 @@
     });
     return ws.onmessage = function(e) {
       return setTimeout(function() {
-        $code.get(0).innerHTML += e.data;
+        $code.get(0).innerHTML += ansi.feed(e.data);
         if (autoscroll) {
           return $(window).scrollTop($('body').height() - window.innerHeight);
         }
-      }, 100);
+      });
     };
   });
 

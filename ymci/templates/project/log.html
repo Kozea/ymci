@@ -4,7 +4,7 @@
 {% block main %}
   <h2>{{ project.name }} build #{{ build.build_id }} [{{ build.status }}]</h2>
   <code class="out"
-  {% if not log %}
+  {% if build.status == 'RUNNING' %}
     data-id="{{ project.project_id }}" data-idx="{{ build.build_id }}"
   {% end %}
   >
@@ -13,7 +13,5 @@
 {% end %}
 
 {% block js %}
-  {% if not log %}
-    <script src="{{ static_url('log.js') }}"></script>
-  {% end %}
+  <script src="{{ static_url('log.js') }}"></script>
 {% end %}

@@ -151,11 +151,6 @@ class ProjectLogWebSocket(WebSocket):
                 self.build.build_id
             )].append(self)
 
-            if os.path.exists(self.build.log_file):
-                with open(self.build.log_file, 'r') as f:
-                    for line in f:
-                        self.write_message(line)
-
     def on_close(self):
         self.application.builder.log_streams[
             '%s-%s' % (self.id, self.idx)].remove(self)
@@ -170,7 +165,7 @@ class ProjectLog(Route):
             build = self.db.query(Build).get((build_id, project_id))
         else:
             build = project.last_build
-        if build.status != 'RUNNING' and os.path.exists(build.log_file):
+        if os.path.exists(build.log_file):
             with open(build.log_file, 'r') as f:
                 log = f.read()
         else:
