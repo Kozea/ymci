@@ -29,4 +29,4 @@ $ ->
       $code.get(0).innerHTML += ansi.feed e.data
       if autoscroll
         $(window).scrollTop($('body').height() - window.innerHeight)
-
+    , 10

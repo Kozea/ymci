@@ -4,7 +4,7 @@
 {% block main %}
   <h2>{{ project.name }} build #{{ build.build_id }} [{{ build.status }}]</h2>
   <code class="out"
-  {% if build.status == 'RUNNING' %}
+  {% if build.status in ['RUNNING', 'PENDING'] %}
     data-id="{{ project.project_id }}" data-idx="{{ build.build_id }}"
   {% end %}
   >

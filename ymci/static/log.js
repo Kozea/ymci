@@ -34,7 +34,7 @@
         if (autoscroll) {
           return $(window).scrollTop($('body').height() - window.innerHeight);
         }
-      });
+      }, 10);
     };
   });
 
